@@ -38,7 +38,7 @@ class Evaluator:
         return matches[0].uris[0]
 
     def evaluate(
-        self, source_service_type: ServiceType, target_service_type: ServiceType
+        self, source_service_type: ServiceType, target_service_type: ServiceType, n=10
     ):
         print(self.services)
         source_service = self.services[source_service_type.value]
@@ -48,11 +48,13 @@ class Evaluator:
         target_header = target_service_type.name.lower()
 
         source_uris = [
-            URI(source_service_type.value, uri) for uri in self.df[source_header]
-        ]
+            URI(service=source_service_type.value, uri=uri)
+            for uri in self.df[source_header]
+        ][:n]
         target_uris = [
-            URI(target_service_type.value, uri) for uri in self.df[target_header]
-        ]
+            URI(service=target_service_type.value, uri=uri)
+            for uri in self.df[target_header]
+        ][:n]
         predictions = [
             self.get_prediction(source_service, target_service, source_uri)
             for source_uri in tqdm(source_uris)
@@ -70,4 +72,4 @@ def main():
     os.chdir(Path(__file__).parent)
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
-    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.MB)

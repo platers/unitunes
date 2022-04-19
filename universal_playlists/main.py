@@ -1,6 +1,5 @@
 import json
-from textwrap import indent
-from typing import Dict, List, NewType, Optional, TypedDict
+from typing import Dict, List, Optional
 import typer
 import pandas as pd
 from pathlib import Path
@@ -27,16 +26,6 @@ class Config(BaseModel):
     dir: Path
     services: List[ConfigServiceEntry] = []
 
-    @staticmethod
-    def from_file(path: Path) -> "Config":
-        with path.open("r") as f:
-            j = json.load(f)
-            return Config.parse_obj(j)
-
-    def to_file(self, path: Path) -> None:
-        with path.open("w") as f:
-            f.write(self.json(indent=4))
-        
 
 class PlaylistManager:
     def __init__(
@@ -51,9 +40,10 @@ class PlaylistManager:
 
             self.config = Config(dir=Path(os.getcwd()))
             os.chdir(self.config.dir)
-            self.config.to_file(self.config_path)
+            with self.config_path.open("w") as f:
+                f.write(self.config.json(indent=4))
 
-        self.config = Config.from_file(self.config_path)
+        self.config = Config.parse_file(self.config_path)
         os.chdir(self.config.dir)
 
         self.table_path = table_path
@@ -75,7 +65,7 @@ class PlaylistManager:
             if type(name) == str:
                 path = self.playlist_path(name)
                 if path.exists():
-                    self.playlists[name] = Playlist.from_file(self.playlist_path(name))
+                    self.playlists[name] = Playlist.parse_file(self.playlist_path(name))
 
     def playlist_path(self, playlist_name: str) -> Path:
         return Path("./playlists") / (playlist_name + ".json")
@@ -105,9 +95,14 @@ class PlaylistManager:
                     name = service.value + " " + service_config_path.name
 
         self.config.services.append(
-            ConfigServiceEntry(name=name, service=service.value, config_path=service_config_path.__str__())
+            ConfigServiceEntry(
+                name=name,
+                service=service.value,
+                config_path=service_config_path.__str__(),
+            )
         )
-        self.config.to_file(self.config_path)
+        with self.config_path.open("w") as f:
+            f.write(self.config.json(indent=4))
 
         # add service to table header
         table_path = Path("playlists.csv")
@@ -137,7 +132,9 @@ class PlaylistManager:
                     playlist.tracks.append(track)
                 # print("Added track: " + track.name)
 
-        playlist.to_file(self.playlist_path(playlist_name))
+        # save playlist
+        with self.playlist_path(playlist_name).open("w") as f:
+            f.write(playlist.json(indent=4))
 
 
 pm = PlaylistManager()
@@ -189,16 +186,21 @@ def pull_metadata() -> None:
             continue
         playlist_config_path = Path("./playlists") / (name + ".json")
         if not playlist_config_path.exists():
-            playlist = Playlist(name, playlist_config_path=playlist_config_path)
-            playlist.to_file(playlist_config_path)
+            playlist = Playlist(name=name)
+            with playlist_config_path.open("w") as f:
+                f.write(playlist.json(indent=4))
         else:
-            playlist = Playlist.from_file(playlist_config_path)
+            playlist = Playlist.parse_file(playlist_config_path)
 
         for service_name, service in pm.services.items():
             if type(row[service_name]) is not str:
                 continue
             metadata = service.get_playlist_metadata(row[service_name])
             playlist.merge_metadata(metadata)
+
+            with playlist_config_path.open("w") as f:
+                print(playlist)
+                f.write(playlist.json(indent=4))
 
     typer.echo("Done")
 

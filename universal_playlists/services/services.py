@@ -1,11 +1,12 @@
 from enum import Enum
 import json
 from pathlib import Path
-from typing import List, NewType, Optional, Set, TypedDict
+from typing import List, Optional, TypedDict
 import spotipy
 from spotipy import SpotifyOAuth
 from ytmusicapi import YTMusic
 import musicbrainzngs as mb
+from pydantic import BaseModel
 
 
 class ServiceType(Enum):
@@ -14,82 +15,40 @@ class ServiceType(Enum):
     MB = "musicbrainz"
 
 
-class URI:
-    def __init__(self, service: str, uri: str):
-        self.service = service
-        self.uri = uri
+class URI(BaseModel):
+    service: str
+    uri: str
 
-    def __eq__(self, __o: object) -> bool:
-        if not isinstance(__o, URI):
-            return False
-        return self.service == __o.service and self.uri == __o.uri
-
-    def __hash__(self) -> int:
-        return hash(self.service) ^ hash(self.uri)
-
-    def toJSON(self) -> dict:
-        return {
-            "service": self.service,
-            "uri": self.uri,
-        }
-
-    def __repr__(self) -> str:
-        return f"URI('{self.service}', '{self.uri}')"
+    class Config:
+        frozen = True
 
 
 class SpotifyURI(URI):
     def __init__(self, uri: str):
-        super().__init__(ServiceType.SPOTIFY.value, uri)
+        super().__init__(service=ServiceType.SPOTIFY.value, uri=uri)
 
 
 class YtmURI(URI):
     def __init__(self, uri: str):
-        super().__init__(ServiceType.YTM.value, uri)
+        super().__init__(service=ServiceType.YTM.value, uri=uri)
 
 
 class MB_RECORDING_URI(URI):
     def __init__(self, uri: str):
-        super().__init__("mb_recording", uri)
+        super().__init__(service=ServiceType.MB.value, uri=uri)
 
 
 class MB_RELEASE(URI):
     def __init__(self, uri: str):
-        super().__init__("mb_release", uri)
+        super().__init__(service=ServiceType.MB.value, uri=uri)
 
 
-class Track:
-    def __init__(
-        self,
-        name: str,
-        album: str = "",
-        album_position: int = 0,
-        artists: list[str] = [],
-        uris: list[URI] = [],
-    ) -> None:
-        self.name = name
-        self.album = album
-        self.album_position = album_position
-        self.artists = artists
-        self.uris = uris
-
-    def toJSON(self) -> dict:
-        return {
-            "name": self.name,
-            "album": self.album,
-            "album_position": self.album_position,
-            "artists": self.artists,
-            "uris": [u.toJSON() for u in self.uris],
-        }
-
-    @staticmethod
-    def fromJSON(json: dict) -> "Track":
-        return Track(
-            json["name"],
-            json["artists"],
-            json["album"] if "album" in json else "",
-            json["album_position"] if "album_position" in json else 0,
-            [URI(u["service"], u["uri"]) for u in json["uris"]],
-        )
+class Track(BaseModel):
+    name: str
+    album: Optional[str] = None
+    album_position: Optional[int] = None
+    artists: List[str] = []
+    uris: List[URI] = []
 
     def matches(self, track: "Track") -> bool:
         # check if any URI in track matches any URI in self
@@ -112,47 +71,17 @@ class PlaylistMetadata(TypedDict):
     uri: URI
 
 
-class Playlist:
-    def __init__(
-        self,
-        name: str,
-        description: str = "",
-        uris: Set[URI] = set(),
-        tracks: List[Track] = [],
-        playlist_config_path: Path = Path(),
-    ) -> None:
-        self.name = name
-        self.description = description
-        self.uris = uris
-        self.tracks = tracks
-        self.playlist_config_path = playlist_config_path
-
-    @classmethod
-    def from_file(cls, file_path: Path) -> "Playlist":
-        with open(file_path, "r") as f:
-            data = json.load(f)
-            data["playlist_config_path"] = file_path
-            data["uris"] = set([URI(**x) for x in data["uris"]])
-            data["tracks"] = [Track.fromJSON(x) for x in data["tracks"]]
-        return cls(**data)
-
-    def to_file(self, file_path: Path) -> None:
-        # touch file
-        file_path.touch(exist_ok=True)
-        with open(file_path, "w") as f:
-            d = {
-                "name": self.name,
-                "description": self.description,
-                "uris": [x.toJSON() for x in list(self.uris)],
-                "tracks": [track.toJSON() for track in self.tracks],
-            }
-            json.dump(d, f, indent=4)
+class Playlist(BaseModel):
+    name: str
+    description: str = ""
+    uris: List[URI] = []
+    tracks: List[Track] = []
 
     def merge_metadata(self, metadata: PlaylistMetadata) -> None:
         self.name = self.name or metadata["name"]
         self.description = self.description or metadata["description"]
-        self.uris.add(metadata["uri"])
-        self.to_file(self.playlist_config_path)
+        if metadata["uri"] not in self.uris:
+            self.uris.append(metadata["uri"])
 
 
 class StreamingService:
@@ -321,7 +250,7 @@ class YTM(StreamingService):
         tracks = list(
             map(
                 lambda x: Track(
-                    x["title"],
+                    name=x["title"],
                     artists=[artist["name"] for artist in x["artists"]],
                     uris=[YtmURI(x["videoId"])],
                 ),
@@ -346,12 +275,12 @@ class MusicBrainz(StreamingService):
         super().__init__("MusicBrainz", Path())
         mb.set_useragent("universal-playlist", "0.1")
 
-    def pull_track(self, uri: MB_RECORDING_URI) -> Optional[Track]:
+    def pull_track(self, uri: MB_RECORDING_URI) -> Track:
         results = mb.get_recording_by_id(
             uri.uri, includes=["releases", "artists", "aliases", "media"]
         )
         if not results:
-            return None
+            raise ValueError(f"Recording {uri} not found")
         recording = results["recording"]
 
         print(json.dumps(recording, indent=4))
@@ -375,7 +304,7 @@ class MusicBrainz(StreamingService):
         track.album_position = first_release["medium-list"][0]["position"]
         return track
 
-    def search_track(self, track: Track) -> Optional[MB_RECORDING_URI]:
+    def search_track(self, track: Track) -> List[Track]:
         fields = [
             "recording:{}".format(track.name),
             "artist:{}".format(" ".join(track.artists)),
@@ -386,9 +315,16 @@ class MusicBrainz(StreamingService):
             query=query,
             limit=1,
         )
-        print(track.name, track.artists)
-        print(json.dumps(results, indent=4))
-        if not results:
-            return None
 
-        return MB_RECORDING_URI(results["recording-list"][0]["id"])
+        def parse_track(recording):
+            return Track(
+                name=recording["title"],
+                artists=[
+                    artist["name"]
+                    for artist in recording["artist-credit"]
+                    if "name" in artist
+                ],
+                uris=[MB_RECORDING_URI(recording["id"])],
+            )
+
+        return list(map(parse_track, results["recording-list"]))
