@@ -9,12 +9,12 @@ from tqdm import tqdm
 def main():
     os.chdir(Path(__file__).parent)
 
-    sp = Spotify("spotify", Path("service_configs/spotify_credentials.json"))
-
-        
+    sp = Spotify("spotify", Path("service_configs/spotify_config.json"))
 
     sp_uris = []
     ytm_uris = []
+    mb_uris = []
+
     filepath = "ytm-spotify-raw"
     with tqdm(total=os.path.getsize(filepath)) as pbar:
         with open(filepath, "r") as f:
@@ -39,13 +39,12 @@ def main():
                         "https://open.spotify"
                     ) and ytm_track_id.startswith("https://music.youtube"):
                         tracks = sp.get_tracks_in_album(SpotifyURI(spotify_album_id))
-                        track = tracks[0]
+                        sp_track = tracks[0]
 
-
-                        sp_uris.append(track.uris[0].uri)
-                        # trim after &
+                        sp_uris.append(sp_track.uris[0].uri.split("/")[-1])
                         ytm_track_id = ytm_track_id.split("&")[0]
-                        ytm_uris.append(ytm_track_id)
+                        ytm_uris.append(ytm_track_id.split("=")[-1])
+                        mb_uris.append(raw["id"])
 
-    df = pd.DataFrame({"spotify": sp_uris, "ytm": ytm_uris})
+    df = pd.DataFrame({"spotify": sp_uris, "ytm": ytm_uris, "mb": mb_uris})
     df.to_csv("dataset.csv", index=False)

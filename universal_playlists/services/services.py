@@ -170,6 +170,8 @@ class StreamingService:
             return Spotify(name, config_path)
         elif service_type == ServiceType.YTM:
             return YTM(name, config_path)
+        elif service_type == ServiceType.MB:
+            return MusicBrainz()
         else:
             raise ValueError(f"Unknown service type: {service_type}")
 
@@ -184,6 +186,13 @@ class StreamingService:
         raise ValueError(f"Playlist {playlist_name} not found in {self.name}")
 
     def pull_tracks(self, uri: URI) -> List[Track]:
+        raise NotImplementedError
+
+    def pull_track(self, uri: URI) -> Track:
+        raise NotImplementedError
+
+    def search_track(self, track: Track) -> List[Track]:
+        '''Search for a track in the streaming service. Returns a list of potential matches.'''
         raise NotImplementedError
 
 
@@ -263,6 +272,17 @@ class Spotify(StreamingService):
             for track in results["items"]
         ]
 
+    def pull_track(self, uri: URI) -> Track:
+        track_id = uri.uri.split("/")[-1]
+        results = self.sp.track(track_id)
+        if not results:
+            raise ValueError(f"Track {uri} not found")
+        return Track(
+            name=results["name"],
+            artists=[artist["name"] for artist in results["artists"]],
+            uris=[SpotifyURI(results["external_urls"]["spotify"])],
+        )
+
 
 class YTM(StreamingService):
     def __init__(self, name: str, config_path: Path) -> None:
@@ -309,6 +329,14 @@ class YTM(StreamingService):
             )
         )
         return tracks
+    
+    def pull_track(self, uri: YtmURI) -> Track:
+        track = self.ytm.get_song(uri.uri)
+        return Track(
+            name=track["title"],
+            artists=[artist["name"] for artist in track["artists"]],
+            uris=[YtmURI(track["videoId"])],
+        )
 
 
 class MusicBrainz(StreamingService):
