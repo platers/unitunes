@@ -44,6 +44,11 @@ class PlaylistManager:
     ) -> None:
         self.config_path = config_path
         if not self.config_path.exists():
+            # ask user for confirmation
+            print("Config file not found. Create new config?")
+            if not input("[y/n] ").lower().startswith("y"):
+                raise ValueError("No config file found")
+
             self.config = Config(dir=Path(os.getcwd()))
             os.chdir(self.config.dir)
             self.config.to_file(self.config_path)

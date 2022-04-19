@@ -1,1 +1,4 @@
 *.pyc
+service_configs
+.cache
+*-raw
