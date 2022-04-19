@@ -192,7 +192,7 @@ class StreamingService:
         raise NotImplementedError
 
     def search_track(self, track: Track) -> List[Track]:
-        '''Search for a track in the streaming service. Returns a list of potential matches.'''
+        """Search for a track in the streaming service. Returns a list of potential matches."""
         raise NotImplementedError
 
 
@@ -329,7 +329,7 @@ class YTM(StreamingService):
             )
         )
         return tracks
-    
+
     def pull_track(self, uri: YtmURI) -> Track:
         track = self.ytm.get_song(uri.uri)
         return Track(

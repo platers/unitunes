@@ -19,7 +19,8 @@ class Evaluator:
             service_type.value: StreamingService.service_builder(
                 service_type,
                 service_type.value,
-                config_path=Path("data/service_configs") / f"{service_type.name}_config.json",
+                config_path=Path("data/service_configs")
+                / f"{service_type.name}_config.json",
             )
             for service_type in service_types
         }
@@ -63,7 +64,6 @@ class Evaluator:
             margins=True,
         )
         print(confusion_df)
-
 
 
 def main():
