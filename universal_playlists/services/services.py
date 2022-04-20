@@ -1,11 +1,9 @@
 from enum import Enum
 import json
 from pathlib import Path
+import shelve
 from typing import List, Optional, TypedDict
-import spotipy
-from spotipy import SpotifyOAuth
 from ytmusicapi import YTMusic
-import musicbrainzngs as mb
 from pydantic import BaseModel
 
 
@@ -23,24 +21,9 @@ class URI(BaseModel):
         frozen = True
 
 
-class SpotifyURI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.SPOTIFY.value, uri=uri)
-
-
 class YtmURI(URI):
     def __init__(self, uri: str):
         super().__init__(service=ServiceType.YTM.value, uri=uri)
-
-
-class MB_RECORDING_URI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.MB.value, uri=uri)
-
-
-class MB_RELEASE(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.MB.value, uri=uri)
 
 
 class Track(BaseModel):
@@ -84,25 +67,36 @@ class Playlist(BaseModel):
             self.uris.append(metadata["uri"])
 
 
+def cache(method):
+    def wrapper(self, *args, use_cache=True, **kwargs):
+        file_path = self.cache_path / f"{method.__name__}.shelve"
+        d = shelve.open(file_path.__str__())
+        cache_key = f"{args}_{kwargs}"
+        if use_cache:
+            if cache_key in d:
+                return d[cache_key]
+        result = method(self, *args, **kwargs)
+        d[cache_key] = result
+        d.close()
+        return result
+
+    return wrapper
+
+
+class ServiceWrapper:
+    def __init__(self, cache_name: str) -> None:
+        cache_root = Path("cache")
+        if not cache_root.exists():
+            cache_root.mkdir()
+        self.cache_path = Path("cache") / cache_name
+        if not self.cache_path.exists():
+            self.cache_path.mkdir()
+
+
 class StreamingService:
     def __init__(self, name: str, config_path: Path) -> None:
         self.name = name
         self.config_path = config_path
-
-    @staticmethod
-    def service_builder(
-        service_type: ServiceType,
-        name: str,
-        config_path: Path,
-    ) -> "StreamingService":
-        if service_type == ServiceType.SPOTIFY:
-            return Spotify(name, config_path)
-        elif service_type == ServiceType.YTM:
-            return YTM(name, config_path)
-        elif service_type == ServiceType.MB:
-            return MusicBrainz()
-        else:
-            raise ValueError(f"Unknown service type: {service_type}")
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         raise NotImplementedError
@@ -123,94 +117,6 @@ class StreamingService:
     def search_track(self, track: Track) -> List[Track]:
         """Search for a track in the streaming service. Returns a list of potential matches."""
         raise NotImplementedError
-
-
-class Spotify(StreamingService):
-    def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, config_path)
-        credentials = json.load(open(config_path, "r"))
-        self.sp = spotipy.Spotify(
-            auth_manager=SpotifyOAuth(
-                client_id=credentials["client_id"],
-                client_secret=credentials["client_secret"],
-                redirect_uri=credentials["redirect_uri"],
-                scope="user-library-read",
-            )
-        )
-
-    def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.sp.current_user_playlists()
-
-        return [
-            {
-                "name": playlist["name"],
-                "description": playlist["description"],
-                "uri": SpotifyURI(playlist["external_urls"]["spotify"]),
-            }
-            for playlist in results["items"]
-        ]
-
-    def pull_tracks(self, uri: URI) -> List[Track]:
-        # query spotify until we get all tracks
-        playlist_id = uri.uri.split("/")[-1]
-
-        def get_tracks(offset: int) -> list[Track]:
-            results = self.sp.user_playlist_tracks(
-                user=self.sp.current_user()["id"],
-                playlist_id=playlist_id,
-                fields="items(track(name,artists(name),id,external_urls))",
-                offset=offset,
-            )
-            tracks = []
-            for track in results["items"]:
-                uris = track["track"]["external_urls"]
-                uri: List[URI] = []
-                if "spotify" in uris:
-                    uri = [SpotifyURI(uris["spotify"])]
-
-                tracks.append(
-                    Track(
-                        name=track["track"]["name"],
-                        artists=[
-                            artist["name"] for artist in track["track"]["artists"]
-                        ],
-                        uris=uri,
-                    )
-                )
-            return tracks
-
-        tracks = []
-        offset = 0
-        while True:
-            new_tracks = get_tracks(offset)
-            if not new_tracks:
-                break
-            tracks.extend(new_tracks)
-            offset += len(new_tracks)
-        return tracks
-
-    def get_tracks_in_album(self, album_uri: URI) -> List[Track]:
-        album_id = album_uri.uri.split("/")[-1]
-        results = self.sp.album_tracks(album_id)
-        return [
-            Track(
-                name=track["name"],
-                artists=[artist["name"] for artist in track["artists"]],
-                uris=[SpotifyURI(track["external_urls"]["spotify"])],
-            )
-            for track in results["items"]
-        ]
-
-    def pull_track(self, uri: URI) -> Track:
-        track_id = uri.uri.split("/")[-1]
-        results = self.sp.track(track_id)
-        if not results:
-            raise ValueError(f"Track {uri} not found")
-        return Track(
-            name=results["name"],
-            artists=[artist["name"] for artist in results["artists"]],
-            uris=[SpotifyURI(results["external_urls"]["spotify"])],
-        )
 
 
 class YTM(StreamingService):
@@ -253,65 +159,3 @@ class YTM(StreamingService):
             artists=[artist["name"] for artist in track["artists"]],
             uris=[YtmURI(track["videoId"])],
         )
-
-
-class MusicBrainz(StreamingService):
-    def __init__(
-        self,
-    ) -> None:
-        super().__init__("MusicBrainz", Path())
-        mb.set_useragent("universal-playlist", "0.1")
-
-    def pull_track(self, uri: MB_RECORDING_URI) -> Track:
-        results = mb.get_recording_by_id(
-            uri.uri, includes=["releases", "artists", "aliases", "media"]
-        )
-        if not results:
-            raise ValueError(f"Recording {uri} not found")
-        recording = results["recording"]
-
-        print(json.dumps(recording, indent=4))
-        track = Track(
-            name=recording["title"],
-            artists=[artist["artist"]["name"] for artist in recording["artist-credit"]],
-        )
-        if "release-list" not in recording or not recording["release-list"]:
-            return track
-
-        first_release = recording["release-list"][0]
-
-        release_results = mb.get_release_by_id(
-            first_release["id"], includes=["url-rels", "recordings"]
-        )
-        if not release_results:
-            return track
-
-        release = release_results["release"]
-        track.album = release["title"]
-        track.album_position = first_release["medium-list"][0]["position"]
-        return track
-
-    def search_track(self, track: Track) -> List[Track]:
-        fields = [
-            "recording:{}".format(track.name),
-            "artist:{}".format(" ".join(track.artists)),
-        ]
-        query = " AND ".join(fields)
-
-        results = mb.search_recordings(
-            query=query,
-            limit=3,
-        )
-
-        def parse_track(recording):
-            return Track(
-                name=recording["title"],
-                artists=[
-                    artist["name"]
-                    for artist in recording["artist-credit"]
-                    if "name" in artist
-                ],
-                uris=[MB_RECORDING_URI(recording["id"])],
-            )
-
-        return list(map(parse_track, results["recording-list"]))

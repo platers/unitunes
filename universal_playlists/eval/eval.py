@@ -1,3 +1,4 @@
+from universal_playlists.main import service_builder
 from universal_playlists.services.services import *
 import os
 import pandas as pd
@@ -17,7 +18,7 @@ class Evaluator:
 
         service_types = [header_servicetype_map[header] for header in headers]
         self.services = {
-            service_type.value: StreamingService.service_builder(
+            service_type.value: service_builder(
                 service_type,
                 service_type.value,
                 config_path=Path("data/service_configs")

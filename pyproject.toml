@@ -5,7 +5,7 @@ description = ""
 authors = ["platers <platers81@gmail.com>"]
 
 [tool.poetry.scripts]
-universal-playlists = "universal_playlists.main:app"
+universal-playlists = "universal_playlists.cli:app"
 up-data= "universal_playlists.eval.data.create_dataset:main"
 up-eval="universal_playlists.eval.eval:main"
 
