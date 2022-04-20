@@ -300,7 +300,7 @@ class MusicBrainz(StreamingService):
 
         results = mb.search_recordings(
             query=query,
-            limit=1,
+            limit=3,
         )
 
         def parse_track(recording):

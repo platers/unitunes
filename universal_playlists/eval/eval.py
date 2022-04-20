@@ -34,6 +34,7 @@ class Evaluator:
     ) -> Optional[URI]:
         track = source_service.pull_track(uri)
         matches = target_service.search_track(track)
+        matches = [match for match in matches if track.matches(match)]
         if len(matches) == 0:
             return None
         return matches[0].uris[0]
