@@ -2,6 +2,7 @@ from universal_playlists.services.services import *
 import os
 import pandas as pd
 from tqdm import tqdm
+import shelve
 
 
 class Evaluator:
@@ -25,8 +26,8 @@ class Evaluator:
             for service_type in service_types
         }
 
+    @staticmethod
     def get_prediction(
-        self,
         source_service: StreamingService,
         target_service: StreamingService,
         uri: URI,
@@ -55,21 +56,38 @@ class Evaluator:
             URI(service=target_service_type.value, uri=uri)
             for uri in self.df[target_header]
         ][:n]
-        predictions = [
+        prediction_uris = [
             self.get_prediction(source_service, target_service, source_uri)
             for source_uri in tqdm(source_uris)
         ]
 
-        confusion_df = pd.crosstab(
-            pd.Series(predictions, name="prediction"),
-            pd.Series(target_uris, name="target"),
-            margins=True,
+        correct = len(
+            [
+                target_uri
+                for target_uri, prediction_uri in zip(target_uris, prediction_uris)
+                if target_uri == prediction_uri
+            ]
         )
-        print(confusion_df)
+
+        # target_strs = [uri.uri if uri else "" for uri in target_uris]
+        # prediction_strs = [uri.uri if uri else "" for uri in prediction_uris]
+
+        # confusion_df = pd.crosstab(
+        #     pd.Series(prediction_strs, name="prediction"),
+        #     pd.Series(target_strs, name="target"),
+        #     margins=True,
+        # )
+
+        print(f"{correct}/{n} correct")
+        for p, t in zip(prediction_uris, target_uris):
+            if p != t and p and t:
+                print(
+                    f"https://musicbrainz.org/recording/{p.uri} -> https://musicbrainz.org/recording/{t.uri}"
+                )
 
 
 def main():
     os.chdir(Path(__file__).parent)
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
-    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.MB)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.MB, n=100)

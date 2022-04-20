@@ -222,19 +222,6 @@ class YTM(StreamingService):
         results = self.ytm.get_library_playlists()
 
         def playlistFromResponse(response):
-            # tracks = self.ytm.get_playlist(response["playlistId"])["tracks"]
-            # tracks = filter(lambda x: x["videoId"] is not None, tracks)
-            # tracks = list(
-            #     map(
-            #         lambda x: Track(
-            #             x["title"],
-            #             artist=x["artists"][0]["name"],
-            #             ytm_url="https://music.youtube.com/watch?v=" + x["videoId"],
-            #         ),
-            #         tracks,
-            #     )
-            # )
-
             return PlaylistMetadata(
                 name=response["title"],
                 description=response["description"],

@@ -26,6 +26,12 @@ def main():
 
                 spotify_album_id = None
                 ytm_track_id = None
+                mb_recording_id = None
+                if raw["media"] and "tracks" in raw["media"][0]:
+                    mb_recording_id = raw["media"][0]["tracks"][0]["recording"]["id"]
+                else:
+                    continue
+
                 for relation in relations:
                     if "url" in relation:
                         url = relation["url"]
@@ -44,7 +50,10 @@ def main():
                         sp_uris.append(sp_track.uris[0].uri.split("/")[-1])
                         ytm_track_id = ytm_track_id.split("&")[0]
                         ytm_uris.append(ytm_track_id.split("=")[-1])
-                        mb_uris.append(raw["id"])
+
+                        mb_uris.append(mb_recording_id)
 
     df = pd.DataFrame({"spotify": sp_uris, "ytm": ytm_uris, "mb": mb_uris})
+    # shuffle
+    df = df.sample(frac=1).reset_index(drop=True)
     df.to_csv("dataset.csv", index=False)
