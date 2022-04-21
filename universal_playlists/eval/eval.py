@@ -3,7 +3,6 @@ from universal_playlists.services.services import *
 import os
 import pandas as pd
 from tqdm import tqdm
-import shelve
 
 
 class Evaluator:
@@ -35,6 +34,7 @@ class Evaluator:
     ) -> Optional[URI]:
         track = source_service.pull_track(uri)
         matches = target_service.search_track(track)
+        matches.sort(key=lambda x: track.similarity(x), reverse=True)
         matches = [match for match in matches if track.matches(match)]
         if len(matches) == 0:
             return None
@@ -71,21 +71,21 @@ class Evaluator:
             ]
         )
 
-        # target_strs = [uri.uri if uri else "" for uri in target_uris]
-        # prediction_strs = [uri.uri if uri else "" for uri in prediction_uris]
-
-        # confusion_df = pd.crosstab(
-        #     pd.Series(prediction_strs, name="prediction"),
-        #     pd.Series(target_strs, name="target"),
-        #     margins=True,
-        # )
-
         print(f"{correct}/{n} correct")
-        for p, t in zip(prediction_uris, target_uris):
-            if p != t and p and t:
-                print(
-                    f"https://musicbrainz.org/recording/{p.uri} -> https://musicbrainz.org/recording/{t.uri}"
-                )
+        num_none = len(
+            [
+                prediction_uri
+                for prediction_uri in prediction_uris
+                if prediction_uri is None
+            ]
+        )
+        print(f"{num_none}/{n} predictions were None")
+
+        # for p, t in zip(prediction_uris, target_uris):
+        #     if p != t and p and t:
+        #         print(
+        #             f"https://musicbrainz.org/recording/{p.uri} -> https://musicbrainz.org/recording/{t.uri}"
+        #         )
 
 
 def main():

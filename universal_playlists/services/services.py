@@ -5,6 +5,7 @@ import shelve
 from typing import List, Optional, TypedDict
 from ytmusicapi import YTMusic
 from pydantic import BaseModel
+from strsimpy.jaro_winkler import JaroWinkler
 
 
 class ServiceType(Enum):
@@ -26,6 +27,42 @@ class YtmURI(URI):
         super().__init__(service=ServiceType.YTM.value, uri=uri)
 
 
+def normalized_string_similarity(s1: str, s2: str) -> float:
+    jw = JaroWinkler().similarity(s1, s2)
+    # convert to [-1, 1]
+    return (jw - 0.5) * 2
+
+
+def name_similarity(name1: str, name2: str) -> float:
+    return normalized_string_similarity(name1, name2)
+
+
+def artists_similarity(artists1: List[str], artists2: List[str]) -> float:
+    if len(artists1) == 0 or len(artists2) == 0:
+        return 0
+
+    mx_similarity = 0
+    for artist1 in artists1:
+        for artist2 in artists2:
+            mx_similarity = max(
+                mx_similarity, normalized_string_similarity(artist1, artist2)
+            )
+
+    return mx_similarity
+
+
+def album_similarity(album1: str, album2: str) -> float:
+    return normalized_string_similarity(album1, album2)
+
+
+def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
+    d = abs(length_sec_1 - length_sec_2)
+    max_dist = 4
+    if d > max_dist:
+        return -1
+    return 1 - d / max_dist
+
+
 class Track(BaseModel):
     name: str
     album: Optional[str] = None
@@ -33,19 +70,38 @@ class Track(BaseModel):
     artists: List[str] = []
     uris: List[URI] = []
 
-    def matches(self, track: "Track") -> bool:
+    def similarity(self, other: "Track") -> float:
         # check if any URI in track matches any URI in self
-        for uri in track.uris:
-            if uri in self.uris:
-                return True
+        for uri in self.uris:
+            if uri in other.uris:
+                return 1
 
-        if self.name == track.name:
-            # check if any artist in track matches any artist in self
-            for artist in track.artists:
-                if artist in self.artists:
-                    return True
+        total_weight = 0
+        similarity = 0
 
-        return False
+        if self.name and other.name:
+            name_weight = 50
+            similarity += name_weight * name_similarity(self.name, other.name)
+            total_weight += name_weight
+
+        if self.artists and other.artists:
+            artists_weight = 30
+            similarity += artists_weight * artists_similarity(
+                self.artists, other.artists
+            )
+            total_weight += artists_weight
+
+        if self.album and other.album:
+            album_weight = 20
+            similarity += album_weight * album_similarity(self.album, other.album)
+            total_weight += album_weight
+
+        similarity /= total_weight
+        assert -1 <= similarity <= 1
+        return similarity
+
+    def matches(self, track: "Track") -> bool:
+        return self.similarity(track) > 0.8
 
 
 class PlaylistMetadata(TypedDict):
