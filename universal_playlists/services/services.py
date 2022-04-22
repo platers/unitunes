@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 import shelve
 from typing import List, Optional, TypedDict
-from ytmusicapi import YTMusic
 from pydantic import BaseModel
 from strsimpy.jaro_winkler import JaroWinkler
 
@@ -20,11 +19,6 @@ class URI(BaseModel):
 
     class Config:
         frozen = True
-
-
-class YtmURI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.YTM.value, uri=uri)
 
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
@@ -173,45 +167,3 @@ class StreamingService:
     def search_track(self, track: Track) -> List[Track]:
         """Search for a track in the streaming service. Returns a list of potential matches."""
         raise NotImplementedError
-
-
-class YTM(StreamingService):
-    def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, config_path)
-        self.ytm = YTMusic(config_path.__str__())
-
-    def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.ytm.get_library_playlists()
-
-        def playlistFromResponse(response):
-            return PlaylistMetadata(
-                name=response["title"],
-                description=response["description"],
-                uri=YtmURI(response["playlistId"]),
-            )
-
-        playlists = list(map(playlistFromResponse, results))
-        return playlists
-
-    def pull_tracks(self, uri: YtmURI) -> List[Track]:
-        tracks = self.ytm.get_playlist(uri.uri)["tracks"]
-        tracks = filter(lambda x: x["videoId"] is not None, tracks)
-        tracks = list(
-            map(
-                lambda x: Track(
-                    name=x["title"],
-                    artists=[artist["name"] for artist in x["artists"]],
-                    uris=[YtmURI(x["videoId"])],
-                ),
-                tracks,
-            )
-        )
-        return tracks
-
-    def pull_track(self, uri: YtmURI) -> Track:
-        track = self.ytm.get_song(uri.uri)
-        return Track(
-            name=track["title"],
-            artists=[artist["name"] for artist in track["artists"]],
-            uris=[YtmURI(track["videoId"])],
-        )

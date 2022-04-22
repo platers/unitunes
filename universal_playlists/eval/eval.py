@@ -43,7 +43,6 @@ class Evaluator:
     def evaluate(
         self, source_service_type: ServiceType, target_service_type: ServiceType, n=10
     ):
-        print(self.services)
         source_service = self.services[source_service_type.value]
         target_service = self.services[target_service_type.value]
 
@@ -92,4 +91,4 @@ def main():
     os.chdir(Path(__file__).parent)
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
-    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.MB, n=100)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=10)

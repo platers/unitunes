@@ -8,12 +8,12 @@ from universal_playlists.services.musicbrainz import MusicBrainz
 
 
 from universal_playlists.services.services import (
-    YTM,
     Playlist,
     ServiceType,
     StreamingService,
 )
 from universal_playlists.services.spotify import SpotifyService
+from universal_playlists.services.ytm import YTM
 
 
 class ConfigServiceEntry(BaseModel):
