@@ -162,3 +162,17 @@ class PlaylistManager:
         # save playlist
         with self.playlist_path(playlist_name).open("w") as f:
             f.write(playlist.json(indent=4))
+
+
+def get_prediction(
+    source_service: StreamingService,
+    target_service: StreamingService,
+    uri: URI,
+) -> Optional[URI]:
+    track = source_service.pull_track(uri)
+    matches = target_service.search_track(track)
+    matches.sort(key=lambda x: track.similarity(x), reverse=True)
+    matches = [match for match in matches if track.matches(match, threshold=0.7)]
+    if len(matches) == 0:
+        return None
+    return matches[0].uris[0]

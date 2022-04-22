@@ -65,6 +65,7 @@ class Track(BaseModel):
     album: Optional[str] = None
     album_position: Optional[int] = None
     artists: List[str] = []
+    length: Optional[int] = None
     uris: List[URI] = []
 
     def similarity(self, other: "Track") -> float:
@@ -93,12 +94,17 @@ class Track(BaseModel):
             similarity += album_weight * album_similarity(self.album, other.album)
             total_weight += album_weight
 
+        if self.length and other.length:
+            length_weight = 20
+            similarity += length_weight * length_similarity(self.length, other.length)
+            total_weight += length_weight
+
         similarity /= total_weight
         assert -1 <= similarity <= 1
         return similarity
 
-    def matches(self, track: "Track") -> bool:
-        return self.similarity(track) > 0.8
+    def matches(self, track: "Track", threshold: float = 0.8) -> bool:
+        return self.similarity(track) > threshold
 
 
 class PlaylistMetadata(TypedDict):

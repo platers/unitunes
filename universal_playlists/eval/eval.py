@@ -1,4 +1,4 @@
-from universal_playlists.main import service_factory, uri_factory
+from universal_playlists.main import get_prediction, service_factory, uri_factory
 from universal_playlists.services.services import *
 import os
 import pandas as pd
@@ -26,20 +26,6 @@ class Evaluator:
             for service_type in service_types
         }
 
-    @staticmethod
-    def get_prediction(
-        source_service: StreamingService,
-        target_service: StreamingService,
-        uri: URI,
-    ) -> Optional[URI]:
-        track = source_service.pull_track(uri)
-        matches = target_service.search_track(track)
-        matches.sort(key=lambda x: track.similarity(x), reverse=True)
-        matches = [match for match in matches if track.matches(match)]
-        if len(matches) == 0:
-            return None
-        return matches[0].uris[0]
-
     def evaluate(
         self,
         source_service_type: ServiceType,
@@ -60,7 +46,7 @@ class Evaluator:
             uri_factory(target_service_type, uri) for uri in self.df[target_header]
         ][:n]
         prediction_uris = [
-            self.get_prediction(source_service, target_service, source_uri)
+            get_prediction(source_service, target_service, source_uri)
             for source_uri in tqdm(source_uris)
         ]
 
@@ -93,4 +79,5 @@ def main():
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
     evaluator.evaluate(ServiceType.YTM, ServiceType.SPOTIFY, n=100)
-    # evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=100)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=100)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.MB, n=100)

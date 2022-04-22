@@ -77,12 +77,15 @@ class YTM(StreamingService):
             return Track(
                 name=details["title"],
                 artists=[details["author"]],
+                length=details["lengthSeconds"],
                 uris=[YtmURI(details["videoId"])],
             )
 
         return Track(
             name=raw["title"],
             artists=[artist["name"] for artist in raw["artists"]],
+            album=raw["album"]["name"] if "album" in raw else None,
+            length=raw["duration_seconds"],
             uris=[YtmURI(raw["videoId"])],
         )
 

@@ -103,6 +103,12 @@ class MusicBrainz(StreamingService):
                     for artist in recording["artist-credit"]
                     if "name" in artist
                 ],
+                album=recording["release-list"][0]["title"]
+                if "release-list" in recording
+                else None,
+                length=int(recording["length"]) // 1000
+                if "length" in recording
+                else None,
                 uris=[MB_RECORDING_URI(recording["id"])],
             )
 

@@ -69,7 +69,7 @@ class SpotifyService(StreamingService):
             {
                 "name": playlist["name"],
                 "description": playlist["description"],
-                "uri": SpotifyURI(playlist["external_urls"]["spotify"]),
+                "uri": SpotifyURI.from_url(playlist["external_urls"]["spotify"]),
             }
             for playlist in results["items"]
         ]
@@ -118,6 +118,8 @@ class SpotifyService(StreamingService):
         return Track(
             name=raw["name"],
             artists=[artist["name"] for artist in raw["artists"]],
+            album=raw["album"]["name"],
+            length=raw["duration_ms"] // 1000,
             uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])],
         )
 
