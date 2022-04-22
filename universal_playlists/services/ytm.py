@@ -59,14 +59,10 @@ class YTM(StreamingService):
         return playlists
 
     def results_to_tracks(self, results: list[dict]) -> List[Track]:
-        songs = filter(lambda x: "videoId" in x, results)
+        songs = filter(lambda x: "videoId" in x or "videoDetails" in x, results)
         return list(
             map(
-                lambda x: Track(
-                    name=x["title"],
-                    artists=[artist["name"] for artist in x["artists"]],
-                    uris=[YtmURI(x["videoId"])],
-                ),
+                self.raw_to_track,
                 songs,
             )
         )
@@ -75,13 +71,24 @@ class YTM(StreamingService):
         tracks = self.ytm.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
+    def raw_to_track(self, raw: dict) -> Track:
+        if "videoDetails" in raw:
+            details = raw["videoDetails"]
+            return Track(
+                name=details["title"],
+                artists=[details["author"]],
+                uris=[YtmURI(details["videoId"])],
+            )
+
+        return Track(
+            name=raw["title"],
+            artists=[artist["name"] for artist in raw["artists"]],
+            uris=[YtmURI(raw["videoId"])],
+        )
+
     def pull_track(self, uri: YtmURI) -> Track:
         track = self.ytm.get_song(uri.uri)
-        return Track(
-            name=track["title"],
-            artists=[artist["name"] for artist in track["artists"]],
-            uris=[YtmURI(track["videoId"])],
-        )
+        return self.raw_to_track(track)
 
     def search_track(self, track: Track) -> List[Track]:
         query = f"{track.name} - {' '.join(track.artists)}"

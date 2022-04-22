@@ -22,6 +22,14 @@ class SpotifyURI(URI):
     def url(self) -> str:
         return f"https://open.spotify.com/track/{self.uri}"
 
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def from_url(url: str) -> "SpotifyURI":
+        return SpotifyURI(SpotifyURI.url_to_uri(url))
+
 
 class SpotifyWrapper(ServiceWrapper):
     def __init__(self, config) -> None:
@@ -36,12 +44,16 @@ class SpotifyWrapper(ServiceWrapper):
         )
 
     @cache
-    def track(self, uri: str, use_cache=True):
-        return self.sp.track(uri)
+    def track(self, *args, use_cache=True, **kwargs):
+        return self.sp.track(*args, **kwargs)
 
     @cache
-    def album_tracks(self, album_id: str, use_cache=True):
-        return self.sp.album_tracks(album_id)
+    def album_tracks(self, *args, use_cache=True, **kwargs):
+        return self.sp.album_tracks(*args, **kwargs)
+
+    @cache
+    def search(self, *args, use_cache=True, **kwargs):
+        return self.sp.search(*args, **kwargs)
 
 
 class SpotifyService(StreamingService):
@@ -73,23 +85,12 @@ class SpotifyService(StreamingService):
                 fields="items(track(name,artists(name),id,external_urls))",
                 offset=offset,
             )
-            tracks = []
-            for track in results["items"]:
-                uris = track["track"]["external_urls"]
-                uri: List[URI] = []
-                if "spotify" in uris:
-                    uri = [SpotifyURI(uris["spotify"])]
-
-                tracks.append(
-                    Track(
-                        name=track["track"]["name"],
-                        artists=[
-                            artist["name"] for artist in track["track"]["artists"]
-                        ],
-                        uris=uri,
-                    )
+            return list(
+                map(
+                    self.raw_to_track,
+                    results["items"],
                 )
-            return tracks
+            )
 
         tracks = []
         offset = 0
@@ -104,22 +105,33 @@ class SpotifyService(StreamingService):
     def get_tracks_in_album(self, album_uri: URI) -> List[Track]:
         album_id = album_uri.uri.split("/")[-1]
         results = self.sp.album_tracks(album_id)
-        return [
-            Track(
-                name=track["name"],
-                artists=[artist["name"] for artist in track["artists"]],
-                uris=[SpotifyURI(track["external_urls"]["spotify"])],
-            )
-            for track in results["items"]
-        ]
+        return [self.raw_to_track(track) for track in results["items"]]
 
     def pull_track(self, uri: URI) -> Track:
         track_id = uri.uri.split("/")[-1]
         results = self.sp.track(track_id)
         if not results:
             raise ValueError(f"Track {uri} not found")
+        return self.raw_to_track(results)
+
+    def raw_to_track(self, raw: dict) -> Track:
         return Track(
-            name=results["name"],
-            artists=[artist["name"] for artist in results["artists"]],
-            uris=[SpotifyURI(results["external_urls"]["spotify"])],
+            name=raw["name"],
+            artists=[artist["name"] for artist in raw["artists"]],
+            uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])],
+        )
+
+    def search_track(self, track: Track) -> List[Track]:
+        query = f"track:{track.name}"
+        if track.artists:
+            query += f" artist:{' '.join(track.artists)}"
+        if track.album:
+            query += f" album:{track.album}"
+
+        results = self.sp.search(query, limit=5, type="track")
+        return list(
+            map(
+                self.raw_to_track,
+                results["tracks"]["items"],
+            )
         )

@@ -41,7 +41,11 @@ class Evaluator:
         return matches[0].uris[0]
 
     def evaluate(
-        self, source_service_type: ServiceType, target_service_type: ServiceType, n=10
+        self,
+        source_service_type: ServiceType,
+        target_service_type: ServiceType,
+        n=10,
+        verbose=False,
     ):
         source_service = self.services[source_service_type.value]
         target_service = self.services[target_service_type.value]
@@ -78,13 +82,15 @@ class Evaluator:
         )
         print(f"{num_none}/{n} predictions were None")
 
-        for p, t, s in zip(prediction_uris, target_uris, source_uris):
-            if p != t and p and t:
-                print(f"Source: {s.url()} Prediction: {p.url()} Target: {t.url()}")
+        if verbose:
+            for p, t, s in zip(prediction_uris, target_uris, source_uris):
+                if p != t and p and t:
+                    print(f"Source: {s.url()} Prediction: {p.url()} Target: {t.url()}")
 
 
 def main():
     os.chdir(Path(__file__).parent)
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
-    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=100)
+    evaluator.evaluate(ServiceType.YTM, ServiceType.SPOTIFY, n=100)
+    # evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=100)
