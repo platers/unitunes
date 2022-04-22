@@ -20,6 +20,9 @@ class URI(BaseModel):
     class Config:
         frozen = True
 
+    def url(self) -> str:
+        return f"{self.service}:{self.uri}"
+
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
     jw = JaroWinkler().similarity(s1, s2)

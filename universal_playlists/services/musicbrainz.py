@@ -17,10 +17,16 @@ class MB_RECORDING_URI(URI):
     def __init__(self, uri: str):
         super().__init__(service=ServiceType.MB.value, uri=uri)
 
+    def url(self) -> str:
+        return f"https://musicbrainz.org/recording/{self.uri}"
+
 
 class MB_RELEASE(URI):
     def __init__(self, uri: str):
         super().__init__(service=ServiceType.MB.value, uri=uri)
+
+    def url(self) -> str:
+        return f"https://musicbrainz.org/release/{self.uri}"
 
 
 class MusicBrainzWrapper(ServiceWrapper):

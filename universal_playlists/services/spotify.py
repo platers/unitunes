@@ -19,6 +19,9 @@ class SpotifyURI(URI):
     def __init__(self, uri: str):
         super().__init__(service=ServiceType.SPOTIFY.value, uri=uri)
 
+    def url(self) -> str:
+        return f"https://open.spotify.com/track/{self.uri}"
+
 
 class SpotifyWrapper(ServiceWrapper):
     def __init__(self, config) -> None:

@@ -18,6 +18,9 @@ class YtmURI(URI):
     def __init__(self, uri: str):
         super().__init__(service=ServiceType.YTM.value, uri=uri)
 
+    def url(self) -> str:
+        return f"https://music.youtube.com/watch?v={self.uri}"
+
 
 class YtmWrapper(ServiceWrapper):
     def __init__(self, config_path: Path) -> None:

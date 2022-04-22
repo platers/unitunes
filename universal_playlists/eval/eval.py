@@ -1,4 +1,4 @@
-from universal_playlists.main import service_builder
+from universal_playlists.main import service_factory, uri_factory
 from universal_playlists.services.services import *
 import os
 import pandas as pd
@@ -17,7 +17,7 @@ class Evaluator:
 
         service_types = [header_servicetype_map[header] for header in headers]
         self.services = {
-            service_type.value: service_builder(
+            service_type.value: service_factory(
                 service_type,
                 service_type.value,
                 config_path=Path("data/service_configs")
@@ -50,12 +50,10 @@ class Evaluator:
         target_header = target_service_type.name.lower()
 
         source_uris = [
-            URI(service=source_service_type.value, uri=uri)
-            for uri in self.df[source_header]
+            uri_factory(source_service_type, uri) for uri in self.df[source_header]
         ][:n]
         target_uris = [
-            URI(service=target_service_type.value, uri=uri)
-            for uri in self.df[target_header]
+            uri_factory(target_service_type, uri) for uri in self.df[target_header]
         ][:n]
         prediction_uris = [
             self.get_prediction(source_service, target_service, source_uri)
@@ -80,15 +78,13 @@ class Evaluator:
         )
         print(f"{num_none}/{n} predictions were None")
 
-        # for p, t in zip(prediction_uris, target_uris):
-        #     if p != t and p and t:
-        #         print(
-        #             f"https://musicbrainz.org/recording/{p.uri} -> https://musicbrainz.org/recording/{t.uri}"
-        #         )
+        for p, t, s in zip(prediction_uris, target_uris, source_uris):
+            if p != t and p and t:
+                print(f"Source: {s.url()} Prediction: {p.url()} Target: {t.url()}")
 
 
 def main():
     os.chdir(Path(__file__).parent)
 
     evaluator = Evaluator(Path("data") / "dataset.csv")
-    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=10)
+    evaluator.evaluate(ServiceType.SPOTIFY, ServiceType.YTM, n=100)

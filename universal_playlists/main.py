@@ -4,16 +4,17 @@ import pandas as pd
 from pathlib import Path
 import os
 from pydantic import BaseModel
-from universal_playlists.services.musicbrainz import MusicBrainz
+from universal_playlists.services.musicbrainz import MB_RECORDING_URI, MusicBrainz
 
 
 from universal_playlists.services.services import (
+    URI,
     Playlist,
     ServiceType,
     StreamingService,
 )
-from universal_playlists.services.spotify import SpotifyService
-from universal_playlists.services.ytm import YTM
+from universal_playlists.services.spotify import SpotifyService, SpotifyURI
+from universal_playlists.services.ytm import YTM, YtmURI
 
 
 class ConfigServiceEntry(BaseModel):
@@ -27,7 +28,7 @@ class Config(BaseModel):
     services: List[ConfigServiceEntry] = []
 
 
-def service_builder(
+def service_factory(
     service_type: ServiceType,
     name: str,
     config_path: Path,
@@ -38,6 +39,17 @@ def service_builder(
         return YTM(name, config_path)
     elif service_type == ServiceType.MB:
         return MusicBrainz()
+    else:
+        raise ValueError(f"Unknown service type: {service_type}")
+
+
+def uri_factory(service_type: ServiceType, uri: str) -> URI:
+    if service_type == ServiceType.SPOTIFY:
+        return SpotifyURI(uri=uri)
+    elif service_type == ServiceType.YTM:
+        return YtmURI(uri=uri)
+    elif service_type == ServiceType.MB:
+        return MB_RECORDING_URI(uri=uri)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 
@@ -70,7 +82,7 @@ class PlaylistManager:
         self.services: Dict[str, StreamingService] = {}
         for s in self.config.services:
             service_config_path = Path(s.config_path)
-            self.services[s.name] = service_builder(
+            self.services[s.name] = service_factory(
                 ServiceType(s.service), s.name, config_path=service_config_path
             )
 
