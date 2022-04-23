@@ -1,4 +1,4 @@
-from universal_playlists.main import get_prediction, service_factory, uri_factory
+from universal_playlists.main import get_prediction_uri, service_factory, uri_factory
 from universal_playlists.services.services import *
 import os
 import pandas as pd
@@ -46,7 +46,7 @@ class Evaluator:
             uri_factory(target_service_type, uri) for uri in self.df[target_header]
         ][:n]
         prediction_uris = [
-            get_prediction(source_service, target_service, source_uri)
+            get_prediction_uri(source_service, target_service, source_uri)
             for source_uri in tqdm(source_uris)
         ]
 

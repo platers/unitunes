@@ -12,6 +12,7 @@ from universal_playlists.services.services import (
     Playlist,
     ServiceType,
     StreamingService,
+    Track,
 )
 from universal_playlists.services.spotify import SpotifyService, SpotifyURI
 from universal_playlists.services.ytm import YTM, YtmURI
@@ -80,6 +81,7 @@ class PlaylistManager:
         Path("./playlists").mkdir(exist_ok=True)
 
         self.services: Dict[str, StreamingService] = {}
+        self.services[ServiceType.MB.value] = MusicBrainz()
         for s in self.config.services:
             service_config_path = Path(s.config_path)
             self.services[s.name] = service_factory(
@@ -164,15 +166,29 @@ class PlaylistManager:
             f.write(playlist.json(indent=4))
 
 
-def get_prediction(
+def get_prediction_track(
+    target_service: StreamingService,
+    track: Track,
+    threshold: float = 0.8,
+) -> Optional[Track]:
+    matches = target_service.search_track(track)
+    if len(matches) == 0:
+        return None
+    scores = [track.similarity(m) for m in matches]
+    # scores[0] += 0.2  # add a bonus to the first match
+    best_match = matches[max(enumerate(scores), key=lambda x: x[1])[0]]  # argmax
+    if max(scores) > threshold:
+        return best_match
+    else:
+        return None
+
+
+def get_prediction_uri(
     source_service: StreamingService,
     target_service: StreamingService,
     uri: URI,
+    threshold: float = 0.8,
 ) -> Optional[URI]:
     track = source_service.pull_track(uri)
-    matches = target_service.search_track(track)
-    matches.sort(key=lambda x: track.similarity(x), reverse=True)
-    matches = [match for match in matches if track.matches(match, threshold=0.7)]
-    if len(matches) == 0:
-        return None
-    return matches[0].uris[0]
+    prediction = get_prediction_track(target_service, track, threshold)
+    return prediction.uris[0] if prediction else None

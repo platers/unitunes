@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 import spotipy
 from spotipy import SpotifyOAuth
+from tqdm import tqdm
 
 from universal_playlists.services.services import (
     URI,
@@ -11,24 +12,9 @@ from universal_playlists.services.services import (
     ServiceWrapper,
     StreamingService,
     Track,
+    SpotifyURI,
     cache,
 )
-
-
-class SpotifyURI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.SPOTIFY.value, uri=uri)
-
-    def url(self) -> str:
-        return f"https://open.spotify.com/track/{self.uri}"
-
-    @staticmethod
-    def url_to_uri(url: str) -> str:
-        return url.split("/")[-1]
-
-    @staticmethod
-    def from_url(url: str) -> "SpotifyURI":
-        return SpotifyURI(SpotifyURI.url_to_uri(url))
 
 
 class SpotifyWrapper(ServiceWrapper):
@@ -58,7 +44,7 @@ class SpotifyWrapper(ServiceWrapper):
 
 class SpotifyService(StreamingService):
     def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, config_path)
+        super().__init__(name, ServiceType.SPOTIFY, config_path)
         credentials = json.load(open(config_path, "r"))
         self.sp = SpotifyWrapper(credentials)
 
@@ -82,15 +68,12 @@ class SpotifyService(StreamingService):
             results = self.sp.sp.user_playlist_tracks(
                 user=self.sp.sp.current_user()["id"],
                 playlist_id=playlist_id,
-                fields="items(track(name,artists(name),id,external_urls))",
+                fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
             )
-            return list(
-                map(
-                    self.raw_to_track,
-                    results["items"],
-                )
-            )
+            return [
+                self.raw_to_track(track["track"]) for track in tqdm(results["items"])
+            ]
 
         tracks = []
         offset = 0
@@ -120,7 +103,9 @@ class SpotifyService(StreamingService):
             artists=[artist["name"] for artist in raw["artists"]],
             album=raw["album"]["name"],
             length=raw["duration_ms"] // 1000,
-            uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])],
+            uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])]
+            if "spotify" in raw["external_urls"]
+            else [],
         )
 
     def search_track(self, track: Track) -> List[Track]:

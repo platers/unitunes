@@ -18,6 +18,7 @@ ytmusicapi = "^0.21.0"
 musicbrainzngs = "^0.7.1"
 pydantic = "^1.9.0"
 strsimpy = "^0.2.1"
+rich = "^12.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

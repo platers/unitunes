@@ -4,6 +4,7 @@ from typing import List
 import musicbrainzngs as mb
 
 from universal_playlists.services.services import (
+    MB_RECORDING_URI,
     URI,
     ServiceType,
     ServiceWrapper,
@@ -11,22 +12,6 @@ from universal_playlists.services.services import (
     Track,
     cache,
 )
-
-
-class MB_RECORDING_URI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.MB.value, uri=uri)
-
-    def url(self) -> str:
-        return f"https://musicbrainz.org/recording/{self.uri}"
-
-
-class MB_RELEASE(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.MB.value, uri=uri)
-
-    def url(self) -> str:
-        return f"https://musicbrainz.org/release/{self.uri}"
 
 
 class MusicBrainzWrapper(ServiceWrapper):
@@ -51,7 +36,7 @@ class MusicBrainz(StreamingService):
     def __init__(
         self,
     ) -> None:
-        super().__init__("MusicBrainz", Path())
+        super().__init__("MusicBrainz", ServiceType.MB, Path())
         self.mb = MusicBrainzWrapper()
 
     def pull_track(self, uri: MB_RECORDING_URI) -> Track:

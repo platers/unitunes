@@ -4,7 +4,7 @@ from typing import List
 from ytmusicapi import YTMusic
 
 from universal_playlists.services.services import (
-    URI,
+    YtmURI,
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
@@ -12,14 +12,6 @@ from universal_playlists.services.services import (
     Track,
     cache,
 )
-
-
-class YtmURI(URI):
-    def __init__(self, uri: str):
-        super().__init__(service=ServiceType.YTM.value, uri=uri)
-
-    def url(self) -> str:
-        return f"https://music.youtube.com/watch?v={self.uri}"
 
 
 class YtmWrapper(ServiceWrapper):
@@ -42,7 +34,7 @@ class YtmWrapper(ServiceWrapper):
 
 class YTM(StreamingService):
     def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, config_path)
+        super().__init__(name, ServiceType.YTM, config_path=config_path)
         self.ytm = YtmWrapper(config_path)
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
@@ -84,8 +76,8 @@ class YTM(StreamingService):
         return Track(
             name=raw["title"],
             artists=[artist["name"] for artist in raw["artists"]],
-            album=raw["album"]["name"] if "album" in raw else None,
-            length=raw["duration_seconds"],
+            album=raw["album"]["name"] if "album" in raw and raw["album"] else None,
+            length=raw["duration_seconds"] if "duration_seconds" in raw else None,
             uris=[YtmURI(raw["videoId"])],
         )
 

@@ -1,16 +1,16 @@
 from enum import Enum
-import json
 from pathlib import Path
 import shelve
-from typing import List, Optional, TypedDict
+from typing import List, Literal, NewType, Optional, TypedDict, Union
 from pydantic import BaseModel
 from strsimpy.jaro_winkler import JaroWinkler
+from pydantic.validators import dict_validator
 
 
-class ServiceType(Enum):
+class ServiceType(str, Enum):
     SPOTIFY = "spotify"
-    YTM = "youtube-music"
-    MB = "musicbrainz"
+    YTM = "ytm"
+    MB = "mb"
 
 
 class URI(BaseModel):
@@ -22,6 +22,64 @@ class URI(BaseModel):
 
     def url(self) -> str:
         return f"{self.service}:{self.uri}"
+
+    def __rich__(self) -> str:
+        return f"[link={self.url()}]{self.url()}[/link]"
+
+    @classmethod
+    def get_validators(cls):
+        # yield dict_validator
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value):
+        if isinstance(value, cls):
+            return value
+        else:
+            return cls(**dict_validator(value))
+
+
+class SpotifyURI(URI):
+    def __init__(self, uri: str):
+        super().__init__(service=ServiceType.SPOTIFY.value, uri=uri)
+
+    def url(self) -> str:
+        return f"https://open.spotify.com/track/{self.uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def from_url(url: str) -> "SpotifyURI":
+        return SpotifyURI(SpotifyURI.url_to_uri(url))
+
+
+class YtmURI(URI):
+    def __init__(self, uri: str):
+        super().__init__(service=ServiceType.YTM.value, uri=uri)
+
+    def url(self) -> str:
+        return f"https://music.youtube.com/watch?v={self.uri}"
+
+
+class MB_RECORDING_URI(URI):
+    def __init__(self, uri: str):
+        super().__init__(service=ServiceType.MB.value, uri=uri)
+
+    def url(self) -> str:
+        return f"https://musicbrainz.org/recording/{self.uri}"
+
+
+class MB_RELEASE(URI):
+    def __init__(self, uri: str):
+        super().__init__(service=ServiceType.MB.value, uri=uri)
+
+    def url(self) -> str:
+        return f"https://musicbrainz.org/release/{self.uri}"
+
+
+URIS = List[Union[SpotifyURI, YtmURI, MB_RECORDING_URI, MB_RELEASE, URI]]
 
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
@@ -49,7 +107,11 @@ def artists_similarity(artists1: List[str], artists2: List[str]) -> float:
 
 
 def album_similarity(album1: str, album2: str) -> float:
-    return normalized_string_similarity(album1, album2)
+    str_sim = normalized_string_similarity(album1, album2)
+    if str_sim < 0:
+        str_sim /= 5
+
+    return str_sim
 
 
 def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
@@ -66,7 +128,20 @@ class Track(BaseModel):
     album_position: Optional[int] = None
     artists: List[str] = []
     length: Optional[int] = None
-    uris: List[URI] = []
+    uris: URIS = []
+
+    def __rich__(self):
+        s = f"[b]{self.name}[/b]"
+        if self.artists:
+            s += f"\nArtists: {', '.join(self.artists)}"
+        if self.album:
+            s += f"\nAlbum: {self.album}"
+        if self.length:
+            s += f"\nLength: {self.length}"
+        if self.uris:
+            s += f"\nURIs: {', '.join(uri.__rich__() for uri in self.uris)}"
+
+        return s
 
     def similarity(self, other: "Track") -> float:
         # check if any URI in track matches any URI in self
@@ -116,7 +191,7 @@ class PlaylistMetadata(TypedDict):
 class Playlist(BaseModel):
     name: str
     description: str = ""
-    uris: List[URI] = []
+    uris: URIS = []
     tracks: List[Track] = []
 
     def merge_metadata(self, metadata: PlaylistMetadata) -> None:
@@ -153,8 +228,9 @@ class ServiceWrapper:
 
 
 class StreamingService:
-    def __init__(self, name: str, config_path: Path) -> None:
+    def __init__(self, name: str, type: ServiceType, config_path: Path) -> None:
         self.name = name
+        self.type = type
         self.config_path = config_path
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
