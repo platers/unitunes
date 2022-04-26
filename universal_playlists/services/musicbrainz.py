@@ -5,7 +5,6 @@ import musicbrainzngs as mb
 
 from universal_playlists.services.services import (
     MB_RECORDING_URI,
-    URI,
     ServiceType,
     ServiceWrapper,
     StreamingService,
@@ -94,7 +93,7 @@ class MusicBrainz(StreamingService):
                 length=int(recording["length"]) // 1000
                 if "length" in recording
                 else None,
-                uris=[MB_RECORDING_URI(recording["id"])],
+                uris=[MB_RECORDING_URI(uri=recording["id"])],
             )
 
         return list(map(parse_track, results["recording-list"]))

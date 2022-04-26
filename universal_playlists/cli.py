@@ -51,7 +51,7 @@ def pull_metadata() -> None:
             playlist = Playlist.parse_file(playlist_config_path)
 
         for service_name, service in pm.services.items():
-            if type(row[service_name]) is not str:
+            if service_name not in row or type(row[service_name]) is not str:
                 continue
             metadata = service.get_playlist_metadata(row[service_name])
             playlist.merge_metadata(metadata)
@@ -76,7 +76,6 @@ def search(service: ServiceType, playlist: str) -> None:
 
     pl = pm.playlists[playlist]
     original_tracks = pl.tracks
-    print(service, pm.services)
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
     predicted_tracks = [
         get_prediction_track(streaming_service, track, threshold=0.5)
