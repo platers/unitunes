@@ -67,7 +67,10 @@ class MusicBrainz(StreamingService):
         track.album_position = first_release["medium-list"][0]["position"]
         return track
 
-    def search_track_fields(self, track: Track, fields) -> List[Track]:
+    def search_track_fields(self, fields) -> List[Track]:
+        # remove empty fields
+        fields = {k: v for k, v in fields.items() if v}
+
         results = self.mb.search_recordings(
             limit=10,
             **fields,
@@ -132,26 +135,35 @@ class MusicBrainz(StreamingService):
             "release": escape_special_chars(" ".join([a.value for a in track.albums])),
         }
 
-        matches = self.search_track_fields(track, all_fields)
-        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
-            track
-        )
-        if max_similarity >= stop_threshold:
-            return matches
+        fields_to_remove = [
+            [],
+            ["release"],
+            ["artist"],
+            ["recording"],
+            ["artist", "release"],
+        ]
 
-        fields_no_release = all_fields.copy()
-        del fields_no_release["release"]
-        matches.extend(self.search_track_fields(track, fields_no_release))
-        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
-            track
-        )
-        if max_similarity >= stop_threshold:
-            return matches
+        def can_stop(matches: List[Track]) -> bool:
+            if not matches:
+                return False
 
-        fields_no_artist = all_fields.copy()
-        del fields_no_artist["artist"]
-        matches.extend(self.search_track_fields(track, fields_no_artist))
-        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
-            track
-        )
+            max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
+                track
+            )
+            return max_similarity >= stop_threshold
+
+        matches = []
+        for removed_fields in fields_to_remove:
+            fields = {
+                field: all_fields[field]
+                for field in all_fields
+                if field not in removed_fields
+            }
+            if not any(fields.values()):
+                continue
+
+            matches.extend(self.search_track_fields(fields))
+            if can_stop(matches):
+                break
+
         return matches
