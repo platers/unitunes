@@ -299,7 +299,9 @@ class StreamingService:
         for meta in metas:
             if meta["name"] == playlist_name:
                 return meta
-        raise ValueError(f"Playlist {playlist_name} not found in {self.name}")
+        raise ValueError(
+            f"Playlist {playlist_name} not found in {self.name}. Available playlists: {', '.join([meta['name'] for meta in metas])}"
+        )
 
     def pull_tracks(self, uri: URI) -> List[Track]:
         raise NotImplementedError

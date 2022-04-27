@@ -166,22 +166,32 @@ class PlaylistManager:
             f.write(playlist.json(indent=4))
 
 
+def get_predicted_tracks(
+    target_service: StreamingService,
+    track: Track,
+) -> List[Track]:
+    matches = target_service.search_track(track)
+    if len(matches) == 0:
+        return []
+    # sort by score
+    matches.sort(key=lambda m: m.similarity(track), reverse=True)
+    return matches
+
+
 def get_prediction_track(
     target_service: StreamingService,
     track: Track,
     threshold: float = 0.8,
 ) -> Optional[Track]:
-    matches = target_service.search_track(track)
+    matches = get_predicted_tracks(target_service, track)
     if len(matches) == 0:
         return None
-    scores = [track.similarity(m) for m in matches]
-    # for m, score in zip(matches, scores):
-    #     print(f"{m.name} ({score})")
-    best_match = matches[max(enumerate(scores), key=lambda x: x[1])[0]]  # argmax
-    if max(scores) > threshold:
-        return best_match
-    else:
+    best_match = matches[0]
+
+    if best_match.similarity(track) < threshold:
         return None
+
+    return best_match
 
 
 def get_prediction_uri(

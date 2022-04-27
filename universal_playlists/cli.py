@@ -1,6 +1,10 @@
 from tqdm import tqdm
 import typer
-from universal_playlists.main import PlaylistManager, get_prediction_track
+from universal_playlists.main import (
+    PlaylistManager,
+    get_predicted_tracks,
+    get_prediction_track,
+)
 from typing import Optional
 from pathlib import Path
 from rich.console import Console
@@ -70,7 +74,9 @@ def pull_tracks(playlist_name: str) -> None:
 
 
 @app.command()
-def search(service: ServiceType, playlist: str, verbose: bool = False) -> None:
+def search(
+    service: ServiceType, playlist: str, verbose: bool = False, debug: bool = False
+) -> None:
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
 
@@ -81,8 +87,11 @@ def search(service: ServiceType, playlist: str, verbose: bool = False) -> None:
         get_prediction_track(streaming_service, track, threshold=0.5)
         for track in tqdm(original_tracks)
     ]
+    all_predicted_tracks = [
+        get_predicted_tracks(streaming_service, track) for track in original_tracks
+    ]
 
-    table = Table(title=f"uncertain {service.value} search results for {playlist}")
+    table = Table(title=f"Uncertain {service.value} search results for {playlist}")
     table.add_column("Original Track")
     table.add_column("Predicted Track")
     table.add_column("Confidence")
@@ -91,12 +100,16 @@ def search(service: ServiceType, playlist: str, verbose: bool = False) -> None:
     for i, (original, predicted) in enumerate(zip(original_tracks, predicted_tracks)):
         if predicted is None:
             # table.add_row(original, "", "")
-            pass
-        else:
-            similarity = original.similarity(predicted)
-            if not verbose and similarity >= 0.7:
-                continue
-            table.add_row(original, predicted, f"{original.similarity(predicted):.2f}")
+            continue
+
+        similarity = original.similarity(predicted)
+        if not verbose and similarity >= 0.7:
+            continue
+
+        table.add_row(original, predicted, f"{original.similarity(predicted):.2f}")
+        if debug:
+            for track in all_predicted_tracks[i][1:]:
+                table.add_row("", track, f"{original.similarity(track):.2f}")
 
     console.print(table)
     num_not_found = len([t for t in predicted_tracks if t is None])

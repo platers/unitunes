@@ -68,9 +68,35 @@ class MusicBrainz(StreamingService):
         return track
 
     def search_track(self, track: Track) -> List[Track]:
+        def escape_special_chars(s: str) -> str:
+            # + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+            special_chars = [
+                "\\",  # \ needs to be escaped first or else it will be escaped twice
+                "+",
+                "-",
+                "&&",
+                "||",
+                "!",
+                "(",
+                ")",
+                "{",
+                "}",
+                "[",
+                "]",
+                "^",
+                '"',
+                "~",
+                "*",
+                "?",
+                ":",
+            ]
+            for char in special_chars:
+                s = s.replace(char, f"\\{char}")
+            return s
+
         fields = [
-            "recording:{}".format(track.name),
-            "artist:{}".format(" ".join(track.artists)),
+            "recording:{}".format(escape_special_chars(track.name.value)),
+            "artist:{}".format(escape_special_chars(" ".join(track.artists))),
         ]
         query = " AND ".join(fields)
 
@@ -80,11 +106,15 @@ class MusicBrainz(StreamingService):
         )
 
         def parse_track(recording):
-            albums = [
-                AliasedString(value=album["title"])
-                for album in recording["release-list"]
-                if "title" in album
-            ]
+            albums = (
+                [
+                    AliasedString(value=album["title"])
+                    for album in recording["release-list"]
+                    if "title" in album
+                ]
+                if "release-list" in recording
+                else []
+            )
             return Track(
                 name=AliasedString(value=recording["title"]),
                 artists=[
