@@ -75,6 +75,8 @@ class MusicBrainz(StreamingService):
             limit=10,
             **fields,
         )
+        # if "Eve" in json.dumps(results):
+        #     print(json.dumps(results, indent=2))
 
         def parse_track(recording):
             albums = (
@@ -86,13 +88,23 @@ class MusicBrainz(StreamingService):
                 if "release-list" in recording
                 else []
             )
+            artists = []
+            for artist in recording["artist-credit"]:
+                if "artist" in artist:
+                    a = artist["artist"]
+                    if "name" in a:
+                        aliases = (
+                            [alias["alias"] for alias in a["alias-list"]]
+                            if "alias-list" in a
+                            else []
+                        )
+                        if "sort-name" in a:
+                            aliases.append(a["sort-name"])
+                        artists.append(AliasedString(value=a["name"], aliases=aliases))
+
             return Track(
                 name=AliasedString(value=recording["title"]),
-                artists=[
-                    artist["name"]
-                    for artist in recording["artist-credit"]
-                    if "name" in artist
-                ],
+                artists=artists,
                 albums=albums,
                 length=int(recording["length"]) // 1000
                 if "length" in recording
@@ -131,7 +143,9 @@ class MusicBrainz(StreamingService):
 
         all_fields = {
             "recording": escape_special_chars(track.name.value),
-            "artist": escape_special_chars(" ".join(track.artists)),
+            "artist": escape_special_chars(
+                " ".join([artist.value for artist in track.artists])
+            ),
             "release": escape_special_chars(" ".join([a.value for a in track.albums])),
         }
 

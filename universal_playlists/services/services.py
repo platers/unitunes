@@ -28,7 +28,7 @@ def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> 
 
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
-    jw = JaroWinkler().similarity(s1, s2)
+    jw = JaroWinkler().similarity(s1.lower(), s2.lower())
     # convert to [-1, 1]
     return (jw - 0.5) * 2
 
@@ -140,18 +140,14 @@ class MB_RELEASE_URI(URIBase):
 URI = Union[SpotifyURI, YtmURI, MB_RECORDING_URI, MB_RELEASE_URI]
 
 
-def artists_similarity(artists1: List[str], artists2: List[str]) -> float:
+def artists_similarity(
+    artists1: List[AliasedString], artists2: List[AliasedString]
+) -> float:
     if len(artists1) == 0 or len(artists2) == 0:
         return 0
 
-    mx_similarity = 0
-    for artist1 in artists1:
-        for artist2 in artists2:
-            mx_similarity = max(
-                mx_similarity, normalized_string_similarity(artist1, artist2)
-            )
-
-    return mx_similarity
+    sim = pairwise_max(artists1, artists2, lambda a, b: a.pairwise_max_similarity(b))
+    return sim
 
 
 def album_similarity(album1: List[AliasedString], album2: List[AliasedString]) -> float:
@@ -173,15 +169,14 @@ def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
 class Track(BaseModel):
     name: AliasedString
     albums: List[AliasedString] = []
-    album_position: Optional[int] = None
-    artists: List[str] = []
+    artists: List[AliasedString] = []
     length: Optional[int] = None
     uris: List[URI] = []
 
     def __rich__(self):
         s = f"[b]{self.name.__rich__()}[/b]"
         if self.artists:
-            s += f"\nArtists: {', '.join(self.artists)}"
+            s += f"\nArtists: {', '.join(a.__rich__() for a in self.artists)}"
         if self.albums:
             s += f"\nAlbums: {', '.join([a.__rich__() for a in self.albums])}"
         if self.length:

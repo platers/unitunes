@@ -101,7 +101,7 @@ class SpotifyService(StreamingService):
     def raw_to_track(self, raw: dict) -> Track:
         return Track(
             name=AliasedString(value=raw["name"]),
-            artists=[artist["name"] for artist in raw["artists"]],
+            artists=[AliasedString(value=artist["name"]) for artist in raw["artists"]],
             albums=[AliasedString(value=raw["album"]["name"])],
             length=raw["duration_ms"] // 1000,
             uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])]
@@ -112,7 +112,7 @@ class SpotifyService(StreamingService):
     def search_track(self, track: Track) -> List[Track]:
         query = f"track:{track.name}"
         if track.artists:
-            query += f" artist:{' '.join(track.artists)}"
+            query += f" artist:{' '.join([artist.value for artist in track.artists])}"
         if track.albums:
             query += f" album:{track.albums[0]}"
 
