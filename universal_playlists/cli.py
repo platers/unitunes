@@ -70,7 +70,7 @@ def pull_tracks(playlist_name: str) -> None:
 
 
 @app.command()
-def search(service: ServiceType, playlist: str) -> None:
+def search(service: ServiceType, playlist: str, verbose: bool = False) -> None:
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
 
@@ -94,7 +94,7 @@ def search(service: ServiceType, playlist: str) -> None:
             pass
         else:
             similarity = original.similarity(predicted)
-            if similarity >= 0.7:
+            if not verbose and similarity >= 0.7:
                 continue
             table.add_row(original, predicted, f"{original.similarity(predicted):.2f}")
 

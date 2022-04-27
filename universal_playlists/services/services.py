@@ -1,11 +1,55 @@
 from enum import Enum
 from pathlib import Path
 import shelve
-from typing import List, Literal, NewType, Optional, TypedDict, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    NewType,
+    Optional,
+    TypedDict,
+    Union,
+)
 from pydantic import BaseModel
 from strsimpy.jaro_winkler import JaroWinkler
 from pydantic.validators import dict_validator
 from abc import ABC, abstractmethod
+from rich import print
+
+
+def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> float:
+    mx = 0
+    for i in a:
+        for j in b:
+            mx = max(mx, f(i, j))
+    return mx
+
+
+def normalized_string_similarity(s1: str, s2: str) -> float:
+    jw = JaroWinkler().similarity(s1, s2)
+    # convert to [-1, 1]
+    return (jw - 0.5) * 2
+
+
+class AliasedString(BaseModel):
+    value: str
+    aliases: List[str] = []
+
+    def __rich__(self):
+        s = self.value
+        if self.aliases:
+            s += f" ({', '.join(self.aliases)})"
+        return s
+
+    def all_values(self) -> List[str]:
+        return [self.value] + self.aliases
+
+    def pairwise_max_similarity(self, other: "AliasedString") -> float:
+        return pairwise_max(
+            self.all_values(), other.all_values(), normalized_string_similarity
+        )
 
 
 class ServiceType(str, Enum):
@@ -96,16 +140,6 @@ class MB_RELEASE_URI(URIBase):
 URI = Union[SpotifyURI, YtmURI, MB_RECORDING_URI, MB_RELEASE_URI]
 
 
-def normalized_string_similarity(s1: str, s2: str) -> float:
-    jw = JaroWinkler().similarity(s1, s2)
-    # convert to [-1, 1]
-    return (jw - 0.5) * 2
-
-
-def name_similarity(name1: str, name2: str) -> float:
-    return normalized_string_similarity(name1, name2)
-
-
 def artists_similarity(artists1: List[str], artists2: List[str]) -> float:
     if len(artists1) == 0 or len(artists2) == 0:
         return 0
@@ -120,12 +154,12 @@ def artists_similarity(artists1: List[str], artists2: List[str]) -> float:
     return mx_similarity
 
 
-def album_similarity(album1: str, album2: str) -> float:
-    str_sim = normalized_string_similarity(album1, album2)
-    if str_sim < 0:
-        str_sim /= 5
+def album_similarity(album1: List[AliasedString], album2: List[AliasedString]) -> float:
+    sim = pairwise_max(album1, album2, lambda a, b: a.pairwise_max_similarity(b))
+    if sim < 0:
+        sim /= 5
 
-    return str_sim
+    return sim
 
 
 def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
@@ -137,19 +171,19 @@ def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
 
 
 class Track(BaseModel):
-    name: str
-    album: Optional[str] = None
+    name: AliasedString
+    albums: List[AliasedString] = []
     album_position: Optional[int] = None
     artists: List[str] = []
     length: Optional[int] = None
     uris: List[URI] = []
 
     def __rich__(self):
-        s = f"[b]{self.name}[/b]"
+        s = f"[b]{self.name.__rich__()}[/b]"
         if self.artists:
             s += f"\nArtists: {', '.join(self.artists)}"
-        if self.album:
-            s += f"\nAlbum: {self.album}"
+        if self.albums:
+            s += f"\nAlbums: {', '.join([a.__rich__() for a in self.albums])}"
         if self.length:
             s += f"\nLength: {self.length}"
         if self.uris:
@@ -157,38 +191,48 @@ class Track(BaseModel):
 
         return s
 
-    def similarity(self, other: "Track") -> float:
+    def similarity(self, other: "Track", verbose=False) -> float:
         # check if any URI in track matches any URI in self
         for uri in self.uris:
             if uri in other.uris:
                 return 1
 
-        total_weight = 0
-        similarity = 0
+        weights = {
+            "name": 50,
+            "album": 20,
+            "artists": 30,
+            "length": 20,
+        }
+
+        feature_scores: Dict[str, float] = {}
 
         if self.name and other.name:
-            name_weight = 50
-            similarity += name_weight * name_similarity(self.name, other.name)
-            total_weight += name_weight
+            feature_scores["name"] = self.name.pairwise_max_similarity(other.name)
 
         if self.artists and other.artists:
-            artists_weight = 30
-            similarity += artists_weight * artists_similarity(
-                self.artists, other.artists
-            )
-            total_weight += artists_weight
+            feature_scores["artists"] = artists_similarity(self.artists, other.artists)
 
-        if self.album and other.album:
-            album_weight = 20
-            similarity += album_weight * album_similarity(self.album, other.album)
-            total_weight += album_weight
+        if self.albums and other.albums:
+            feature_scores["album"] = album_similarity(self.albums, other.albums)
 
         if self.length and other.length:
-            length_weight = 20
-            similarity += length_weight * length_similarity(self.length, other.length)
-            total_weight += length_weight
+            feature_scores["length"] = length_similarity(self.length, other.length)
 
-        similarity /= total_weight
+        if verbose:
+            print(f"{self.name} vs {other.name}")
+            print(other)
+            print(feature_scores)
+
+        used_features = feature_scores.keys()
+        if not used_features:
+            return 0
+
+        weighted_sum = sum(
+            feature_scores[feature] * weights[feature] for feature in used_features
+        )
+        total_weight = sum(weights[feature] for feature in used_features)
+
+        similarity = weighted_sum / total_weight
         assert -1 <= similarity <= 1
         return similarity
 

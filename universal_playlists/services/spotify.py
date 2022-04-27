@@ -7,6 +7,7 @@ from tqdm import tqdm
 
 from universal_playlists.services.services import (
     URI,
+    AliasedString,
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
@@ -99,9 +100,9 @@ class SpotifyService(StreamingService):
 
     def raw_to_track(self, raw: dict) -> Track:
         return Track(
-            name=raw["name"],
+            name=AliasedString(value=raw["name"]),
             artists=[artist["name"] for artist in raw["artists"]],
-            album=raw["album"]["name"],
+            albums=[AliasedString(value=raw["album"]["name"])],
             length=raw["duration_ms"] // 1000,
             uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])]
             if "spotify" in raw["external_urls"]
@@ -112,8 +113,8 @@ class SpotifyService(StreamingService):
         query = f"track:{track.name}"
         if track.artists:
             query += f" artist:{' '.join(track.artists)}"
-        if track.album:
-            query += f" album:{track.album}"
+        if track.albums:
+            query += f" album:{track.albums[0]}"
 
         results = self.sp.search(query, limit=5, type="track")
         return list(

@@ -175,7 +175,8 @@ def get_prediction_track(
     if len(matches) == 0:
         return None
     scores = [track.similarity(m) for m in matches]
-    # scores[0] += 0.2  # add a bonus to the first match
+    # for m, score in zip(matches, scores):
+    #     print(f"{m.name} ({score})")
     best_match = matches[max(enumerate(scores), key=lambda x: x[1])[0]]  # argmax
     if max(scores) > threshold:
         return best_match

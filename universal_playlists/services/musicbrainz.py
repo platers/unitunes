@@ -5,6 +5,7 @@ import musicbrainzngs as mb
 
 from universal_playlists.services.services import (
     MB_RECORDING_URI,
+    AliasedString,
     ServiceType,
     ServiceWrapper,
     StreamingService,
@@ -46,7 +47,6 @@ class MusicBrainz(StreamingService):
             raise ValueError(f"Recording {uri} not found")
         recording = results["recording"]
 
-        print(json.dumps(recording, indent=4))
         track = Track(
             name=recording["title"],
             artists=[artist["artist"]["name"] for artist in recording["artist-credit"]],
@@ -80,16 +80,19 @@ class MusicBrainz(StreamingService):
         )
 
         def parse_track(recording):
+            albums = [
+                AliasedString(value=album["title"])
+                for album in recording["release-list"]
+                if "title" in album
+            ]
             return Track(
-                name=recording["title"],
+                name=AliasedString(value=recording["title"]),
                 artists=[
                     artist["name"]
                     for artist in recording["artist-credit"]
                     if "name" in artist
                 ],
-                album=recording["release-list"][0]["title"]
-                if "release-list" in recording
-                else None,
+                albums=albums,
                 length=int(recording["length"]) // 1000
                 if "length" in recording
                 else None,
