@@ -95,14 +95,18 @@ class MusicBrainz(StreamingService):
             return s
 
         fields = [
-            "recording:{}".format(escape_special_chars(track.name.value)),
-            "artist:{}".format(escape_special_chars(" ".join(track.artists))),
+            'recording:"{}"'.format(escape_special_chars(track.name.value)),
+            'artist:"{}"'.format(escape_special_chars(" ".join(track.artists))),
+            'release:"{}"'.format(
+                escape_special_chars(" ".join([a.value for a in track.albums]))
+            ),
         ]
-        query = " AND ".join(fields)
+        query = " OR ".join(fields)
+        print(query)
 
         results = self.mb.search_recordings(
             query=query,
-            limit=3,
+            limit=10,
         )
 
         def parse_track(recording):

@@ -75,7 +75,11 @@ def pull_tracks(playlist_name: str) -> None:
 
 @app.command()
 def search(
-    service: ServiceType, playlist: str, verbose: bool = False, debug: bool = False
+    service: ServiceType,
+    playlist: str,
+    showall: bool = False,
+    debug: bool = False,
+    onlyfailed: bool = False,
 ) -> None:
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
@@ -99,11 +103,16 @@ def search(
 
     for i, (original, predicted) in enumerate(zip(original_tracks, predicted_tracks)):
         if predicted is None:
-            # table.add_row(original, "", "")
+            if showall or onlyfailed:
+                table.add_row(original, "", "")
+                for track in all_predicted_tracks[i]:
+                    table.add_row("", track, f"{original.similarity(track):.2f}")
+            continue
+        elif onlyfailed:
             continue
 
         similarity = original.similarity(predicted)
-        if not verbose and similarity >= 0.7:
+        if not showall and similarity >= 0.7:
             continue
 
         table.add_row(original, predicted, f"{original.similarity(predicted):.2f}")
