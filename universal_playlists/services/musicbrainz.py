@@ -67,46 +67,10 @@ class MusicBrainz(StreamingService):
         track.album_position = first_release["medium-list"][0]["position"]
         return track
 
-    def search_track(self, track: Track) -> List[Track]:
-        def escape_special_chars(s: str) -> str:
-            # + - && || ! ( ) { } [ ] ^ " ~ * ? : \
-            special_chars = [
-                "\\",  # \ needs to be escaped first or else it will be escaped twice
-                "+",
-                "-",
-                "&&",
-                "||",
-                "!",
-                "(",
-                ")",
-                "{",
-                "}",
-                "[",
-                "]",
-                "^",
-                '"',
-                "~",
-                "*",
-                "?",
-                ":",
-            ]
-            for char in special_chars:
-                s = s.replace(char, f"\\{char}")
-            return s
-
-        fields = [
-            'recording:"{}"'.format(escape_special_chars(track.name.value)),
-            'artist:"{}"'.format(escape_special_chars(" ".join(track.artists))),
-            'release:"{}"'.format(
-                escape_special_chars(" ".join([a.value for a in track.albums]))
-            ),
-        ]
-        query = " OR ".join(fields)
-        print(query)
-
+    def search_track_fields(self, track: Track, fields) -> List[Track]:
         results = self.mb.search_recordings(
-            query=query,
             limit=10,
+            **fields,
         )
 
         def parse_track(recording):
@@ -134,3 +98,60 @@ class MusicBrainz(StreamingService):
             )
 
         return list(map(parse_track, results["recording-list"]))
+
+    def search_track(self, track: Track, stop_threshold: float = 0.8) -> List[Track]:
+        def escape_special_chars(s: str) -> str:
+            # + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+            special_chars = [
+                "\\",  # \ needs to be escaped first or else it will be escaped twice
+                "+",
+                "-",
+                "&&",
+                "||",
+                "!",
+                "(",
+                ")",
+                "{",
+                "}",
+                "[",
+                "]",
+                "^",
+                '"',
+                "~",
+                "*",
+                "?",
+                ":",
+            ]
+            for char in special_chars:
+                s = s.replace(char, f"\\{char}")
+            return s
+
+        all_fields = {
+            "recording": escape_special_chars(track.name.value),
+            "artist": escape_special_chars(" ".join(track.artists)),
+            "release": escape_special_chars(" ".join([a.value for a in track.albums])),
+        }
+
+        matches = self.search_track_fields(track, all_fields)
+        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
+            track
+        )
+        if max_similarity >= stop_threshold:
+            return matches
+
+        fields_no_release = all_fields.copy()
+        del fields_no_release["release"]
+        matches.extend(self.search_track_fields(track, fields_no_release))
+        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
+            track
+        )
+        if max_similarity >= stop_threshold:
+            return matches
+
+        fields_no_artist = all_fields.copy()
+        del fields_no_artist["artist"]
+        matches.extend(self.search_track_fields(track, fields_no_artist))
+        max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
+            track
+        )
+        return matches
