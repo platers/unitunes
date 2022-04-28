@@ -1,8 +1,12 @@
 import json
+from mmap import mmap
 from pathlib import Path
 from typing import List
 import musicbrainzngs as mb
+from ratelimit import sleep_and_retry, limits
 
+
+import requests
 from universal_playlists.services.services import (
     MB_RECORDING_URI,
     AliasedString,
@@ -19,9 +23,27 @@ class MusicBrainzWrapper(ServiceWrapper):
         super().__init__("musicbrainz")
         mb.set_useragent("universal-playlist", "0.1")
 
+    @sleep_and_retry
+    @limits(calls=1, period=1)
+    def query_mb_api(self, query: str, params):
+        headers = {"User-Agent": "universal-playlist"}
+        r = requests.get(query, params=params, headers=headers)
+        if r.status_code != 200:
+            raise Exception(f"MusicBrainz API returned {r.status_code}")
+        if "error" in r.json():
+            raise Exception(f"MusicBrainz API returned error: {r.json()['error']}")
+        return r.json()
+
     @cache
-    def get_recording_by_id(self, *args, use_cache=True, **kwargs):
-        return mb.get_recording_by_id(*args, **kwargs)
+    def get_recording_by_id(self, id: str, use_cache=True, includes: List[str] = []):
+        # Send this manually because the musicbrainzngs library doesn't return aliases for some reason
+        params = {
+            "inc": "+".join(includes),
+            "fmt": "json",
+        }
+        return self.query_mb_api(
+            f"http://musicbrainz.org/ws/2/recording/{id}", params=params
+        )
 
     @cache
     def search_recordings(self, *args, use_cache=True, **kwargs):
@@ -39,56 +61,27 @@ class MusicBrainz(StreamingService):
         super().__init__("MusicBrainz", ServiceType.MB, Path())
         self.mb = MusicBrainzWrapper()
 
-    def pull_track(self, uri: MB_RECORDING_URI) -> Track:
-        results = self.mb.get_recording_by_id(
-            id=uri.uri, includes=["releases", "artists", "aliases", "media"]
+    @staticmethod
+    def parse_track(recording):
+        if "title" not in recording:
+            raise ValueError(f"Recording {recording} has no title")
+        aliases = (
+            [alias["name"] for alias in recording["aliases"]]
+            if "aliases" in recording
+            else []
         )
-        if not results:
-            raise ValueError(f"Recording {uri} not found")
-        recording = results["recording"]
-
-        track = Track(
-            name=recording["title"],
-            artists=[artist["artist"]["name"] for artist in recording["artist-credit"]],
+        name = AliasedString(value=recording["title"], aliases=aliases)
+        albums = (
+            [
+                AliasedString(value=album["title"])
+                for album in recording["release-list"]
+                if "title" in album
+            ]
+            if "release-list" in recording
+            else []
         )
-        if "release-list" not in recording or not recording["release-list"]:
-            return track
-
-        first_release = recording["release-list"][0]
-
-        release_results = self.mb.get_release_by_id(
-            first_release["id"], includes=["url-rels", "recordings"]
-        )
-        if not release_results:
-            return track
-
-        release = release_results["release"]
-        track.album = release["title"]
-        track.album_position = first_release["medium-list"][0]["position"]
-        return track
-
-    def search_track_fields(self, fields) -> List[Track]:
-        # remove empty fields
-        fields = {k: v for k, v in fields.items() if v}
-
-        results = self.mb.search_recordings(
-            limit=10,
-            **fields,
-        )
-        # if "Eve" in json.dumps(results):
-        #     print(json.dumps(results, indent=2))
-
-        def parse_track(recording):
-            albums = (
-                [
-                    AliasedString(value=album["title"])
-                    for album in recording["release-list"]
-                    if "title" in album
-                ]
-                if "release-list" in recording
-                else []
-            )
-            artists = []
+        artists = []
+        if "artist-credit" in recording:
             for artist in recording["artist-credit"]:
                 if "artist" in artist:
                     a = artist["artist"]
@@ -102,17 +95,35 @@ class MusicBrainz(StreamingService):
                             aliases.append(a["sort-name"])
                         artists.append(AliasedString(value=a["name"], aliases=aliases))
 
-            return Track(
-                name=AliasedString(value=recording["title"]),
-                artists=artists,
-                albums=albums,
-                length=int(recording["length"]) // 1000
-                if "length" in recording
-                else None,
-                uris=[MB_RECORDING_URI(uri=recording["id"])],
-            )
+        return Track(
+            name=name,
+            artists=artists,
+            albums=albums,
+            length=int(recording["length"]) // 1000
+            if "length" in recording and recording["length"]
+            else None,
+            uris=[MB_RECORDING_URI(uri=recording["id"])],
+        )
 
-        return list(map(parse_track, results["recording-list"]))
+    def pull_track(self, uri: MB_RECORDING_URI) -> Track:
+        results = self.mb.get_recording_by_id(
+            id=uri.uri, includes=["releases", "artists", "aliases"]
+        )
+        if not results:
+            raise ValueError(f"Recording {uri} not found")
+        track = self.parse_track(results)
+        return track
+
+    def search_track_fields(self, fields) -> List[Track]:
+        # remove empty fields
+        fields = {k: v for k, v in fields.items() if v}
+
+        results = self.mb.search_recordings(
+            limit=10,
+            **fields,
+        )
+
+        return list(map(self.parse_track, results["recording-list"]))
 
     def search_track(self, track: Track, stop_threshold: float = 0.8) -> List[Track]:
         def escape_special_chars(s: str) -> str:
@@ -180,4 +191,9 @@ class MusicBrainz(StreamingService):
             if can_stop(matches):
                 break
 
-        return matches
+        matches.sort(key=lambda m: m.similarity(track), reverse=True)
+        # augment most promising matches
+        for i in range(min(len(matches), 3)):
+            matches[i] = self.pull_track(matches[i].uris[0])
+
+        return matches[:3]

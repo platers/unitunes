@@ -37,6 +37,13 @@ class AliasedString(BaseModel):
     value: str
     aliases: List[str] = []
 
+    def __init__(self, value: str, aliases: List[str] = []):
+        super().__init__(value=value, aliases=aliases)
+        # remove duplicates
+        self.aliases = list(set(self.aliases))
+        if self.value in self.aliases:
+            self.aliases.remove(self.value)
+
     def __rich__(self):
         s = self.value
         if self.aliases:
