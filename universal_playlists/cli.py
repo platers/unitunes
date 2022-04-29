@@ -15,7 +15,28 @@ from universal_playlists.services.services import Playlist, ServiceType
 console = Console()
 app = typer.Typer()
 
-pm = PlaylistManager()
+
+@app.command()
+def init(
+    directory: Optional[Path] = typer.Argument(
+        Path("."),
+        help="Directory to store playlist files in",
+    )
+) -> None:
+    """Initialize a new playlist manager"""
+    if not directory:
+        directory = Path(".")
+
+    try:
+        PlaylistManager.create_config(directory)
+    except FileExistsError:
+        console.print(
+            f"A playlist manager is already initialized in {directory}",
+            style="red",
+        )
+        raise typer.Exit()
+
+    PlaylistManager()
 
 
 @app.command()
@@ -26,6 +47,7 @@ def add_service(
 ) -> None:
     """Add a service to the config file"""
 
+    pm = PlaylistManager()
     # check if service is already added
     for s in pm.config.services:
         if s.service == service.value and s.config_path == service_config_path:
@@ -41,6 +63,7 @@ def add_service(
 @app.command()
 def pull_metadata() -> None:
     """Pull playlists from services"""
+    pm = PlaylistManager()
     # loop rows of table after header
     for i, row in pm.playlist_table.iterrows():  # type: ignore
         name = row["Unified Playlist"]
@@ -61,7 +84,6 @@ def pull_metadata() -> None:
             playlist.merge_metadata(metadata)
 
             with playlist_config_path.open("w") as f:
-                print(playlist)
                 f.write(playlist.json(indent=4))
 
     typer.echo("Done")
@@ -70,6 +92,7 @@ def pull_metadata() -> None:
 @app.command()
 def pull_tracks(playlist_name: str) -> None:
     """Pull tracks from services and merge into Unified Playlist"""
+    pm = PlaylistManager()
     pm.pull_tracks(playlist_name)
 
 
@@ -84,6 +107,7 @@ def search(
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
 
+    pm = PlaylistManager()
     pl = pm.playlists[playlist]
     original_tracks = pl.tracks
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
