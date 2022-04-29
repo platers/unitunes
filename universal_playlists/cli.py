@@ -13,7 +13,8 @@ from rich.table import Table
 from universal_playlists.services.services import Playlist, ServiceType
 
 console = Console()
-app = typer.Typer()
+app = typer.Typer(no_args_is_help=True)
+service_app = typer.Typer()
 
 
 @app.command()
@@ -39,8 +40,8 @@ def init(
     PlaylistManager()
 
 
-@app.command()
-def add_service(
+@service_app.command()
+def add(
     service: ServiceType,
     service_config_path: str,
     name: Optional[str] = typer.Argument(None),
@@ -58,6 +59,25 @@ def add_service(
         name = ""
     pm.add_service(service, Path(service_config_path), name)
     typer.echo(f"Added {service.value, service_config_path}")
+
+
+@service_app.callback(invoke_without_command=True)
+def list() -> None:
+    """List all services"""
+    pm = PlaylistManager()
+    table = Table(title="Services")
+    table.add_column("Name", justify="left")
+    table.add_column("Service", justify="left")
+    table.add_column("Config Path", justify="left")
+    for s in pm.config.services:
+        table.add_row(s.name, s.service, s.config_path)
+    console.print(table)
+
+
+@service_app.command()
+def remove(name: str) -> None:
+    """Remove a service from the config file"""
+    raise NotImplementedError  # TODO
 
 
 @app.command()
