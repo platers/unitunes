@@ -5,11 +5,13 @@ import os
 import pandas as pd
 from tqdm import tqdm
 
+from universal_playlists.services.spotify import SpotifyService
+
 
 def main():
     os.chdir(Path(__file__).parent)
 
-    sp = Spotify("spotify", Path("service_configs/spotify_config.json"))
+    sp = SpotifyService("spotify", Path("service_configs/spotify_config.json"))
 
     sp_uris = []
     ytm_uris = []
@@ -44,7 +46,9 @@ def main():
                     if spotify_album_id.startswith(
                         "https://open.spotify"
                     ) and ytm_track_id.startswith("https://music.youtube"):
-                        tracks = sp.get_tracks_in_album(SpotifyURI(spotify_album_id))
+                        tracks = sp.get_tracks_in_album(
+                            SpotifyTrackURI(spotify_album_id)
+                        )
                         sp_track = tracks[0]
 
                         sp_uris.append(sp_track.uris[0].uri.split("/")[-1])

@@ -74,7 +74,9 @@ class URIBase(BaseModel, ABC):
 
     @abstractmethod
     def url(self) -> str:
-        pass
+        """
+        Returns a clickable URL for the URI.
+        """
 
     def __rich__(self) -> str:
         return f"[link={self.url()}]{self.url()}[/link]"
@@ -92,10 +94,24 @@ class URIBase(BaseModel, ABC):
             return cls(**dict_validator(value))
 
 
-class SpotifyURI(URIBase):
-    type: Literal["spotify"] = "spotify"
+class TrackURI(URIBase):
+    pass
 
-    def __init__(self, **kwargs):
+
+class PlaylistURI(URIBase):
+    pass
+
+
+class AlbumURI(URIBase):
+    pass
+
+
+class SpotifyTrackURI(TrackURI):
+    type: Literal["spotify_track"] = "spotify_track"
+
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
         kwargs["service"] = ServiceType.SPOTIFY.value
         super().__init__(**kwargs)
 
@@ -107,25 +123,75 @@ class SpotifyURI(URIBase):
         return url.split("/")[-1]
 
     @staticmethod
-    def from_url(url: str) -> "SpotifyURI":
-        return SpotifyURI(uri=SpotifyURI.url_to_uri(url))
+    def from_url(url: str) -> "SpotifyTrackURI":
+        return SpotifyTrackURI(SpotifyTrackURI.url_to_uri(url))
 
 
-class YtmURI(URIBase):
-    type: Literal["ytm"] = "ytm"
+class SpotifyPlaylistURI(PlaylistURI):
+    type: Literal["spotify_playlist"] = "spotify_playlist"
 
-    def __init__(self, **kwargs):
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
+        kwargs["service"] = ServiceType.SPOTIFY.value
+        super().__init__(**kwargs)
+
+    def url(self) -> str:
+        return f"https://open.spotify.com/playlist/{self.uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def from_url(url: str) -> "SpotifyPlaylistURI":
+        return SpotifyPlaylistURI(uri=SpotifyPlaylistURI.url_to_uri(url))
+
+
+class YtmTrackURI(TrackURI):
+    type: Literal["ytm_track"] = "ytm_track"
+
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
         kwargs["service"] = ServiceType.YTM.value
         super().__init__(**kwargs)
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("=")[-1]
 
     def url(self) -> str:
         return f"https://music.youtube.com/watch?v={self.uri}"
 
 
-class MB_RECORDING_URI(URIBase):
+class YtmPlaylistURI(PlaylistURI):
+    type: Literal["ytm_playlist"] = "ytm_playlist"
+
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
+        kwargs["service"] = ServiceType.YTM.value
+        super().__init__(**kwargs)
+
+    def url(self) -> str:
+        return f"https://music.youtube.com/playlist?list={self.uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("=")[-1]
+
+    @staticmethod
+    def from_url(url: str) -> "YtmPlaylistURI":
+        return YtmPlaylistURI(uri=YtmPlaylistURI.url_to_uri(url))
+
+
+class MB_RECORDING_URI(TrackURI):
     type: Literal["mb_recording"] = "mb_recording"
 
-    def __init__(self, **kwargs):
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
         kwargs["service"] = ServiceType.MB.value
         super().__init__(**kwargs)
 
@@ -133,10 +199,12 @@ class MB_RECORDING_URI(URIBase):
         return f"https://musicbrainz.org/recording/{self.uri}"
 
 
-class MB_RELEASE_URI(URIBase):
+class MB_RELEASE_URI(AlbumURI):
     type: Literal["mb_release"] = "mb_release"
 
-    def __init__(self, **kwargs):
+    def __init__(self, *uri, **kwargs):
+        if len(uri) == 1:
+            kwargs["uri"] = uri[0]
         kwargs["service"] = ServiceType.MB.value
         super().__init__(**kwargs)
 
@@ -144,7 +212,16 @@ class MB_RELEASE_URI(URIBase):
         return f"https://musicbrainz.org/release/{self.uri}"
 
 
-URI = Union[SpotifyURI, YtmURI, MB_RECORDING_URI, MB_RELEASE_URI]
+URI = Union[
+    SpotifyTrackURI,
+    SpotifyPlaylistURI,
+    YtmTrackURI,
+    YtmPlaylistURI,
+    MB_RECORDING_URI,
+    MB_RELEASE_URI,
+]
+TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
+PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
 
 
 def artists_similarity(
@@ -178,7 +255,7 @@ class Track(BaseModel):
     albums: List[AliasedString] = []
     artists: List[AliasedString] = []
     length: Optional[int] = None
-    uris: List[URI] = []
+    uris: List[TrackURIs] = []
 
     def __rich__(self):
         s = f"[b]{self.name.__rich__()}[/b]"
@@ -245,13 +322,13 @@ class Track(BaseModel):
 class PlaylistMetadata(TypedDict):
     name: str
     description: str
-    uri: URI
+    uri: PlaylistURIs
 
 
 class Playlist(BaseModel):
     name: str
     description: str = ""
-    uris: List[URI] = []
+    uris: List[PlaylistURIs] = []
     tracks: List[Track] = []
 
     def merge_metadata(self, metadata: PlaylistMetadata) -> None:
@@ -305,10 +382,10 @@ class StreamingService:
             f"Playlist {playlist_name} not found in {self.name}. Available playlists: {', '.join([meta['name'] for meta in metas])}"
         )
 
-    def pull_tracks(self, uri: URI) -> List[Track]:
+    def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
         raise NotImplementedError
 
-    def pull_track(self, uri: URI) -> Track:
+    def pull_track(self, uri: TrackURI) -> Track:
         raise NotImplementedError
 
     def search_track(self, track: Track) -> List[Track]:

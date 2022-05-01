@@ -15,6 +15,7 @@ from universal_playlists.services.services import Playlist, ServiceType
 console = Console()
 app = typer.Typer(no_args_is_help=True)
 service_app = typer.Typer()
+app.add_typer(service_app, name="service")
 
 
 @app.command()
@@ -62,8 +63,11 @@ def add(
 
 
 @service_app.callback(invoke_without_command=True)
-def list() -> None:
+def list(ctx: typer.Context) -> None:
     """List all services"""
+    if ctx.invoked_subcommand:
+        return
+
     pm = PlaylistManager()
     table = Table(title="Services")
     table.add_column("Name", justify="left")

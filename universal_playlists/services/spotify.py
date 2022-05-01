@@ -11,9 +11,10 @@ from universal_playlists.services.services import (
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
+    SpotifyPlaylistURI,
     StreamingService,
     Track,
-    SpotifyURI,
+    SpotifyTrackURI,
     cache,
 )
 
@@ -53,11 +54,11 @@ class SpotifyService(StreamingService):
         results = self.sp.sp.current_user_playlists()
 
         return [
-            {
-                "name": playlist["name"],
-                "description": playlist["description"],
-                "uri": SpotifyURI.from_url(playlist["external_urls"]["spotify"]),
-            }
+            PlaylistMetadata(
+                name=playlist["name"],
+                description=playlist["description"],
+                uri=SpotifyPlaylistURI.from_url(playlist["external_urls"]["spotify"]),
+            )
             for playlist in results["items"]
         ]
 
@@ -104,7 +105,7 @@ class SpotifyService(StreamingService):
             artists=[AliasedString(value=artist["name"]) for artist in raw["artists"]],
             albums=[AliasedString(value=raw["album"]["name"])],
             length=raw["duration_ms"] // 1000,
-            uris=[SpotifyURI.from_url(raw["external_urls"]["spotify"])]
+            uris=[SpotifyTrackURI.from_url(raw["external_urls"]["spotify"])]
             if "spotify" in raw["external_urls"]
             else [],
         )

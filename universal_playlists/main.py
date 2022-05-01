@@ -1,4 +1,3 @@
-import json
 from typing import Dict, List, Optional
 import pandas as pd
 from pathlib import Path
@@ -13,9 +12,10 @@ from universal_playlists.services.services import (
     ServiceType,
     StreamingService,
     Track,
+    TrackURI,
 )
-from universal_playlists.services.spotify import SpotifyService, SpotifyURI
-from universal_playlists.services.ytm import YTM, YtmURI
+from universal_playlists.services.spotify import SpotifyService, SpotifyTrackURI
+from universal_playlists.services.ytm import YTM, YtmTrackURI
 
 
 class ConfigServiceEntry(BaseModel):
@@ -46,9 +46,9 @@ def service_factory(
 
 def uri_factory(service_type: ServiceType, uri: str) -> URI:
     if service_type == ServiceType.SPOTIFY:
-        return SpotifyURI(uri=uri)
+        return SpotifyTrackURI(uri=uri)
     elif service_type == ServiceType.YTM:
-        return YtmURI(uri=uri)
+        return YtmTrackURI(uri=uri)
     elif service_type == ServiceType.MB:
         return MB_RECORDING_URI(uri=uri)
     else:
@@ -200,9 +200,9 @@ def get_prediction_track(
 def get_prediction_uri(
     source_service: StreamingService,
     target_service: StreamingService,
-    uri: URI,
+    uri: TrackURI,
     threshold: float = 0.8,
-) -> Optional[URI]:
+) -> Optional[TrackURI]:
     track = source_service.pull_track(uri)
     prediction = get_prediction_track(target_service, track, threshold)
     return prediction.uris[0] if prediction else None

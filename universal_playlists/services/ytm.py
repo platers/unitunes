@@ -4,7 +4,9 @@ from typing import List
 from ytmusicapi import YTMusic
 
 from universal_playlists.services.services import (
-    YtmURI,
+    AliasedString,
+    YtmPlaylistURI,
+    YtmTrackURI,
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
@@ -44,7 +46,7 @@ class YTM(StreamingService):
             return PlaylistMetadata(
                 name=response["title"],
                 description=response["description"],
-                uri=YtmURI(response["playlistId"]),
+                uri=YtmPlaylistURI(response["playlistId"]),
             )
 
         playlists = list(map(playlistFromResponse, results))
@@ -59,7 +61,7 @@ class YTM(StreamingService):
             )
         )
 
-    def pull_tracks(self, uri: YtmURI) -> List[Track]:
+    def pull_tracks(self, uri: YtmTrackURI) -> List[Track]:
         tracks = self.ytm.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
@@ -70,22 +72,24 @@ class YTM(StreamingService):
                 name=details["title"],
                 artists=[details["author"]],
                 length=details["lengthSeconds"],
-                uris=[YtmURI(details["videoId"])],
+                uris=[YtmTrackURI(details["videoId"])],
             )
 
         return Track(
-            name=raw["title"],
-            artists=[artist["name"] for artist in raw["artists"]],
-            album=raw["album"]["name"] if "album" in raw and raw["album"] else None,
+            name=AliasedString(raw["title"]),
+            artists=[AliasedString(value=artist["name"]) for artist in raw["artists"]],
+            albums=[AliasedString(value=raw["album"]["name"])]
+            if "album" in raw and raw["album"]
+            else [],
             length=raw["duration_seconds"] if "duration_seconds" in raw else None,
-            uris=[YtmURI(raw["videoId"])],
+            uris=[YtmTrackURI(raw["videoId"])],
         )
 
-    def pull_track(self, uri: YtmURI) -> Track:
+    def pull_track(self, uri: YtmTrackURI) -> Track:
         track = self.ytm.get_song(uri.uri)
         return self.raw_to_track(track)
 
     def search_track(self, track: Track) -> List[Track]:
-        query = f"{track.name} - {' '.join(track.artists)}"
+        query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
         results = self.ytm.search(query)
         return self.results_to_tracks(results)
