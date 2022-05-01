@@ -156,13 +156,12 @@ class PlaylistManager:
 
             # merge tracks into playlist
             for track in tracks:
-                if any(t.matches(track) for t in playlist.tracks):
-                    if service.name == "youtube-music":
-                        print(f"Track {track.name} already in playlist")
-                    continue
-                if service.name == "spotify":  # TODO: remove this
+                matches = [t for t in playlist.tracks if t.matches(track)]
+                if matches:
+                    assert len(matches) == 1  # TODO: handle multiple matches
+                    matches[0].merge(track)
+                else:
                     playlist.tracks.append(track)
-                # print("Added track: " + track.name)
 
         # save playlist
         with self.playlist_path(playlist_name).open("w") as f:

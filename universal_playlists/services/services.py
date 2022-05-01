@@ -318,6 +318,13 @@ class Track(BaseModel):
     def matches(self, track: "Track", threshold: float = 0.8) -> bool:
         return self.similarity(track) > threshold
 
+    def merge(self, other: "Track") -> None:
+        for uri in other.uris:
+            if uri not in self.uris:
+                self.uris.append(uri)
+
+        # TODO: merge other fields
+
 
 class PlaylistMetadata(TypedDict):
     name: str
