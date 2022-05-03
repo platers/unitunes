@@ -5,8 +5,6 @@ from ytmusicapi import YTMusic
 
 from universal_playlists.services.services import (
     AliasedString,
-    YtmPlaylistURI,
-    YtmTrackURI,
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
@@ -14,6 +12,7 @@ from universal_playlists.services.services import (
     Track,
     cache,
 )
+from universal_playlists.uri import YtmPlaylistURI, YtmTrackURI
 
 
 class YtmWrapper(ServiceWrapper):

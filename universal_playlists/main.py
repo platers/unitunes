@@ -7,15 +7,14 @@ from universal_playlists.services.musicbrainz import MB_RECORDING_URI, MusicBrai
 
 
 from universal_playlists.services.services import (
-    URI,
     Playlist,
     ServiceType,
     StreamingService,
     Track,
     TrackURI,
 )
-from universal_playlists.services.spotify import SpotifyService, SpotifyTrackURI
-from universal_playlists.services.ytm import YTM, YtmTrackURI
+from universal_playlists.services.spotify import SpotifyService
+from universal_playlists.services.ytm import YTM
 
 
 class ConfigServiceEntry(BaseModel):
@@ -40,17 +39,6 @@ def service_factory(
         return YTM(name, config_path)
     elif service_type == ServiceType.MB:
         return MusicBrainz()
-    else:
-        raise ValueError(f"Unknown service type: {service_type}")
-
-
-def uri_factory(service_type: ServiceType, uri: str) -> URI:
-    if service_type == ServiceType.SPOTIFY:
-        return SpotifyTrackURI(uri=uri)
-    elif service_type == ServiceType.YTM:
-        return YtmTrackURI(uri=uri)
-    elif service_type == ServiceType.MB:
-        return MB_RECORDING_URI(uri=uri)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 

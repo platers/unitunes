@@ -8,7 +8,6 @@ from ratelimit import sleep_and_retry, limits
 
 import requests
 from universal_playlists.services.services import (
-    MB_RECORDING_URI,
     AliasedString,
     ServiceType,
     ServiceWrapper,
@@ -16,6 +15,7 @@ from universal_playlists.services.services import (
     Track,
     cache,
 )
+from universal_playlists.uri import MB_RECORDING_URI
 
 
 class MusicBrainzWrapper(ServiceWrapper):

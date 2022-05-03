@@ -6,6 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from universal_playlists.services.spotify import SpotifyService
+from universal_playlists.uri import SpotifyTrackURI
 
 
 def main():

@@ -6,17 +6,15 @@ from spotipy import SpotifyOAuth
 from tqdm import tqdm
 
 from universal_playlists.services.services import (
-    URI,
     AliasedString,
     PlaylistMetadata,
     ServiceType,
     ServiceWrapper,
-    SpotifyPlaylistURI,
     StreamingService,
     Track,
-    SpotifyTrackURI,
     cache,
 )
+from universal_playlists.uri import URI, SpotifyPlaylistURI, SpotifyTrackURI
 
 
 class SpotifyWrapper(ServiceWrapper):

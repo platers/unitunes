@@ -6,16 +6,15 @@ from typing import (
     Callable,
     Dict,
     List,
-    Literal,
     Optional,
     TypedDict,
-    Union,
 )
 from pydantic import BaseModel
 from strsimpy.jaro_winkler import JaroWinkler
-from pydantic.validators import dict_validator
-from abc import ABC, abstractmethod
 from rich import print
+
+from universal_playlists.types import ServiceType
+from universal_playlists.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
 
 
 def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> float:
@@ -56,136 +55,6 @@ class AliasedString(BaseModel):
         return pairwise_max(
             self.all_values(), other.all_values(), normalized_string_similarity
         )
-
-
-class ServiceType(str, Enum):
-    SPOTIFY = "spotify"
-    YTM = "ytm"
-    MB = "mb"
-
-
-class URIBase(BaseModel, ABC):
-    service: ServiceType
-    type: Literal["track", "playlist", "album"]
-    uri: str
-
-    class Config:
-        frozen = True
-
-    @abstractmethod
-    def url(self) -> str:
-        """
-        Returns a clickable URL for the URI.
-        """
-
-    def __rich__(self) -> str:
-        return f"[link={self.url()}]{self.url()}[/link]"
-
-    @classmethod
-    def get_validators(cls):
-        # yield dict_validator
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, value):
-        if isinstance(value, cls):
-            return value
-        else:
-            return cls(**dict_validator(value))
-
-
-class TrackURI(URIBase):
-    type: Literal["track"] = "track"
-
-
-class PlaylistURI(URIBase):
-    type: Literal["playlist"] = "playlist"
-
-
-class AlbumURI(URIBase):
-    type: Literal["album"] = "album"
-
-
-class SpotifyTrackURI(TrackURI):
-    service: ServiceType = ServiceType.SPOTIFY
-
-    def url(self) -> str:
-        return f"https://open.spotify.com/track/{self.uri}"
-
-    @staticmethod
-    def url_to_uri(url: str) -> str:
-        return url.split("/")[-1]
-
-    @staticmethod
-    def from_url(url: str) -> "SpotifyTrackURI":
-        return SpotifyTrackURI(uri=SpotifyTrackURI.url_to_uri(url))
-
-
-class SpotifyPlaylistURI(PlaylistURI):
-    service: ServiceType = ServiceType.SPOTIFY
-
-    def url(self) -> str:
-        return f"https://open.spotify.com/playlist/{self.uri}"
-
-    @staticmethod
-    def url_to_uri(url: str) -> str:
-        return url.split("/")[-1]
-
-    @staticmethod
-    def from_url(url: str) -> "SpotifyPlaylistURI":
-        return SpotifyPlaylistURI(uri=SpotifyPlaylistURI.url_to_uri(url))
-
-
-class YtmTrackURI(TrackURI):
-    service: ServiceType = ServiceType.YTM
-
-    @staticmethod
-    def url_to_uri(url: str) -> str:
-        return url.split("=")[-1]
-
-    def url(self) -> str:
-        return f"https://music.youtube.com/watch?v={self.uri}"
-
-
-class YtmPlaylistURI(PlaylistURI):
-    service: ServiceType = ServiceType.YTM
-
-    def url(self) -> str:
-        return f"https://music.youtube.com/playlist?list={self.uri}"
-
-    @staticmethod
-    def url_to_uri(url: str) -> str:
-        return url.split("=")[-1]
-
-    @staticmethod
-    def from_url(url: str) -> "YtmPlaylistURI":
-        return YtmPlaylistURI(uri=YtmPlaylistURI.url_to_uri(url))
-
-
-class MB_RECORDING_URI(TrackURI):
-    service: ServiceType = ServiceType.MB
-
-    def url(self) -> str:
-        return f"https://musicbrainz.org/recording/{self.uri}"
-
-
-class MB_RELEASE_URI(AlbumURI):
-    service: ServiceType = ServiceType.MB
-
-    def url(self) -> str:
-        return f"https://musicbrainz.org/release/{self.uri}"
-
-
-URI = Union[
-    SpotifyTrackURI,
-    SpotifyPlaylistURI,
-    YtmTrackURI,
-    YtmPlaylistURI,
-    MB_RECORDING_URI,
-    MB_RELEASE_URI,
-]
-TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
-PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
 
 
 def artists_similarity(
