@@ -3,11 +3,11 @@ import pandas as pd
 from pathlib import Path
 import os
 from pydantic import BaseModel
-from universal_playlists.services.musicbrainz import MB_RECORDING_URI, MusicBrainz
+from universal_playlists.playlist import Playlist
+from universal_playlists.services.musicbrainz import MusicBrainz
 
 
 from universal_playlists.services.services import (
-    Playlist,
     ServiceType,
     StreamingService,
     Track,

@@ -1,17 +1,16 @@
-import json
 from pathlib import Path
 from typing import List
 from ytmusicapi import YTMusic
+from universal_playlists.playlist import PlaylistMetadata
+
 
 from universal_playlists.services.services import (
-    AliasedString,
-    PlaylistMetadata,
-    ServiceType,
     ServiceWrapper,
     StreamingService,
-    Track,
     cache,
 )
+from universal_playlists.track import AliasedString, Track
+from universal_playlists.types import ServiceType
 from universal_playlists.uri import YtmPlaylistURI, YtmTrackURI
 
 

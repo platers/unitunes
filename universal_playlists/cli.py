@@ -9,8 +9,10 @@ from typing import Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
+from universal_playlists.playlist import Playlist
 
-from universal_playlists.services.services import Playlist, ServiceType
+from universal_playlists.types import ServiceType
+
 
 console = Console()
 app = typer.Typer(no_args_is_help=True)

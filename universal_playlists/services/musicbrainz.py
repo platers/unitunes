@@ -8,13 +8,12 @@ from ratelimit import sleep_and_retry, limits
 
 import requests
 from universal_playlists.services.services import (
-    AliasedString,
-    ServiceType,
     ServiceWrapper,
     StreamingService,
-    Track,
     cache,
 )
+from universal_playlists.track import AliasedString, Track
+from universal_playlists.types import ServiceType
 from universal_playlists.uri import MB_RECORDING_URI
 
 

@@ -4,16 +4,15 @@ from typing import List
 import spotipy
 from spotipy import SpotifyOAuth
 from tqdm import tqdm
+from universal_playlists.playlist import PlaylistMetadata
 
 from universal_playlists.services.services import (
-    AliasedString,
-    PlaylistMetadata,
-    ServiceType,
     ServiceWrapper,
     StreamingService,
-    Track,
     cache,
 )
+from universal_playlists.track import AliasedString, Track
+from universal_playlists.types import ServiceType
 from universal_playlists.uri import URI, SpotifyPlaylistURI, SpotifyTrackURI
 
 
