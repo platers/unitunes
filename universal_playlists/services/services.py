@@ -159,7 +159,7 @@ class Track(BaseModel):
         # TODO: merge other fields
 
 
-class PlaylistMetadata(TypedDict):
+class PlaylistMetadata(BaseModel):
     name: str
     description: str
     uri: PlaylistURIs
@@ -172,10 +172,10 @@ class Playlist(BaseModel):
     tracks: List[Track] = []
 
     def merge_metadata(self, metadata: PlaylistMetadata) -> None:
-        self.name = self.name or metadata["name"]
-        self.description = self.description or metadata["description"]
-        if metadata["uri"] not in self.uris:
-            self.uris.append(metadata["uri"])
+        self.name = self.name or metadata.name
+        self.description = self.description or metadata.description
+        if metadata.uri not in self.uris:
+            self.uris.append(metadata.uri)
 
 
 def cache(method):
@@ -216,10 +216,10 @@ class StreamingService:
     def get_playlist_metadata(self, playlist_name: str) -> PlaylistMetadata:
         metas = self.get_playlist_metadatas()
         for meta in metas:
-            if meta["name"] == playlist_name:
+            if meta.name == playlist_name:
                 return meta
         raise ValueError(
-            f"Playlist {playlist_name} not found in {self.name}. Available playlists: {', '.join([meta['name'] for meta in metas])}"
+            f"Playlist {playlist_name} not found in {self.name}. Available playlists: {', '.join([meta.name for meta in metas])}"
         )
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
