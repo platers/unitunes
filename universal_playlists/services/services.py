@@ -7,7 +7,6 @@ from typing import (
     Dict,
     List,
     Literal,
-    NewType,
     Optional,
     TypedDict,
     Union,
@@ -66,7 +65,8 @@ class ServiceType(str, Enum):
 
 
 class URIBase(BaseModel, ABC):
-    service: str
+    service: ServiceType
+    type: Literal["track", "playlist", "album"]
     uri: str
 
     class Config:
@@ -95,25 +95,19 @@ class URIBase(BaseModel, ABC):
 
 
 class TrackURI(URIBase):
-    pass
+    type: Literal["track"] = "track"
 
 
 class PlaylistURI(URIBase):
-    pass
+    type: Literal["playlist"] = "playlist"
 
 
 class AlbumURI(URIBase):
-    pass
+    type: Literal["album"] = "album"
 
 
 class SpotifyTrackURI(TrackURI):
-    type: Literal["spotify_track"] = "spotify_track"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.SPOTIFY.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.SPOTIFY
 
     def url(self) -> str:
         return f"https://open.spotify.com/track/{self.uri}"
@@ -124,17 +118,11 @@ class SpotifyTrackURI(TrackURI):
 
     @staticmethod
     def from_url(url: str) -> "SpotifyTrackURI":
-        return SpotifyTrackURI(SpotifyTrackURI.url_to_uri(url))
+        return SpotifyTrackURI(uri=SpotifyTrackURI.url_to_uri(url))
 
 
 class SpotifyPlaylistURI(PlaylistURI):
-    type: Literal["spotify_playlist"] = "spotify_playlist"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.SPOTIFY.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.SPOTIFY
 
     def url(self) -> str:
         return f"https://open.spotify.com/playlist/{self.uri}"
@@ -149,13 +137,7 @@ class SpotifyPlaylistURI(PlaylistURI):
 
 
 class YtmTrackURI(TrackURI):
-    type: Literal["ytm_track"] = "ytm_track"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.YTM.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.YTM
 
     @staticmethod
     def url_to_uri(url: str) -> str:
@@ -166,13 +148,7 @@ class YtmTrackURI(TrackURI):
 
 
 class YtmPlaylistURI(PlaylistURI):
-    type: Literal["ytm_playlist"] = "ytm_playlist"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.YTM.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.YTM
 
     def url(self) -> str:
         return f"https://music.youtube.com/playlist?list={self.uri}"
@@ -187,26 +163,14 @@ class YtmPlaylistURI(PlaylistURI):
 
 
 class MB_RECORDING_URI(TrackURI):
-    type: Literal["mb_recording"] = "mb_recording"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.MB.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.MB
 
     def url(self) -> str:
         return f"https://musicbrainz.org/recording/{self.uri}"
 
 
 class MB_RELEASE_URI(AlbumURI):
-    type: Literal["mb_release"] = "mb_release"
-
-    def __init__(self, *uri, **kwargs):
-        if len(uri) == 1:
-            kwargs["uri"] = uri[0]
-        kwargs["service"] = ServiceType.MB.value
-        super().__init__(**kwargs)
+    service: ServiceType = ServiceType.MB
 
     def url(self) -> str:
         return f"https://musicbrainz.org/release/{self.uri}"
