@@ -1,22 +1,13 @@
-from enum import Enum
 from pathlib import Path
 import shelve
 from typing import (
-    Any,
-    Callable,
-    Dict,
     List,
-    Optional,
-    TypedDict,
 )
-from pydantic import BaseModel
-from strsimpy.jaro_winkler import JaroWinkler
-from rich import print
 from universal_playlists.playlist import PlaylistMetadata
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
+from universal_playlists.uri import PlaylistURI, TrackURI
 
 
 def cache(method):

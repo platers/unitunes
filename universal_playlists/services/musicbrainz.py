@@ -1,5 +1,3 @@
-import json
-from mmap import mmap
 from pathlib import Path
 from typing import List
 import musicbrainzngs as mb

@@ -5,16 +5,14 @@ import os
 from pydantic import BaseModel
 from universal_playlists.playlist import Playlist
 from universal_playlists.services.musicbrainz import MusicBrainz
+from universal_playlists.services.services import StreamingService
 
 
-from universal_playlists.services.services import (
-    ServiceType,
-    StreamingService,
-    Track,
-    TrackURI,
-)
 from universal_playlists.services.spotify import SpotifyService
 from universal_playlists.services.ytm import YTM
+from universal_playlists.track import Track
+from universal_playlists.types import ServiceType
+from universal_playlists.uri import TrackURI
 
 
 class ConfigServiceEntry(BaseModel):
@@ -32,7 +30,7 @@ def service_factory(
     service_type: ServiceType,
     name: str,
     config_path: Path,
-) -> "StreamingService":
+) -> StreamingService:
     if service_type == ServiceType.SPOTIFY:
         return SpotifyService(name, config_path)
     elif service_type == ServiceType.YTM:

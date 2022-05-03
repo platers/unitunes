@@ -1,4 +1,3 @@
-import shelve
 from typing import (
     List,
 )
