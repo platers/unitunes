@@ -12,8 +12,8 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from universal_playlists.playlist import Playlist
-from universal_playlists.cli.playlist import playlist_app
-from universal_playlists.cli.service import service_app
+from universal_playlists.cli.playlist_cli import playlist_app
+from universal_playlists.cli.service_cli import service_app
 
 from universal_playlists.types import ServiceType
 

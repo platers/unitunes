@@ -35,13 +35,9 @@ class Config(BaseModel):
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs] = []):
         if name in self.playlists:
-            raise ValueError("Playlist already exists")
+            for uri in uris:
+                self.playlists[name].add_uri(uri)
         self.playlists[name] = UPRelations(uris=uris)
-
-    def add_playlist_uri(self, name: str, uri: PlaylistURIs):
-        if name not in self.playlists:
-            raise ValueError("Playlist does not exist")
-        self.playlists[name].add_uri(uri)
 
     def playlist_names(self) -> List[str]:
         return list(self.playlists.keys())
@@ -143,11 +139,9 @@ class PlaylistManager:
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:
         self.config.add_playlist(name, uris)
+        self.playlists[name] = Playlist(name=name)
         self.file_manager.save_config(self.config)
-
-    def add_playlist_uri(self, name: str, uri: PlaylistURIs) -> None:
-        self.config.add_playlist_uri(name, uri)
-        self.file_manager.save_config(self.config)
+        self.file_manager.save_playlist(self.playlists[name])
 
     def pull_tracks(self, playlist_name: str) -> None:
         if playlist_name not in self.playlists:
