@@ -29,11 +29,8 @@ class UPRelations(BaseModel):
             self.uris.append(uri)
 
 
-class PlaylistTable(BaseModel):
-    """
-    Stores relationships of playlists across services
-    """
-
+class Config(BaseModel):
+    services: List[ConfigServiceEntry] = []
     playlists: Dict[str, UPRelations] = {}
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs] = []):
@@ -48,11 +45,6 @@ class PlaylistTable(BaseModel):
 
     def playlist_names(self) -> List[str]:
         return list(self.playlists.keys())
-
-
-class Config(BaseModel):
-    services: List[ConfigServiceEntry] = []
-    playlists: PlaylistTable = PlaylistTable()
 
 
 def service_factory(
@@ -125,7 +117,7 @@ class PlaylistManager:
 
         # create playlist objects
         self.playlists: Dict[str, Playlist] = {}
-        names = self.config.playlists.playlist_names()
+        names = self.config.playlist_names()
         for name in names:
             self.playlists[name] = self.file_manager.load_playlist(name)
 
@@ -150,11 +142,11 @@ class PlaylistManager:
         self.file_manager.save_config(self.config)
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:
-        self.config.playlists.add_playlist(name, uris)
+        self.config.add_playlist(name, uris)
         self.file_manager.save_config(self.config)
 
     def add_playlist_uri(self, name: str, uri: PlaylistURIs) -> None:
-        self.config.playlists.add_playlist_uri(name, uri)
+        self.config.add_playlist_uri(name, uri)
         self.file_manager.save_config(self.config)
 
     def pull_tracks(self, playlist_name: str) -> None:

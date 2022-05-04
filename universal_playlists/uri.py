@@ -203,14 +203,11 @@ class MB_RELEASE_URI(AlbumURI):
 TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
 PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
 AlbumURIs = MB_RELEASE_URI
-all_uri_types = [
-    SpotifyTrackURI,
-    SpotifyPlaylistURI,
-    YtmTrackURI,
-    YtmPlaylistURI,
-    MB_RECORDING_URI,
-    MB_RELEASE_URI,
-]
+
+playlist_uri_types = [SpotifyPlaylistURI, YtmPlaylistURI]
+track_uri_types = [SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
+album_uri_types = [MB_RELEASE_URI]
+all_uri_types = [..., *playlist_uri_types, *track_uri_types, *album_uri_types]
 
 URI = Union[
     TrackURIs,
@@ -239,6 +236,30 @@ def URI_Builder(service: ServiceType, type: EntityType, uri: str) -> URI:
         raise ValueError(f"Unknown service type {service}")
 
     raise ValueError(f"Unknown entity type {type} for service {service}")
+
+
+def playlistURI_from_url(url: str) -> PlaylistURIs:
+    for cls in playlist_uri_types:
+        if cls.valid_url(url):
+            return cls.from_url(url)
+
+    raise ValueError(f"Unknown URL format {url}")
+
+
+def trackURI_from_url(url: str) -> TrackURIs:
+    for cls in track_uri_types:
+        if cls.valid_url(url):
+            return cls.from_url(url)
+
+    raise ValueError(f"Unknown URL format {url}")
+
+
+def albumURI_from_url(url: str) -> AlbumURIs:
+    for cls in album_uri_types:
+        if cls.valid_url(url):
+            return cls.from_url(url)
+
+    raise ValueError(f"Unknown URL format {url}")
 
 
 def URI_from_url(url: str) -> URI:
