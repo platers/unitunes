@@ -44,7 +44,7 @@ class YTM(StreamingService):
             return PlaylistMetadata(
                 name=response["title"],
                 description=response["description"],
-                uri=YtmPlaylistURI(uri=response["playlistId"]),
+                uri=YtmPlaylistURI.from_uri(response["playlistId"]),
             )
 
         playlists = list(map(playlistFromResponse, results))
@@ -70,7 +70,7 @@ class YTM(StreamingService):
                 name=details["title"],
                 artists=[details["author"]],
                 length=details["lengthSeconds"],
-                uris=[YtmTrackURI(uri=details["videoId"])],
+                uris=[YtmTrackURI.from_uri(details["videoId"])],
             )
 
         return Track(
@@ -80,7 +80,7 @@ class YTM(StreamingService):
             if "album" in raw and raw["album"]
             else [],
             length=raw["duration_seconds"] if "duration_seconds" in raw else None,
-            uris=[YtmTrackURI(uri=raw["videoId"])],
+            uris=[YtmTrackURI.from_uri(raw["videoId"])],
         )
 
     def pull_track(self, uri: YtmTrackURI) -> Track:

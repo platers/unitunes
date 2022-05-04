@@ -76,7 +76,7 @@ class Evaluator:
         if verbose:
             for p, t, s in zip(prediction_uris, target_uris, source_uris):
                 if p != t and p and t:
-                    print(f"Source: {s.url()} Prediction: {p.url()} Target: {t.url()}")
+                    print(f"Source: {s.url} Prediction: {p.url} Target: {t.url}")
 
 
 def main():

@@ -12,7 +12,7 @@ from universal_playlists.services.spotify import SpotifyService
 from universal_playlists.services.ytm import YTM
 from universal_playlists.track import Track
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import TrackURI
+from universal_playlists.uri import PlaylistURIs, TrackURI
 
 
 class ConfigServiceEntry(BaseModel):
@@ -21,9 +21,38 @@ class ConfigServiceEntry(BaseModel):
     config_path: str
 
 
+class UPRelations(BaseModel):
+    uris: List[PlaylistURIs] = []
+
+    def add_uri(self, uri: PlaylistURIs):
+        if uri not in self.uris:
+            self.uris.append(uri)
+
+
+class PlaylistTable(BaseModel):
+    """
+    Stores relationships of playlists across services
+    """
+
+    playlists: Dict[str, UPRelations] = {}
+
+    def add_playlist(self, name: str, uris: List[PlaylistURIs] = []):
+        if name in self.playlists:
+            raise ValueError("Playlist already exists")
+        self.playlists[name] = UPRelations(uris=uris)
+
+    def add_playlist_uri(self, name: str, uri: PlaylistURIs):
+        if name not in self.playlists:
+            raise ValueError("Playlist does not exist")
+        self.playlists[name].add_uri(uri)
+
+    def playlist_names(self) -> List[str]:
+        return list(self.playlists.keys())
+
+
 class Config(BaseModel):
-    dir: Path
     services: List[ConfigServiceEntry] = []
+    playlists: PlaylistTable = PlaylistTable()
 
 
 def service_factory(
@@ -41,22 +70,49 @@ def service_factory(
         raise ValueError(f"Unknown service type: {service_type}")
 
 
-class PlaylistManager:
-    def __init__(
-        self, config_path=Path("config.json"), table_path=Path("playlists.csv")
-    ) -> None:
-        self.config_path = config_path
+class FileManager:
+    dir: Path
+    config_path = Path("config.json")
+    playlist_folder = Path("playlists")
+
+    def __init__(self, dir: Path) -> None:
+        self.dir = dir
+        os.chdir(self.dir)
+
+    def get_playlist_path(self, name: str) -> Path:
+        return self.playlist_folder / f"{name}.json"
+
+    def make_playlist_dir(self) -> None:
+        self.playlist_folder.mkdir(exist_ok=True)
+
+    def save_config(self, config: Config) -> None:
+        with open(self.config_path, "w") as f:
+            f.write(config.json(indent=4))
+
+    def load_config(self) -> Config:
         if not self.config_path.exists():
-            raise ValueError(f"Config file not found at {self.config_path}")
+            raise FileNotFoundError(f"Config file not found: {self.config_path}")
+        return Config.parse_file(self.config_path)
 
-        self.config = Config.parse_file(self.config_path)
-        os.chdir(self.config.dir)
+    def save_playlist(self, playlist: Playlist) -> None:
+        with open(self.get_playlist_path(playlist.name), "w") as f:
+            f.write(playlist.json(indent=4))
 
-        self.table_path = table_path
-        self.playlist_table = self.create_playlist_table()
+    def load_playlist(self, name: str) -> Playlist:
+        path = self.get_playlist_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Playlist file not found: {path}")
+        return Playlist.parse_file(path)
 
-        # create playlist directory
-        Path("./playlists").mkdir(exist_ok=True)
+
+class PlaylistManager:
+    config: Config
+    file_manager: FileManager
+    playlists: Dict[str, Playlist]
+
+    def __init__(self, config: Config, file_manager: FileManager) -> None:
+        self.config = config
+        self.file_manager = file_manager
 
         # create service objects
         self.services: Dict[str, StreamingService] = {}
@@ -69,38 +125,9 @@ class PlaylistManager:
 
         # create playlist objects
         self.playlists: Dict[str, Playlist] = {}
-        for i, row in self.playlist_table.iterrows():
-            name = row["Unified Playlist"]
-            if type(name) == str:
-                path = self.playlist_path(name)
-                if path.exists():
-                    self.playlists[name] = Playlist.parse_file(self.playlist_path(name))
-
-    @staticmethod
-    def create_config(dir: Path) -> None:
-        config = Config(dir=dir)
-        os.chdir(config.dir)
-        if Path("config.json").exists():
-            raise FileExistsError("Config file already exists")
-
-        with Path("config.json").open("w") as f:
-            f.write(config.json(indent=4))
-
-    def playlist_path(self, playlist_name: str) -> Path:
-        return Path("./playlists") / (playlist_name + ".json")
-
-    def create_playlist_table(self) -> pd.DataFrame:
-        if self.table_path.exists():
-            return pd.read_csv(self.table_path)
-
-        # create a csv. headers are services
-        headers = ["Unified Playlist"] + [s.name for s in self.config.services]
-        table = pd.DataFrame(columns=headers)
-        # add empty row
-        table.loc[0] = [""] * len(headers)  # type: ignore
-
-        table.to_csv(self.table_path, index=False)
-        return table
+        names = self.config.playlists.playlist_names()
+        for name in names:
+            self.playlists[name] = self.file_manager.load_playlist(name)
 
     def add_service(
         self, service: ServiceType, service_config_path: Path, name=""
@@ -119,17 +146,16 @@ class PlaylistManager:
                 config_path=service_config_path.__str__(),
             )
         )
-        with self.config_path.open("w") as f:
-            f.write(self.config.json(indent=4))
 
-        # add service to table header
-        table_path = Path("playlists.csv")
-        if table_path.exists():
-            table = pd.read_csv(table_path)
-            table.insert(len(table.columns), name, "")
-            table.to_csv(table_path, index=False)
-        else:
-            self.create_playlist_table()
+        self.file_manager.save_config(self.config)
+
+    def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:
+        self.config.playlists.add_playlist(name, uris)
+        self.file_manager.save_config(self.config)
+
+    def add_playlist_uri(self, name: str, uri: PlaylistURIs) -> None:
+        self.config.playlists.add_playlist_uri(name, uri)
+        self.file_manager.save_config(self.config)
 
     def pull_tracks(self, playlist_name: str) -> None:
         if playlist_name not in self.playlists:
@@ -149,9 +175,7 @@ class PlaylistManager:
                 else:
                     playlist.tracks.append(track)
 
-        # save playlist
-        with self.playlist_path(playlist_name).open("w") as f:
-            f.write(playlist.json(indent=4))
+        self.file_manager.save_playlist(playlist)
 
 
 def get_predicted_tracks(

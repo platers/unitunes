@@ -1,23 +1,27 @@
 from tqdm import tqdm
 import typer
+from universal_playlists.cli.utils import get_playlist_manager
 from universal_playlists.main import (
-    PlaylistManager,
+    Config,
+    FileManager,
     get_predicted_tracks,
     get_prediction_track,
 )
-from typing import Optional
+from typing import List, Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from universal_playlists.playlist import Playlist
+from universal_playlists.cli.playlist import playlist_app
+from universal_playlists.cli.service import service_app
 
 from universal_playlists.types import ServiceType
 
 
 console = Console()
 app = typer.Typer(no_args_is_help=True)
-service_app = typer.Typer()
 app.add_typer(service_app, name="service")
+app.add_typer(playlist_app, name="playlist")
 
 
 @app.command()
@@ -30,9 +34,10 @@ def init(
     """Initialize a new playlist manager"""
     if not directory:
         directory = Path(".")
+    fm = FileManager(directory)
 
     try:
-        PlaylistManager.create_config(directory)
+        fm.save_config(Config())
     except FileExistsError:
         console.print(
             f"A playlist manager is already initialized in {directory}",
@@ -40,86 +45,43 @@ def init(
         )
         raise typer.Exit()
 
-    PlaylistManager()
+    fm.make_playlist_dir()
 
 
-@service_app.command()
-def add(
-    service: ServiceType,
-    service_config_path: str,
-    name: Optional[str] = typer.Argument(None),
-) -> None:
-    """Add a service to the config file"""
+# @app.command()
+# def pull_metadata() -> None:
+#     """Pull playlists from services"""
+#     pm = get_playlist_manager()
+#     # loop rows of table after header
+#     for _, row in pm.playlist_table.iterrows():  # type: ignore
+#         name = row["Unified Playlist"]
+#         if type(name) is not str:
+#             continue
+#         playlist_config_path = Path("./playlists") / (name + ".json")
+#         if not playlist_config_path.exists():
+#             playlist = Playlist(name=name)
+#             with playlist_config_path.open("w") as f:
+#                 f.write(playlist.json(indent=4))
+#         else:
+#             playlist = Playlist.parse_file(playlist_config_path)
 
-    pm = PlaylistManager()
-    # check if service is already added
-    for s in pm.config.services:
-        if s.service == service.value and s.config_path == service_config_path:
-            typer.echo(f"{service.value, service_config_path} is already added")
-            return
+#         for service_name, service in pm.services.items():
+#             if service_name not in row or type(row[service_name]) is not str:
+#                 continue
+#             metadata = service.get_playlist_metadata(row[service_name])
+#             playlist.merge_metadata(metadata)
 
-    if not name:
-        name = ""
-    pm.add_service(service, Path(service_config_path), name)
-    typer.echo(f"Added {service.value, service_config_path}")
+#             with playlist_config_path.open("w") as f:
+#                 f.write(playlist.json(indent=4))
 
-
-@service_app.callback(invoke_without_command=True)
-def list(ctx: typer.Context) -> None:
-    """List all services"""
-    if ctx.invoked_subcommand:
-        return
-
-    pm = PlaylistManager()
-    table = Table(title="Services")
-    table.add_column("Name", justify="left")
-    table.add_column("Service", justify="left")
-    table.add_column("Config Path", justify="left")
-    for s in pm.config.services:
-        table.add_row(s.name, s.service, s.config_path)
-    console.print(table)
+#     typer.echo("Done")
 
 
-@service_app.command()
-def remove(name: str) -> None:
-    """Remove a service from the config file"""
-    raise NotImplementedError  # TODO
-
-
-@app.command()
-def pull_metadata() -> None:
-    """Pull playlists from services"""
-    pm = PlaylistManager()
-    # loop rows of table after header
-    for i, row in pm.playlist_table.iterrows():  # type: ignore
-        name = row["Unified Playlist"]
-        if type(name) is not str:
-            continue
-        playlist_config_path = Path("./playlists") / (name + ".json")
-        if not playlist_config_path.exists():
-            playlist = Playlist(name=name)
-            with playlist_config_path.open("w") as f:
-                f.write(playlist.json(indent=4))
-        else:
-            playlist = Playlist.parse_file(playlist_config_path)
-
-        for service_name, service in pm.services.items():
-            if service_name not in row or type(row[service_name]) is not str:
-                continue
-            metadata = service.get_playlist_metadata(row[service_name])
-            playlist.merge_metadata(metadata)
-
-            with playlist_config_path.open("w") as f:
-                f.write(playlist.json(indent=4))
-
-    typer.echo("Done")
-
-
-@app.command()
-def pull_tracks(playlist_name: str) -> None:
-    """Pull tracks from services and merge into Unified Playlist"""
-    pm = PlaylistManager()
-    pm.pull_tracks(playlist_name)
+# @app.command()
+# def pull_tracks(playlist_name: str) -> None:
+#     """Pull tracks from services and merge into Unified Playlist"""
+#     pm = get_playlist_manager()
+#     pm.pull_tracks(playlist_name)
 
 
 @app.command()
@@ -133,7 +95,7 @@ def search(
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
 
-    pm = PlaylistManager()
+    pm = get_playlist_manager()
     pl = pm.playlists[playlist]
     original_tracks = pl.tracks
     streaming_service = [s for s in pm.services.values() if s.type == service][0]

@@ -48,7 +48,7 @@ def main():
                         "https://open.spotify"
                     ) and ytm_track_id.startswith("https://music.youtube"):
                         tracks = sp.get_tracks_in_album(
-                            SpotifyTrackURI(uri=spotify_album_id)
+                            SpotifyTrackURI.from_uri(spotify_album_id)
                         )
                         sp_track = tracks[0]
 

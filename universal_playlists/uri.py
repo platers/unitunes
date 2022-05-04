@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Literal, Union
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from pydantic.validators import dict_validator
 from universal_playlists.types import EntityType, ServiceType
 
@@ -9,18 +9,27 @@ class URIBase(BaseModel, ABC):
     service: Literal[ServiceType.SPOTIFY, ServiceType.YTM, ServiceType.MB]
     type: Literal[EntityType.TRACK, EntityType.PLAYLIST, EntityType.ALBUM]
     uri: str
+    url: str
 
     class Config:
         frozen = True
 
+    @staticmethod
     @abstractmethod
-    def url(self) -> str:
+    def uri_to_url(uri: str) -> str:
         """
         Returns a clickable URL for the URI.
         """
 
+    @staticmethod
+    @abstractmethod
+    def url_to_uri(url: str) -> str:
+        """
+        Returns the URI corresponding to a URL.
+        """
+
     def __rich__(self) -> str:
-        return f"[link={self.url()}]{self.url()}[/link]"
+        return f"[link={self.url}]{self.url}[/link]"
 
     @classmethod
     def get_validators(cls):
@@ -50,74 +59,151 @@ class AlbumURI(URIBase):
 class SpotifyTrackURI(TrackURI):
     service: Literal[ServiceType.SPOTIFY] = ServiceType.SPOTIFY
 
-    def url(self) -> str:
-        return f"https://open.spotify.com/track/{self.uri}"
+    @classmethod
+    def from_uri(cls, uri: str) -> "SpotifyTrackURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://open.spotify.com/track/{uri}"
 
     @staticmethod
     def url_to_uri(url: str) -> str:
         return url.split("/")[-1]
 
     @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://open.spotify.com/track/")
+
+    @staticmethod
     def from_url(url: str) -> "SpotifyTrackURI":
-        return SpotifyTrackURI(uri=SpotifyTrackURI.url_to_uri(url))
+        return SpotifyTrackURI.from_uri(SpotifyTrackURI.url_to_uri(url))
 
 
 class SpotifyPlaylistURI(PlaylistURI):
     service: Literal[ServiceType.SPOTIFY] = ServiceType.SPOTIFY
 
-    def url(self) -> str:
-        return f"https://open.spotify.com/playlist/{self.uri}"
+    @classmethod
+    def from_uri(cls, uri: str) -> "SpotifyPlaylistURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://open.spotify.com/playlist/{uri}"
 
     @staticmethod
     def url_to_uri(url: str) -> str:
         return url.split("/")[-1]
 
     @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://open.spotify.com/playlist/")
+
+    @staticmethod
     def from_url(url: str) -> "SpotifyPlaylistURI":
-        return SpotifyPlaylistURI(uri=SpotifyPlaylistURI.url_to_uri(url))
+        return SpotifyPlaylistURI.from_uri(SpotifyPlaylistURI.url_to_uri(url))
 
 
 class YtmTrackURI(TrackURI):
     service: Literal[ServiceType.YTM] = ServiceType.YTM
 
+    @classmethod
+    def from_uri(cls, uri: str) -> "YtmTrackURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
     @staticmethod
     def url_to_uri(url: str) -> str:
         return url.split("=")[-1]
 
-    def url(self) -> str:
-        return f"https://music.youtube.com/watch?v={self.uri}"
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://music.youtube.com/watch?v={uri}"
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://music.youtube.com/watch?v=")
+
+    @staticmethod
+    def from_url(url: str) -> "YtmTrackURI":
+        return YtmTrackURI.from_uri(YtmTrackURI.url_to_uri(url))
 
 
 class YtmPlaylistURI(PlaylistURI):
     service: Literal[ServiceType.YTM] = ServiceType.YTM
 
-    def url(self) -> str:
-        return f"https://music.youtube.com/playlist?list={self.uri}"
+    @classmethod
+    def from_uri(cls, uri: str) -> "YtmPlaylistURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
 
     @staticmethod
     def url_to_uri(url: str) -> str:
         return url.split("=")[-1]
 
     @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://music.youtube.com/playlist?list={uri}"
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://music.youtube.com/playlist?list=")
+
+    @staticmethod
     def from_url(url: str) -> "YtmPlaylistURI":
-        return YtmPlaylistURI(uri=YtmPlaylistURI.url_to_uri(url))
+        return YtmPlaylistURI.from_uri(YtmPlaylistURI.url_to_uri(url))
 
 
 class MB_RECORDING_URI(TrackURI):
     service: Literal[ServiceType.MB] = ServiceType.MB
 
-    def url(self) -> str:
-        return f"https://musicbrainz.org/recording/{self.uri}"
+    @classmethod
+    def from_uri(cls, uri: str) -> "MB_RECORDING_URI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://musicbrainz.org/recording/{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://musicbrainz.org/recording/")
+
+    @staticmethod
+    def from_url(url: str) -> "MB_RECORDING_URI":
+        return MB_RECORDING_URI.from_uri(MB_RECORDING_URI.url_to_uri(url))
 
 
 class MB_RELEASE_URI(AlbumURI):
     service: Literal[ServiceType.MB] = ServiceType.MB
 
-    def url(self) -> str:
-        return f"https://musicbrainz.org/release/{self.uri}"
+    @classmethod
+    def from_uri(cls, uri: str) -> "MB_RELEASE_URI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://musicbrainz.org/release/{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://musicbrainz.org/release/")
+
+    @staticmethod
+    def from_url(url: str) -> "MB_RELEASE_URI":
+        return MB_RELEASE_URI.from_uri(MB_RELEASE_URI.url_to_uri(url))
 
 
-URI = Union[
+TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
+PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
+AlbumURIs = MB_RELEASE_URI
+all_uri_types = [
     SpotifyTrackURI,
     SpotifyPlaylistURI,
     YtmTrackURI,
@@ -125,27 +211,39 @@ URI = Union[
     MB_RECORDING_URI,
     MB_RELEASE_URI,
 ]
-TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
-PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
+
+URI = Union[
+    TrackURIs,
+    PlaylistURIs,
+    AlbumURIs,
+]
 
 
 def URI_Builder(service: ServiceType, type: EntityType, uri: str) -> URI:
     if service == ServiceType.SPOTIFY:
         if type == EntityType.TRACK:
-            return SpotifyTrackURI(uri=uri)
+            return SpotifyTrackURI.from_uri(uri)
         elif type == EntityType.PLAYLIST:
-            return SpotifyPlaylistURI(uri=uri)
+            return SpotifyPlaylistURI.from_uri(uri)
     elif service == ServiceType.YTM:
         if type == EntityType.TRACK:
-            return YtmTrackURI(uri=uri)
+            return YtmTrackURI.from_uri(uri)
         elif type == EntityType.PLAYLIST:
-            return YtmPlaylistURI(uri=uri)
+            return YtmPlaylistURI.from_uri(uri)
     elif service == ServiceType.MB:
         if type == EntityType.TRACK:
-            return MB_RECORDING_URI(uri=uri)
+            return MB_RECORDING_URI.from_uri(uri)
         elif type == EntityType.ALBUM:
-            return MB_RELEASE_URI(uri=uri)
+            return MB_RELEASE_URI.from_uri(uri)
     else:
         raise ValueError(f"Unknown service type {service}")
 
     raise ValueError(f"Unknown entity type {type} for service {service}")
+
+
+def URI_from_url(url: str) -> URI:
+    for cls in all_uri_types:
+        if cls.valid_url(url):
+            return cls.from_url(url)
+
+    raise ValueError(f"Unknown URL format {url}")

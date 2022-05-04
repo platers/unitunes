@@ -99,7 +99,7 @@ class MusicBrainz(StreamingService):
             length=int(recording["length"]) // 1000
             if "length" in recording and recording["length"]
             else None,
-            uris=[MB_RECORDING_URI(uri=recording["id"])],
+            uris=[MB_RECORDING_URI.from_uri(recording["id"])],
         )
 
     def pull_track(self, uri: MB_RECORDING_URI) -> Track:
