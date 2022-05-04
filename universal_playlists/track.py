@@ -8,6 +8,7 @@ from typing import (
 from pydantic import BaseModel
 from strsimpy.jaro_winkler import JaroWinkler
 from rich import print
+from universal_playlists.types import ServiceType
 from universal_playlists.uri import TrackURIs
 
 
@@ -155,5 +156,5 @@ class Track(BaseModel):
 
         # TODO: merge other fields
 
-    def is_on_service(self, service_name: str) -> bool:
-        return any(uri.service == service_name for uri in self.uris)
+    def is_on_service(self, service: ServiceType) -> bool:
+        return any(uri.service == service for uri in self.uris)

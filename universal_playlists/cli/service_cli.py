@@ -23,7 +23,7 @@ def add(
 
     pm = get_playlist_manager()
     # check if service is already added
-    for s in pm.config.services:
+    for s in pm.config.services.values():
         if s.service == service.value and s.config_path == service_config_path:
             typer.echo(f"{service.value, service_config_path} is already added")
             return
@@ -45,7 +45,7 @@ def list(ctx: typer.Context) -> None:
     table.add_column("Name", justify="left")
     table.add_column("Service", justify="left")
     table.add_column("Config Path", justify="left")
-    for s in pm.config.services:
+    for s in pm.config.services.values():
         table.add_row(s.name, s.service, s.config_path)
     console.print(table)
 

@@ -14,6 +14,7 @@ from rich.table import Table
 from universal_playlists.playlist import Playlist
 from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
+from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
 
@@ -22,6 +23,12 @@ console = Console()
 app = typer.Typer(no_args_is_help=True)
 app.add_typer(service_app, name="service")
 app.add_typer(playlist_app, name="playlist")
+
+
+def print_tracks(tracks: List[Track]) -> None:
+    for track in tracks:
+        console.print(track)
+        console.print("")
 
 
 @app.command()
@@ -49,69 +56,75 @@ def init(
 
 
 @app.command()
-def pull(
-    service: str,
-    playlist: str,
-):
-    """Pull a playlist from a service"""
+def view(playlist: str) -> None:
+    """View a playlist"""
     pm = get_playlist_manager()
     if playlist not in pm.playlists:
         console.print(f"{playlist} is not a playlist", style="red")
         raise typer.Exit()
     pl = pm.playlists[playlist]
 
-    if service not in pm.services:
-        console.print(f"{service} is not a service", style="red")
-        raise typer.Exit()
-    s = pm.services[service]
-
-    remote_tracks = s.pull_tracks(pl.find_uri(service))
-    new_tracks = pl.get_new_tracks(remote_tracks)
-    removed_tracks = pl.get_removed_tracks(service, remote_tracks)
-
-    console.print(f"{len(new_tracks)} new tracks")
-    console.print(f"{len(removed_tracks)} removed tracks")
-
-    pl.merge_new_tracks(new_tracks)
-    pl.remove_tracks(removed_tracks)
-
-    pm.save_playlist(pl.name)
+    console.print(pl)
 
 
-# @app.command()
-# def pull_metadata() -> None:
-#     """Pull playlists from services"""
-#     pm = get_playlist_manager()
-#     # loop rows of table after header
-#     for _, row in pm.playlist_table.iterrows():  # type: ignore
-#         name = row["Unified Playlist"]
-#         if type(name) is not str:
-#             continue
-#         playlist_config_path = Path("./playlists") / (name + ".json")
-#         if not playlist_config_path.exists():
-#             playlist = Playlist(name=name)
-#             with playlist_config_path.open("w") as f:
-#                 f.write(playlist.json(indent=4))
-#         else:
-#             playlist = Playlist.parse_file(playlist_config_path)
+@app.command()
+def pull(
+    playlists: Optional[List[str]] = typer.Argument(None),
+    services: Optional[List[str]] = typer.Option(
+        None,
+        "--service",
+        "-s",
+        help="Service to pull from",
+    ),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+    ),
+):
+    """Pull a playlist from a service"""
+    pm = get_playlist_manager()
 
-#         for service_name, service in pm.services.items():
-#             if service_name not in row or type(row[service_name]) is not str:
-#                 continue
-#             metadata = service.get_playlist_metadata(row[service_name])
-#             playlist.merge_metadata(metadata)
+    if not playlists:
+        playlists = list(pm.config.playlists.keys())
 
-#             with playlist_config_path.open("w") as f:
-#                 f.write(playlist.json(indent=4))
+    if not services:
+        services = list(pm.config.services.keys())
 
-#     typer.echo("Done")
+    for playlist_name in playlists:
+        if playlist_name not in pm.playlists:
+            console.print(f"{playlist_name} is not a playlist", style="red")
+            raise typer.Exit()
+        pl = pm.playlists[playlist_name]
 
+        new_tracks: List[Track] = []
+        removed_tracks: List[Track] = []
 
-# @app.command()
-# def pull_tracks(playlist_name: str) -> None:
-#     """Pull tracks from services and merge into Unified Playlist"""
-#     pm = get_playlist_manager()
-#     pm.pull_tracks(playlist_name)
+        for service_name in services:
+            if service_name not in pm.services:
+                console.print(f"{service_name} is not a service", style="red")
+                raise typer.Exit()
+            service = pm.services[service_name]
+
+            uri = pl.find_uri(service.type)
+            if not uri:
+                continue
+
+            remote_tracks = service.pull_tracks(uri)
+            new_tracks.extend(pl.get_new_tracks(remote_tracks))
+            removed_tracks.extend(pl.get_removed_tracks(service.type, remote_tracks))
+
+        console.print(f"{len(new_tracks)} new tracks")
+        if verbose:
+            print_tracks(new_tracks)
+        console.print(f"{len(removed_tracks)} removed tracks")
+        if verbose:
+            print_tracks(removed_tracks)
+
+        pl.merge_new_tracks(new_tracks)
+        pl.remove_tracks(removed_tracks)
+
+        pm.save_playlist(pl.name)
 
 
 @app.command()

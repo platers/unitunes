@@ -70,10 +70,7 @@ class SpotifyService(StreamingService):
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
             )
-            print(playlist_id)
-            return [
-                self.raw_to_track(track["track"]) for track in tqdm(results["items"])
-            ]
+            return [self.raw_to_track(track["track"]) for track in results["items"]]
 
         tracks = []
         offset = 0
@@ -83,6 +80,9 @@ class SpotifyService(StreamingService):
                 break
             tracks.extend(new_tracks)
             offset += len(new_tracks)
+
+        # filter out tracks withouth uris
+        tracks = [track for track in tracks if track.uris]
         return tracks
 
     def get_tracks_in_album(self, album_uri: URI) -> List[Track]:

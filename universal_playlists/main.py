@@ -30,14 +30,15 @@ class UPRelations(BaseModel):
 
 
 class Config(BaseModel):
-    services: List[ConfigServiceEntry] = []
+    services: Dict[str, ConfigServiceEntry] = {}
     playlists: Dict[str, UPRelations] = {}
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs] = []):
         if name in self.playlists:
             for uri in uris:
                 self.playlists[name].add_uri(uri)
-        self.playlists[name] = UPRelations(uris=uris)
+        else:
+            self.playlists[name] = UPRelations(uris=uris)
 
     def playlist_names(self) -> List[str]:
         return list(self.playlists.keys())
@@ -105,7 +106,7 @@ class PlaylistManager:
 
         # create service objects
         self.services[ServiceType.MB.value] = MusicBrainz()
-        for s in self.config.services:
+        for s in self.config.services.values():
             service_config_path = Path(s.config_path)
             self.services[s.name] = service_factory(
                 ServiceType(s.service), s.name, config_path=service_config_path
@@ -123,16 +124,14 @@ class PlaylistManager:
         if name == "":
             name = service.value
             # check if service is already in config
-            for s in self.config.services:
+            for s in self.config.services.values():
                 if s.service == service.value:
                     name = service.value + " " + service_config_path.name
 
-        self.config.services.append(
-            ConfigServiceEntry(
-                name=name,
-                service=service.value,
-                config_path=service_config_path.__str__(),
-            )
+        self.config.services[name] = ConfigServiceEntry(
+            name=name,
+            service=service.value,
+            config_path=service_config_path.__str__(),
         )
 
         self.file_manager.save_config(self.config)
@@ -142,6 +141,17 @@ class PlaylistManager:
         self.playlists[name] = Playlist(name=name, uris=uris)
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(self.playlists[name])
+
+    def add_uris_to_playlist(
+        self, playlist_name: str, uris: List[PlaylistURIs]
+    ) -> None:
+        self.config.add_playlist(playlist_name, uris)
+        pl = self.playlists[playlist_name]
+        for uri in uris:
+            pl.add_uri(uri)
+
+        self.file_manager.save_config(self.config)
+        self.file_manager.save_playlist(pl)
 
     def save_playlist(self, playlist_name: str) -> None:
         self.file_manager.save_playlist(self.playlists[playlist_name])

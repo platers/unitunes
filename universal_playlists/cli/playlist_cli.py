@@ -12,6 +12,12 @@ playlist_app = typer.Typer()
 def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
     """Add a playlist to the config file"""
     pm = get_playlist_manager()
-    uris = [playlistURI_from_url(url) for url in urls or []]
-    pm.add_playlist(name, uris)
-    typer.echo(f"Added {name}")
+    urls = urls or []
+    uris = [playlistURI_from_url(url) for url in urls]
+
+    if name in pm.playlists:
+        pm.add_uris_to_playlist(name, uris)
+        typer.echo(f"Added {', '.join(urls)} to {name}")
+    else:
+        pm.add_playlist(name, uris)
+        typer.echo(f"Added playlist {name}")
