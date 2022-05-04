@@ -48,6 +48,36 @@ def init(
     fm.make_playlist_dir()
 
 
+@app.command()
+def pull(
+    service: str,
+    playlist: str,
+):
+    """Pull a playlist from a service"""
+    pm = get_playlist_manager()
+    if playlist not in pm.playlists:
+        console.print(f"{playlist} is not a playlist", style="red")
+        raise typer.Exit()
+    pl = pm.playlists[playlist]
+
+    if service not in pm.services:
+        console.print(f"{service} is not a service", style="red")
+        raise typer.Exit()
+    s = pm.services[service]
+
+    remote_tracks = s.pull_tracks(pl.find_uri(service))
+    new_tracks = pl.get_new_tracks(remote_tracks)
+    removed_tracks = pl.get_removed_tracks(service, remote_tracks)
+
+    console.print(f"{len(new_tracks)} new tracks")
+    console.print(f"{len(removed_tracks)} removed tracks")
+
+    pl.merge_new_tracks(new_tracks)
+    pl.remove_tracks(removed_tracks)
+
+    pm.save_playlist(pl.name)
+
+
 # @app.command()
 # def pull_metadata() -> None:
 #     """Pull playlists from services"""

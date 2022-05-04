@@ -97,13 +97,13 @@ class PlaylistManager:
     config: Config
     file_manager: FileManager
     playlists: Dict[str, Playlist]
+    services: Dict[str, StreamingService] = {}
 
     def __init__(self, config: Config, file_manager: FileManager) -> None:
         self.config = config
         self.file_manager = file_manager
 
         # create service objects
-        self.services: Dict[str, StreamingService] = {}
         self.services[ServiceType.MB.value] = MusicBrainz()
         for s in self.config.services:
             service_config_path = Path(s.config_path)
@@ -139,29 +139,12 @@ class PlaylistManager:
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:
         self.config.add_playlist(name, uris)
-        self.playlists[name] = Playlist(name=name)
+        self.playlists[name] = Playlist(name=name, uris=uris)
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(self.playlists[name])
 
-    def pull_tracks(self, playlist_name: str) -> None:
-        if playlist_name not in self.playlists:
-            raise ValueError("Playlist not found")
-
-        playlist = self.playlists[playlist_name]
-        for uri in playlist.uris:
-            service = self.services[uri.service]
-            tracks = service.pull_tracks(uri)
-
-            # merge tracks into playlist
-            for track in tracks:
-                matches = [t for t in playlist.tracks if t.matches(track)]
-                if matches:
-                    assert len(matches) == 1  # TODO: handle multiple matches
-                    matches[0].merge(track)
-                else:
-                    playlist.tracks.append(track)
-
-        self.file_manager.save_playlist(playlist)
+    def save_playlist(self, playlist_name: str) -> None:
+        self.file_manager.save_playlist(self.playlists[playlist_name])
 
 
 def get_predicted_tracks(

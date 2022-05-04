@@ -145,9 +145,15 @@ class Track(BaseModel):
     def matches(self, track: "Track", threshold: float = 0.8) -> bool:
         return self.similarity(track) > threshold
 
+    def uri_matches(self, track: "Track") -> bool:
+        return any(uri in track.uris for uri in self.uris)
+
     def merge(self, other: "Track") -> None:
         for uri in other.uris:
             if uri not in self.uris:
                 self.uris.append(uri)
 
         # TODO: merge other fields
+
+    def is_on_service(self, service_name: str) -> bool:
+        return any(uri.service == service_name for uri in self.uris)

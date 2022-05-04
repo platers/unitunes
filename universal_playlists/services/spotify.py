@@ -61,7 +61,7 @@ class SpotifyService(StreamingService):
 
     def pull_tracks(self, uri: URI) -> List[Track]:
         # query spotify until we get all tracks
-        playlist_id = uri.uri.split("/")[-1]
+        playlist_id = uri.uri
 
         def get_tracks(offset: int) -> list[Track]:
             results = self.sp.sp.user_playlist_tracks(
@@ -70,6 +70,7 @@ class SpotifyService(StreamingService):
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
             )
+            print(playlist_id)
             return [
                 self.raw_to_track(track["track"]) for track in tqdm(results["items"])
             ]
