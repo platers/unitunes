@@ -12,9 +12,9 @@ from typing import List, Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
-from universal_playlists.playlist import Playlist
 from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
+from universal_playlists.eval.eval import eval_app
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
@@ -24,6 +24,7 @@ console = Console()
 app = typer.Typer(no_args_is_help=True)
 app.add_typer(service_app, name="service")
 app.add_typer(playlist_app, name="playlist")
+app.add_typer(eval_app, name="eval")
 
 
 def print_tracks(tracks: List[Track]) -> None:

@@ -7,7 +7,6 @@ authors = ["platers <platers81@gmail.com>"]
 [tool.poetry.scripts]
 universal-playlists = "universal_playlists.cli.cli:app"
 up-data= "universal_playlists.eval.data.create_dataset:main"
-up-eval="universal_playlists.eval.eval:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"

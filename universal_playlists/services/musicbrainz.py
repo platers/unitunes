@@ -116,7 +116,7 @@ class MusicBrainz(StreamingService):
         fields = {k: v for k, v in fields.items() if v}
 
         results = self.mb.search_recordings(
-            limit=10,
+            limit=5,
             **fields,
         )
 
@@ -184,7 +184,10 @@ class MusicBrainz(StreamingService):
             if not any(fields.values()):
                 continue
 
-            matches.extend(self.search_track_fields(fields))
+            new_matches = self.search_track_fields(fields)
+            for match in new_matches:
+                if match not in matches:
+                    matches.append(match)
             if can_stop(matches):
                 break
 
