@@ -189,8 +189,4 @@ class MusicBrainz(StreamingService):
                 break
 
         matches.sort(key=lambda m: m.similarity(track), reverse=True)
-        # augment most promising matches
-        for i in range(min(len(matches), 3)):
-            matches[i] = self.pull_track(matches[i].uris[0])
-
         return matches[:3]

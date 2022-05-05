@@ -2,6 +2,7 @@ from pathlib import Path
 import shelve
 from typing import (
     List,
+    Optional,
 )
 from universal_playlists.playlist import PlaylistMetadata
 from universal_playlists.track import Track
@@ -63,3 +64,12 @@ class StreamingService:
     def search_track(self, track: Track) -> List[Track]:
         """Search for a track in the streaming service. Returns a list of potential matches."""
         raise NotImplementedError
+
+    def best_match(self, track: Track) -> Optional[Track]:
+        """Returns the best match for a track in the streaming service if found."""
+        matches = self.search_track(track)
+        if not matches:
+            return None
+
+        matches.sort(key=lambda t: t.similarity(track), reverse=True)
+        return matches[0]

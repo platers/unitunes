@@ -194,3 +194,11 @@ def get_prediction_uri(
     track = source_service.pull_track(uri)
     prediction = get_prediction_track(target_service, track, threshold)
     return prediction.uris[0] if prediction else None
+
+
+def augment_track(track: Track):
+    """Tries to find metadata from musicbrainz. Adds metadata to track if found."""
+    mb = MusicBrainz()
+    match = mb.best_match(track)
+    if match and track.matches(match):
+        track.merge(match)

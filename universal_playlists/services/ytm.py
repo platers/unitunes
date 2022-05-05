@@ -19,8 +19,7 @@ class YtmWrapper(ServiceWrapper):
         super().__init__("ytm")
         self.ytm = YTMusic(config_path.__str__())
 
-    @cache
-    def get_playlist(self, *args, use_cache=True, **kwargs):
+    def get_playlist(self, *args, **kwargs):
         return self.ytm.get_playlist(*args, **kwargs)
 
     @cache

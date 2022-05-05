@@ -4,6 +4,7 @@ from universal_playlists.cli.utils import get_playlist_manager
 from universal_playlists.main import (
     Config,
     FileManager,
+    augment_track,
     get_predicted_tracks,
     get_prediction_track,
 )
@@ -120,6 +121,10 @@ def pull(
         console.print(f"{len(removed_tracks)} removed tracks")
         if verbose:
             print_tracks(removed_tracks)
+
+        console.print("Augmenting new tracks...")
+        for track in tqdm(new_tracks):
+            augment_track(track)
 
         pl.merge_new_tracks(new_tracks)
         pl.remove_tracks(removed_tracks)
