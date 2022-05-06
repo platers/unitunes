@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 import shelve
 from typing import (
@@ -28,20 +29,31 @@ def cache(method):
 
 
 class ServiceWrapper:
-    def __init__(self, cache_name: str) -> None:
-        cache_root = Path("cache")
-        if not cache_root.exists():
-            cache_root.mkdir()
-        self.cache_path = Path("cache") / cache_name
+    cache_path: Path
+    cache_name: str
+
+    def create_cache_dir(self, cache_dir: Path):
+        if not cache_dir.exists():
+            cache_dir.mkdir()
         if not self.cache_path.exists():
             self.cache_path.mkdir()
 
+    def __init__(self, cache_name: str, cache_root: Path = Path("cache")) -> None:
+        self.cache_name = cache_name
+        self.cache_path = Path("cache") / cache_name
+        self.create_cache_dir(cache_root)
 
-class StreamingService:
-    def __init__(self, name: str, type: ServiceType, config_path: Path) -> None:
+
+class StreamingService(
+    ABC
+):  # TODO: implement interfaces or protocols for pullabe, pushable, searchable
+    name: str
+    type: ServiceType
+    wrapper: ServiceWrapper
+
+    def __init__(self, name: str, type: ServiceType) -> None:
         self.name = name
         self.type = type
-        self.config_path = config_path
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         raise NotImplementedError

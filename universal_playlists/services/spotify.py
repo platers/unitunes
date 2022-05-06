@@ -17,8 +17,8 @@ from universal_playlists.uri import URI, SpotifyPlaylistURI, SpotifyTrackURI
 
 
 class SpotifyWrapper(ServiceWrapper):
-    def __init__(self, config) -> None:
-        super().__init__("spotify")
+    def __init__(self, config, cache_root) -> None:
+        super().__init__("spotify", cache_root=cache_root)
         self.sp = spotipy.Spotify(
             auth_manager=SpotifyOAuth(
                 client_id=config["client_id"],
@@ -42,13 +42,14 @@ class SpotifyWrapper(ServiceWrapper):
 
 
 class SpotifyService(StreamingService):
-    def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, ServiceType.SPOTIFY, config_path)
-        credentials = json.load(open(config_path, "r"))
-        self.sp = SpotifyWrapper(credentials)
+    wrapper: SpotifyWrapper
+
+    def __init__(self, name: str, wrapper: SpotifyWrapper) -> None:
+        super().__init__(name, ServiceType.SPOTIFY)
+        self.wrapper = wrapper
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.sp.sp.current_user_playlists()
+        results = self.wrapper.sp.current_user_playlists()
 
         return [
             PlaylistMetadata(
@@ -64,8 +65,8 @@ class SpotifyService(StreamingService):
         playlist_id = uri.uri
 
         def get_tracks(offset: int) -> list[Track]:
-            results = self.sp.sp.user_playlist_tracks(
-                user=self.sp.sp.current_user()["id"],
+            results = self.wrapper.sp.user_playlist_tracks(
+                user=self.wrapper.sp.current_user()["id"],
                 playlist_id=playlist_id,
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
@@ -87,12 +88,12 @@ class SpotifyService(StreamingService):
 
     def get_tracks_in_album(self, album_uri: URI) -> List[Track]:
         album_id = album_uri.uri.split("/")[-1]
-        results = self.sp.album_tracks(album_id)
+        results = self.wrapper.album_tracks(album_id)
         return [self.raw_to_track(track) for track in results["items"]]
 
     def pull_track(self, uri: URI) -> Track:
         track_id = uri.uri.split("/")[-1]
-        results = self.sp.track(track_id)
+        results = self.wrapper.track(track_id)
         if not results:
             raise ValueError(f"Track {uri} not found")
         return self.raw_to_track(results)
@@ -115,7 +116,7 @@ class SpotifyService(StreamingService):
         if track.albums:
             query += f" album:{track.albums[0]}"
 
-        results = self.sp.search(query, limit=5, type="track")
+        results = self.wrapper.search(query, limit=5, type="track")
         return list(
             map(
                 self.raw_to_track,

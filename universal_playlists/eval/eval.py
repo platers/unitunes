@@ -49,7 +49,10 @@ def build_service(service_type: ServiceType) -> StreamingService:
         / "service_configs"
         / f"{service_type}_config.json"
     )
-    service = service_factory(service_type, service_type, path)
+    cache_path = Path(__file__).parent / "data" / "cache"
+    service = service_factory(
+        service_type, service_type, cache_path=cache_path, config_path=path
+    )
     return service
 
 

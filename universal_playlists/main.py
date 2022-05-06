@@ -1,3 +1,5 @@
+from curses import wrapper
+import json
 from typing import Dict, List, Optional
 import pandas as pd
 from pathlib import Path
@@ -8,8 +10,8 @@ from universal_playlists.services.musicbrainz import MusicBrainz
 from universal_playlists.services.services import StreamingService
 
 
-from universal_playlists.services.spotify import SpotifyService
-from universal_playlists.services.ytm import YTM
+from universal_playlists.services.spotify import SpotifyService, SpotifyWrapper
+from universal_playlists.services.ytm import YTM, YtmWrapper
 from universal_playlists.track import Track
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import PlaylistURIs, TrackURI
@@ -47,12 +49,17 @@ class Config(BaseModel):
 def service_factory(
     service_type: ServiceType,
     name: str,
-    config_path: Path,
+    cache_path: Path,
+    config_path: Optional[Path] = None,
 ) -> StreamingService:
+
     if service_type == ServiceType.SPOTIFY:
-        return SpotifyService(name, config_path)
+        assert config_path is not None
+        config = json.load(config_path.open())
+        return SpotifyService(name, SpotifyWrapper(config, cache_path))
     elif service_type == ServiceType.YTM:
-        return YTM(name, config_path)
+        assert config_path is not None
+        return YTM(name, YtmWrapper(config_path, cache_path))
     elif service_type == ServiceType.MB:
         return MusicBrainz()
     else:
@@ -63,6 +70,7 @@ class FileManager:
     dir: Path
     config_path = Path("config.json")
     playlist_folder = Path("playlists")
+    cache_path = Path("cache")
 
     def __init__(self, dir: Path) -> None:
         self.dir = dir
@@ -109,7 +117,10 @@ class PlaylistManager:
         for s in self.config.services.values():
             service_config_path = Path(s.config_path)
             self.services[s.name] = service_factory(
-                ServiceType(s.service), s.name, config_path=service_config_path
+                ServiceType(s.service),
+                s.name,
+                config_path=service_config_path,
+                cache_path=self.file_manager.cache_path,
             )
 
         # create playlist objects

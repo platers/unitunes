@@ -15,8 +15,8 @@ from universal_playlists.uri import YtmPlaylistURI, YtmTrackURI
 
 
 class YtmWrapper(ServiceWrapper):
-    def __init__(self, config_path: Path) -> None:
-        super().__init__("ytm")
+    def __init__(self, config_path: Path, cache_root: Path) -> None:
+        super().__init__("ytm", cache_root=cache_root)
         self.ytm = YTMusic(config_path.__str__())
 
     def get_playlist(self, *args, **kwargs):
@@ -32,12 +32,14 @@ class YtmWrapper(ServiceWrapper):
 
 
 class YTM(StreamingService):
-    def __init__(self, name: str, config_path: Path) -> None:
-        super().__init__(name, ServiceType.YTM, config_path=config_path)
-        self.ytm = YtmWrapper(config_path)
+    wrapper: YtmWrapper
+
+    def __init__(self, name: str, wrapper: YtmWrapper) -> None:
+        super().__init__(name, ServiceType.YTM)
+        self.wrapper = wrapper
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.ytm.ytm.get_library_playlists()
+        results = self.wrapper.ytm.get_library_playlists()
 
         def playlistFromResponse(response):
             return PlaylistMetadata(
@@ -59,7 +61,7 @@ class YTM(StreamingService):
         )
 
     def pull_tracks(self, uri: YtmTrackURI) -> List[Track]:
-        tracks = self.ytm.get_playlist(uri.uri)["tracks"]
+        tracks = self.wrapper.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
     def raw_to_track(self, raw: dict) -> Track:
@@ -83,10 +85,10 @@ class YTM(StreamingService):
         )
 
     def pull_track(self, uri: YtmTrackURI) -> Track:
-        track = self.ytm.get_song(uri.uri)
+        track = self.wrapper.get_song(uri.uri)
         return self.raw_to_track(track)
 
     def search_track(self, track: Track) -> List[Track]:
         query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
-        results = self.ytm.search(query)
+        results = self.wrapper.search(query)
         return self.results_to_tracks(results)

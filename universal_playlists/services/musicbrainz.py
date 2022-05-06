@@ -52,11 +52,13 @@ class MusicBrainzWrapper(ServiceWrapper):
 
 
 class MusicBrainz(StreamingService):
+    wrapper: MusicBrainzWrapper
+
     def __init__(
         self,
     ) -> None:
-        super().__init__("MusicBrainz", ServiceType.MB, Path())
-        self.mb = MusicBrainzWrapper()
+        super().__init__("MusicBrainz", ServiceType.MB)
+        self.wrapper = MusicBrainzWrapper()
 
     @staticmethod
     def parse_track(recording):
@@ -103,7 +105,7 @@ class MusicBrainz(StreamingService):
         )
 
     def pull_track(self, uri: MB_RECORDING_URI) -> Track:
-        results = self.mb.get_recording_by_id(
+        results = self.wrapper.get_recording_by_id(
             id=uri.uri, includes=["releases", "artists", "aliases"]
         )
         if not results:
@@ -115,7 +117,7 @@ class MusicBrainz(StreamingService):
         # remove empty fields
         fields = {k: v for k, v in fields.items() if v}
 
-        results = self.mb.search_recordings(
+        results = self.wrapper.search_recordings(
             limit=5,
             **fields,
         )
