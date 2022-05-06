@@ -8,7 +8,7 @@ from universal_playlists.main import service_factory
 from universal_playlists.services.services import StreamingService
 
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import URI_from_url, trackURI_from_url
+from universal_playlists.uri import TrackURI, URI_from_url, trackURI_from_url
 
 
 class Case(BaseModel):
@@ -66,39 +66,57 @@ def search(
     cases = load_cases()
 
     for case in cases:
-        print(case.description)
+        console.print(f"Case: {case.description}", style="bold")
         matches = [trackURI_from_url(url) for url in case.matches]
         non_matches = [trackURI_from_url(url) for url in case.non_matches]
         matched_services = [uri.service for uri in matches]
+        if guess_service is not None:
+            matched_services.append(guess_service)
 
-        if guess_service and guess_service not in matched_services:
-            target_service = build_service(guess_service)
+        for source_uri in matches:
+            for target_type in matched_services:
+                target_service = build_service(target_type)
+                source_service = build_service(source_uri.service)
+                source_track = source_service.pull_track(source_uri)
+                guesses = target_service.search_track(source_track)[:3]
+                best_guess = target_service.best_match(source_track)
 
-            for uri in matches:
-                source_service = build_service(uri.service)
-                track = source_service.pull_track(uri)
-                guesses = target_service.search_track(track)
+                if best_guess and best_guess.uris[0] in matches:
+                    console.print(
+                        f"{source_uri.service} -> {target_type}",
+                        style="green",
+                    )
+                    continue
+                console.print(
+                    f"{source_uri.service} -> {target_type}",
+                    style="red",
+                )
 
                 console.print("Original:", end="\n\n")
-                console.print(track, end="\n\n")
+                console.print(source_track, end="\n\n")
                 console.print("Guesses:")
 
                 for g in guesses:
                     uris_on_service = [
-                        uri for uri in g.uris if uri.service == guess_service
+                        uri for uri in g.uris if uri.service == target_type
                     ]
                     assert len(uris_on_service) == 1
                     guess_uri = uris_on_service[0]
 
-                    console.print(g, end="\n\n")
-                    # ask user if this is the correct match
-                    correct = typer.confirm(f"Is {g.name.value} a correct match?")
-
-                    if correct:
-                        case.matches.append(guess_uri.url)
-                        print("Added to matches")
+                    if guess_uri in matches:
+                        console.print(g, style="green")
+                    elif guess_uri in non_matches:
+                        console.print(g, style="red")
                     else:
-                        case.non_matches.append(guess_uri.url)
-                        print("Added to non-matches")
+                        # ask user if this is the correct match
+                        console.print(g)
+                        correct = typer.confirm(f"Is {g.name.value} a correct match?")
 
-                    save_cases(cases)
+                        if correct:
+                            case.matches.append(guess_uri.url)
+                            print("Added to matches")
+                        else:
+                            case.non_matches.append(guess_uri.url)
+                            print("Added to non-matches")
+
+                        save_cases(cases)

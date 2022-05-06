@@ -110,11 +110,13 @@ class SpotifyService(StreamingService):
         )
 
     def search_track(self, track: Track) -> List[Track]:
-        query = f"track:{track.name}"
+        query = f'track:"{track.name}"'
         if track.artists:
-            query += f" artist:{' '.join([artist.value for artist in track.artists])}"
+            query += (
+                f" artist:\"{' '.join([artist.value for artist in track.artists])}\""
+            )
         if track.albums:
-            query += f" album:{track.albums[0]}"
+            query += f' album:"{track.albums[0]}"'
 
         results = self.wrapper.search(query, limit=5, type="track")
         return list(

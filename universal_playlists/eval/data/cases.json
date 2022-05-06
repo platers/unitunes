@@ -7,7 +7,10 @@
         ],
         "non_matches": [
             "https://musicbrainz.org/recording/9c50b21d-8d3b-44d3-9ce7-d3f7f3c6c301",
-            "https://musicbrainz.org/recording/6402b7d3-c90f-453c-a6da-b0970afc7f95"
+            "https://musicbrainz.org/recording/6402b7d3-c90f-453c-a6da-b0970afc7f95",
+            "https://open.spotify.com/track/1iOQmZULzzkDN1hQZNoDii",
+            "https://open.spotify.com/track/66a0Ib85gRjtZmac4HFsvw",
+            "https://open.spotify.com/track/6MKOd8KDFzwpu8Vz6ccZU5"
         ]
     }
 ]
