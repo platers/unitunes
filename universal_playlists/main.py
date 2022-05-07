@@ -1,7 +1,5 @@
-from curses import wrapper
 import json
 from typing import Dict, List, Optional
-import pandas as pd
 from pathlib import Path
 import os
 from pydantic import BaseModel
@@ -109,7 +107,7 @@ class FileManager:
 class PlaylistManager:
     config: Config
     file_manager: FileManager
-    playlists: Dict[str, Playlist]
+    playlists: Dict[str, Playlist] = {}
     services: Dict[str, StreamingService] = {}
 
     def __init__(self, config: Config, file_manager: FileManager) -> None:
@@ -128,7 +126,6 @@ class PlaylistManager:
             )
 
         # create playlist objects
-        self.playlists: Dict[str, Playlist] = {}
         names = self.config.playlist_names()
         for name in names:
             self.playlists[name] = self.file_manager.load_playlist(name)

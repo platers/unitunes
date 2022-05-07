@@ -1,9 +1,6 @@
-import json
-from pathlib import Path
 from typing import List
 import spotipy
 from spotipy import SpotifyOAuth
-from tqdm import tqdm
 from universal_playlists.playlist import Playlist, PlaylistMetadata
 
 from universal_playlists.services.services import (

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Literal, Union
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from pydantic.validators import dict_validator
 from universal_playlists.types import EntityType, ServiceType
 

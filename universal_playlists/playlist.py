@@ -5,7 +5,7 @@ from typing import (
 from pydantic import BaseModel
 from universal_playlists.track import Track
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import PlaylistURIs, TrackURIs
+from universal_playlists.uri import PlaylistURIs
 
 
 class PlaylistMetadata(BaseModel):
