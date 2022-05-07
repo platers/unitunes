@@ -5,7 +5,11 @@ from pydantic import BaseModel
 import typer
 from rich.console import Console
 from universal_playlists.main import service_factory
-from universal_playlists.services.services import StreamingService
+from universal_playlists.services.services import (
+    Searchable,
+    StreamingService,
+    TrackPullable,
+)
 
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import TrackURI, URI_from_url, trackURI_from_url
@@ -77,6 +81,10 @@ def search(
             for target_type in matched_services:
                 target_service = build_service(target_type)
                 source_service = build_service(source_uri.service)
+                if not isinstance(source_service, TrackPullable):
+                    continue
+                if not isinstance(target_service, Searchable):
+                    continue
                 source_track = source_service.pull_track(source_uri)
                 guesses = target_service.search_track(source_track)[:3]
                 best_guess = target_service.best_match(source_track)

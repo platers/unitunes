@@ -7,8 +7,10 @@ from ratelimit import sleep_and_retry, limits
 
 import requests
 from universal_playlists.services.services import (
+    Searchable,
     ServiceWrapper,
     StreamingService,
+    TrackPullable,
     cache,
 )
 from universal_playlists.track import AliasedString, Track
@@ -52,7 +54,7 @@ class MusicBrainzWrapper(ServiceWrapper):
         return mb.get_release_by_id(*args, **kwargs)
 
 
-class MusicBrainz(StreamingService):
+class MusicBrainz(StreamingService, Searchable, TrackPullable):
     wrapper: MusicBrainzWrapper
 
     def __init__(

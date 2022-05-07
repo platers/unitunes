@@ -45,19 +45,10 @@ class ServiceWrapper:
         self.create_cache_dir(cache_root)
 
 
-class StreamingService(
-    ABC
-):  # TODO: implement interfaces or protocols for pullabe, pushable, searchable
-    name: str
-    type: ServiceType
-    wrapper: ServiceWrapper
-
-    def __init__(self, name: str, type: ServiceType) -> None:
-        self.name = name
-        self.type = type
-
+class UserPlaylistPullable(ABC):
+    @abstractmethod
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        raise NotImplementedError
+        """Returns the users playlists"""
 
     def get_playlist_metadata(self, playlist_name: str) -> PlaylistMetadata:
         metas = self.get_playlist_metadatas()
@@ -65,18 +56,26 @@ class StreamingService(
             if meta.name == playlist_name:
                 return meta
         raise ValueError(
-            f"Playlist {playlist_name} not found in {self.name}. Available playlists: {', '.join([meta.name for meta in metas])}"
+            f"Playlist {playlist_name} not found. Available playlists: {', '.join([meta.name for meta in metas])}"
         )
 
-    def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        raise NotImplementedError
 
+class PlaylistPullable(ABC):
+    @abstractmethod
+    def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
+        """Gets tracks from a playlist"""
+
+
+class TrackPullable(ABC):
+    @abstractmethod
     def pull_track(self, uri: TrackURI) -> Track:
         raise NotImplementedError
 
+
+class Searchable(ABC):
+    @abstractmethod
     def search_track(self, track: Track) -> List[Track]:
         """Search for a track in the streaming service. Returns a list of potential matches."""
-        raise NotImplementedError
 
     def best_match(self, track: Track) -> Optional[Track]:
         """Returns the best match for a track in the streaming service if found."""
@@ -86,3 +85,13 @@ class StreamingService(
 
         matches.sort(key=lambda t: t.similarity(track), reverse=True)
         return matches[0]
+
+
+class StreamingService(ABC):
+    name: str
+    type: ServiceType
+    wrapper: ServiceWrapper
+
+    def __init__(self, name: str, type: ServiceType) -> None:
+        self.name = name
+        self.type = type

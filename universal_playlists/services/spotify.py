@@ -7,8 +7,11 @@ from tqdm import tqdm
 from universal_playlists.playlist import PlaylistMetadata
 
 from universal_playlists.services.services import (
+    PlaylistPullable,
+    Searchable,
     ServiceWrapper,
     StreamingService,
+    TrackPullable,
     cache,
 )
 from universal_playlists.track import AliasedString, Track
@@ -41,7 +44,7 @@ class SpotifyWrapper(ServiceWrapper):
         return self.sp.search(*args, **kwargs)
 
 
-class SpotifyService(StreamingService):
+class SpotifyService(StreamingService, PlaylistPullable, Searchable, TrackPullable):
     wrapper: SpotifyWrapper
 
     def __init__(self, name: str, wrapper: SpotifyWrapper) -> None:
