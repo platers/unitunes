@@ -5,7 +5,7 @@ from typing import (
     List,
     Optional,
 )
-from universal_playlists.playlist import PlaylistMetadata
+from universal_playlists.playlist import Playlist, PlaylistMetadata
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
@@ -85,6 +85,15 @@ class Searchable(ABC):
 
         matches.sort(key=lambda t: t.similarity(track), reverse=True)
         return matches[0]
+
+
+class Pushable(ABC):
+    @abstractmethod
+    def push_playlist(self, playlist: Playlist) -> PlaylistURI:
+        """Pushes a playlist to the streaming service.
+        If a PlaylistURI is given, modifies that playlist.
+        Else creates a new playlist.
+        Returns the playlist URI."""
 
 
 class StreamingService(ABC):

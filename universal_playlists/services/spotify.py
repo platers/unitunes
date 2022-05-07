@@ -4,10 +4,11 @@ from typing import List
 import spotipy
 from spotipy import SpotifyOAuth
 from tqdm import tqdm
-from universal_playlists.playlist import PlaylistMetadata
+from universal_playlists.playlist import Playlist, PlaylistMetadata
 
 from universal_playlists.services.services import (
     PlaylistPullable,
+    Pushable,
     Searchable,
     ServiceWrapper,
     StreamingService,
@@ -16,7 +17,13 @@ from universal_playlists.services.services import (
 )
 from universal_playlists.track import AliasedString, Track
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import URI, SpotifyPlaylistURI, SpotifyTrackURI
+from universal_playlists.uri import (
+    URI,
+    PlaylistURI,
+    PlaylistURIs,
+    SpotifyPlaylistURI,
+    SpotifyTrackURI,
+)
 
 
 class SpotifyWrapper(ServiceWrapper):
@@ -27,7 +34,7 @@ class SpotifyWrapper(ServiceWrapper):
                 client_id=config["client_id"],
                 client_secret=config["client_secret"],
                 redirect_uri=config["redirect_uri"],
-                scope="user-library-read",
+                scope="user-library-read playlist-modify-private, playlist-modify-public",
             )
         )
 
@@ -44,7 +51,9 @@ class SpotifyWrapper(ServiceWrapper):
         return self.sp.search(*args, **kwargs)
 
 
-class SpotifyService(StreamingService, PlaylistPullable, Searchable, TrackPullable):
+class SpotifyService(
+    StreamingService, PlaylistPullable, Searchable, TrackPullable, Pushable
+):
     wrapper: SpotifyWrapper
 
     def __init__(self, name: str, wrapper: SpotifyWrapper) -> None:
@@ -121,7 +130,6 @@ class SpotifyService(StreamingService, PlaylistPullable, Searchable, TrackPullab
         if track.albums:
             query += f' album:"{track.albums[0].value}"'
 
-        print(query)
         results = self.wrapper.search(query, limit=5, type="track")
         return list(
             map(
@@ -129,3 +137,27 @@ class SpotifyService(StreamingService, PlaylistPullable, Searchable, TrackPullab
                 results["tracks"]["items"],
             )
         )
+
+    def create_empty_playlist(self, name: str, description: str = "") -> PlaylistURIs:
+        playlist = self.wrapper.sp.user_playlist_create(
+            self.wrapper.sp.current_user()["id"],
+            name,
+            public=False,
+            description=description,
+        )
+        uri = SpotifyPlaylistURI.from_url(playlist["external_urls"]["spotify"])
+        return uri
+
+    def push_playlist(self, playlist: Playlist) -> PlaylistURI:
+        uri = playlist.find_uri(self.type)
+        if not uri:
+            uri = self.create_empty_playlist(playlist.name, playlist.description)
+
+        track_uris = [track.find_uri(self.type) for track in playlist.tracks]
+        track_ids = [uri.uri for uri in track_uris if uri]
+
+        self.wrapper.sp.user_playlist_replace_tracks(
+            self.wrapper.sp.current_user()["id"], uri.uri, track_ids
+        )
+
+        return uri

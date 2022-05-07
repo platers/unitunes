@@ -158,3 +158,9 @@ class Track(BaseModel):
 
     def is_on_service(self, service: ServiceType) -> bool:
         return any(uri.service == service for uri in self.uris)
+
+    def find_uri(self, service: ServiceType) -> Optional[TrackURIs]:
+        for uri in self.uris:
+            if uri.service == service:
+                return uri
+        return None
