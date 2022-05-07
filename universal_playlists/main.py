@@ -7,7 +7,11 @@ import os
 from pydantic import BaseModel
 from universal_playlists.playlist import Playlist
 from universal_playlists.services.musicbrainz import MusicBrainz
-from universal_playlists.services.services import StreamingService
+from universal_playlists.services.services import (
+    Searchable,
+    StreamingService,
+    TrackPullable,
+)
 
 
 from universal_playlists.services.spotify import SpotifyService, SpotifyWrapper
@@ -172,6 +176,8 @@ def get_predicted_tracks(
     target_service: StreamingService,
     track: Track,
 ) -> List[Track]:
+    if not isinstance(target_service, Searchable):
+        raise ValueError(f"Service {target_service.name} is not searchable")
     matches = target_service.search_track(track)
     if len(matches) == 0:
         return []
@@ -202,14 +208,15 @@ def get_prediction_uri(
     uri: TrackURI,
     threshold: float = 0.8,
 ) -> Optional[TrackURI]:
+    if not isinstance(source_service, TrackPullable):
+        raise ValueError(f"Service {source_service} is not pullable")
     track = source_service.pull_track(uri)
     prediction = get_prediction_track(target_service, track, threshold)
     return prediction.uris[0] if prediction else None
 
 
-def augment_track(track: Track):
+def augment_track(track: Track, mb: MusicBrainz):
     """Tries to find metadata from musicbrainz. Adds metadata to track if found."""
-    mb = MusicBrainz()
     match = mb.best_match(track)
     if match and track.matches(match):
         track.merge(match)

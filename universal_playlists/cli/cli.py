@@ -15,6 +15,8 @@ from rich.table import Table
 from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
 from universal_playlists.eval.eval import eval_app
+from universal_playlists.services.musicbrainz import MusicBrainz
+from universal_playlists.services.services import PlaylistPullable
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
@@ -107,11 +109,15 @@ def pull(
                 console.print(f"{service_name} is not a service", style="red")
                 raise typer.Exit()
             service = pm.services[service_name]
+            if not isinstance(service, PlaylistPullable):
+                console.print(
+                    f"{service} is not a playlist pullable service", style="red"
+                )
+                raise typer.Exit()
 
             uri = pl.find_uri(service.type)
             if not uri:
                 continue
-
             remote_tracks = service.pull_tracks(uri)
             new_tracks.extend(pl.get_new_tracks(remote_tracks))
             removed_tracks.extend(pl.get_removed_tracks(service.type, remote_tracks))
@@ -124,8 +130,9 @@ def pull(
             print_tracks(removed_tracks)
 
         console.print("Augmenting new tracks...")
+        mb = MusicBrainz()
         for track in tqdm(new_tracks):
-            augment_track(track)
+            augment_track(track, mb)
 
         pl.merge_new_tracks(new_tracks)
         pl.remove_tracks(removed_tracks)
