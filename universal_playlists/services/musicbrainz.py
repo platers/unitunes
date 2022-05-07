@@ -1,5 +1,6 @@
+import json
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import musicbrainzngs as mb
 from ratelimit import sleep_and_retry, limits
 
@@ -62,23 +63,34 @@ class MusicBrainz(StreamingService):
 
     @staticmethod
     def parse_track(recording):
-        if "title" not in recording:
-            raise ValueError(f"Recording {recording} has no title")
-        aliases = (
-            [alias["name"] for alias in recording["aliases"]]
-            if "aliases" in recording
-            else []
-        )
-        name = AliasedString(value=recording["title"], aliases=aliases)
-        albums = (
-            [
-                AliasedString(value=album["title"])
-                for album in recording["release-list"]
-                if "title" in album
-            ]
-            if "release-list" in recording
-            else []
-        )
+        def parse_aliases(obj) -> List[str]:
+            return (
+                [alias["name"] for alias in obj["aliases"]]
+                if "obj" in recording
+                else []
+            )
+
+        def parse_aliased_string(obj) -> Optional[AliasedString]:
+            if "title" not in obj:
+                return None
+            return AliasedString(obj["title"], parse_aliases(obj))
+
+        name = parse_aliased_string(recording)
+        if not name:
+            raise ValueError(f"Recording {recording} has no name")
+
+        albums = []
+        if "releases" in recording:
+            for album in recording["releases"]:
+                s = parse_aliased_string(album)
+                if s:
+                    albums.append(s)
+        if "release-list" in recording:
+            for album in recording["release-list"]:
+                s = parse_aliased_string(album)
+                if s:
+                    albums.append(s)
+
         artists = []
         if "artist-credit" in recording:
             for artist in recording["artist-credit"]:
