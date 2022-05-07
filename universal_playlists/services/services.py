@@ -36,11 +36,12 @@ class ServiceWrapper:
         if not cache_dir.exists():
             cache_dir.mkdir()
         if not self.cache_path.exists():
+            print(f"Creating cache dir: {self.cache_path}")
             self.cache_path.mkdir()
 
     def __init__(self, cache_name: str, cache_root: Path = Path("cache")) -> None:
         self.cache_name = cache_name
-        self.cache_path = Path("cache") / cache_name
+        self.cache_path = cache_root / cache_name
         self.create_cache_dir(cache_root)
 
 

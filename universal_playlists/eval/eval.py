@@ -20,7 +20,7 @@ class Case(BaseModel):
 eval_app = typer.Typer()
 console = Console()
 
-path = Path(__file__).parent / "data" / "cases.json"
+path = Path(__file__).absolute().parent / "data" / "cases.json"
 
 
 def load_cases() -> List[Case]:
@@ -49,7 +49,7 @@ def build_service(service_type: ServiceType) -> StreamingService:
         / "service_configs"
         / f"{service_type}_config.json"
     )
-    cache_path = Path(__file__).parent / "data" / "cache"
+    cache_path = Path(__file__).absolute().parent / "data" / "cache"
     service = service_factory(
         service_type, service_type, cache_path=cache_path, config_path=path
     )
