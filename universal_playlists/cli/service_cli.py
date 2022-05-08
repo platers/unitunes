@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import List, Optional
 import typer
 
-from universal_playlists.cli.utils import get_playlist_manager
+from universal_playlists.cli.utils import get_playlist_manager, print_grid
 from universal_playlists.services.services import UserPlaylistPullable
 from universal_playlists.types import ServiceType
 
@@ -36,17 +36,14 @@ def add(
 
 
 @service_app.command()
-def list() -> None:
+def list(plain: bool = False) -> None:
     """List all services"""
 
     pm = get_playlist_manager()
-    table = Table(title="Services")
-    table.add_column("Name", justify="left")
-    table.add_column("Service", justify="left")
-    table.add_column("Config Path", justify="left")
-    for s in pm.config.services.values():
-        table.add_row(s.name, s.service, s.config_path)
-    console.print(table)
+    grid = [[s.name, s.service, s.config_path] for s in pm.config.services.values()]
+    print_grid(
+        "Services", headers=["Name", "Service", "Config Path"], rows=grid, plain=plain
+    )
 
 
 @service_app.command()

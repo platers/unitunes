@@ -1,7 +1,7 @@
 from typing import List, Optional
 import typer
 
-from universal_playlists.cli.utils import get_playlist_manager
+from universal_playlists.cli.utils import get_playlist_manager, print_grid
 from universal_playlists.uri import playlistURI_from_url
 
 
@@ -24,8 +24,18 @@ def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
 
 
 @playlist_app.command()
-def list() -> None:
+def list(plain: bool = False) -> None:
     """List all playlists"""
     pm = get_playlist_manager()
-    for name in pm.playlists:
-        typer.echo(name)
+    grid = [
+        [
+            pl.name,
+            len(pl.uris),
+            len(pl.tracks),
+        ]
+        for pl in pm.playlists.values()
+    ]
+
+    print_grid(
+        "Playlists", headers=["Name", "URIs", "# Tracks"], rows=grid, plain=plain
+    )
