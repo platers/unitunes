@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Callable, Optional
+from typing import Any, Dict, List, Callable
 from strsimpy.jaro_winkler import JaroWinkler
 
 from universal_playlists.track import AliasedString, Track
-from universal_playlists.uri import URI, URIBase
 
 
 def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> float:
@@ -15,6 +14,7 @@ def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> 
 
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
+    """Returns a similarity score between 0 and 1."""
     return JaroWinkler().similarity(s1.lower(), s2.lower())
 
 
@@ -44,7 +44,7 @@ class DefaultMatcherStrategy(MatcherStrategy):
             artists1: List[AliasedString], artists2: List[AliasedString]
         ) -> float:
             if len(artists1) == 0 or len(artists2) == 0:
-                return 0
+                return 0.5
 
             sim = pairwise_max(artists1, artists2, self.aliased_string_similarity)
             return sim
@@ -53,16 +53,13 @@ class DefaultMatcherStrategy(MatcherStrategy):
             album1: List[AliasedString], album2: List[AliasedString]
         ) -> float:
             sim = pairwise_max(album1, album2, self.aliased_string_similarity)
-            if sim < 0:
-                sim /= 5
-
             return sim
 
         def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
             d = abs(length_sec_1 - length_sec_2)
-            max_dist = 4
+            max_dist = 5
             if d > max_dist:
-                return -1
+                return 0
             return 1 - d / max_dist
 
         weights = {
@@ -100,7 +97,5 @@ class DefaultMatcherStrategy(MatcherStrategy):
         total_weight = sum(weights[feature] for feature in used_features)
 
         similarity = weighted_sum / total_weight
-        assert -1 <= similarity <= 1
-        similarity = (similarity + 1) / 2
         assert 0 <= similarity <= 1
         return similarity

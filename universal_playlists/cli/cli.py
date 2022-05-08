@@ -224,7 +224,6 @@ def search(
     table.add_column("Predicted Track")
     table.add_column("Confidence")
     table.show_lines = True
-    matcher = DefaultMatcherStrategy()
 
     for i, (original, predicted) in enumerate(zip(original_tracks, predicted_tracks)):
         if predicted is None:
