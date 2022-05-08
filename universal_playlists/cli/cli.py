@@ -197,7 +197,7 @@ def search(
     showall: bool = False,
     debug: bool = False,
     onlyfailed: bool = False,
-    save: bool = False,
+    save: bool = True,
 ) -> None:
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
@@ -219,7 +219,7 @@ def search(
 
     for (original, predicted) in zip(original_tracks, predicted_tracks):
         if predicted is None:
-            console.print(f"{original.name.value} not found")
+            console.print(f"{original.name.value} ->", style="red")
             continue
         console.print(f"{original.name.value} -> {predicted.name.value}")
         original.merge(predicted)
