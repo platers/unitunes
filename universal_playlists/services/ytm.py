@@ -67,15 +67,17 @@ class YTM(StreamingService, PlaylistPullable, Searchable, TrackPullable):
         tracks = self.wrapper.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
+    def parse_video_details(self, details: dict) -> Track:
+        return Track(
+            name=AliasedString(details["title"]),
+            artists=[AliasedString(details["author"])],
+            length=details["lengthSeconds"],
+            uris=[YtmTrackURI.from_uri(details["videoId"])],
+        )
+
     def raw_to_track(self, raw: dict) -> Track:
         if "videoDetails" in raw:
-            details = raw["videoDetails"]
-            return Track(
-                name=details["title"],
-                artists=[details["author"]],
-                length=details["lengthSeconds"],
-                uris=[YtmTrackURI.from_uri(details["videoId"])],
-            )
+            return self.parse_video_details(raw["videoDetails"])
 
         return Track(
             name=AliasedString(raw["title"]),

@@ -5,6 +5,8 @@ from pydantic import BaseModel
 import typer
 from rich.console import Console
 from universal_playlists.main import service_factory
+from universal_playlists.matcher import DefaultMatcherStrategy
+from universal_playlists.searcher import DefaultSearcherStrategy
 from universal_playlists.services.services import (
     Searchable,
     StreamingService,
@@ -77,6 +79,9 @@ def search(
         if guess_service is not None:
             matched_services.append(guess_service)
 
+        matcher = DefaultMatcherStrategy()
+        searcher = DefaultSearcherStrategy(matcher)
+
         for source_uri in matches:
             for target_type in matched_services:
                 target_service = build_service(target_type)
@@ -86,10 +91,9 @@ def search(
                 if not isinstance(target_service, Searchable):
                     continue
                 source_track = source_service.pull_track(source_uri)
-                guesses = target_service.search_track(source_track)[:3]
-                best_guess = target_service.best_match(source_track)
+                guesses = searcher.search(target_service, source_track)
 
-                if best_guess and best_guess.uris[0] in matches:
+                if guesses and guesses[0].uris[0] in matches:
                     console.print(
                         f"{source_uri.service} -> {target_type}",
                         style="green",
