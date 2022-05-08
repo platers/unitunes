@@ -5,6 +5,7 @@ import os
 from pydantic import BaseModel
 from universal_playlists.matcher import DefaultMatcherStrategy, MatcherStrategy
 from universal_playlists.playlist import Playlist
+from universal_playlists.searcher import DefaultSearcherStrategy, SearcherStrategy
 from universal_playlists.services.musicbrainz import MusicBrainz
 from universal_playlists.services.services import (
     Searchable,
@@ -173,25 +174,22 @@ class PlaylistManager:
 def get_predicted_tracks(
     target_service: StreamingService,
     track: Track,
-    matcher: MatcherStrategy = DefaultMatcherStrategy(),
+    searcher: SearcherStrategy,
 ) -> List[Track]:
     if not isinstance(target_service, Searchable):
         raise ValueError(f"Service {target_service.name} is not searchable")
-    matches = target_service.search_track(track)
-    if len(matches) == 0:
-        return []
-    # sort by score
-    matches.sort(key=lambda m: matcher.similarity(track, m), reverse=True)
-    return matches
+
+    return searcher.search(target_service, track)
 
 
 def get_prediction_track(
     target_service: StreamingService,
     track: Track,
+    matcher: MatcherStrategy,
+    searcher: SearcherStrategy,
     threshold: float = 0.8,
-    matcher: MatcherStrategy = DefaultMatcherStrategy(),
 ) -> Optional[Track]:
-    matches = get_predicted_tracks(target_service, track)
+    matches = get_predicted_tracks(target_service, track, searcher)
     if len(matches) == 0:
         return None
     best_match = matches[0]
@@ -205,10 +203,14 @@ def get_prediction_uri(
     source_service: StreamingService,
     target_service: StreamingService,
     uri: TrackURI,
+    matcher: MatcherStrategy,
+    searcher: SearcherStrategy,
     threshold: float = 0.8,
 ) -> Optional[TrackURI]:
     if not isinstance(source_service, TrackPullable):
         raise ValueError(f"Service {source_service} is not pullable")
     track = source_service.pull_track(uri)
-    prediction = get_prediction_track(target_service, track, threshold)
+    prediction = get_prediction_track(
+        target_service, track, matcher, searcher, threshold
+    )
     return prediction.uris[0] if prediction else None

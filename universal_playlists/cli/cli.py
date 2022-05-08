@@ -15,6 +15,7 @@ from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
 from universal_playlists.eval.eval import eval_app
 from universal_playlists.matcher import DefaultMatcherStrategy
+from universal_playlists.searcher import DefaultSearcherStrategy
 from universal_playlists.services.services import PlaylistPullable, Pushable
 from universal_playlists.track import Track
 
@@ -206,12 +207,16 @@ def search(
     pl = pm.playlists[playlist]
     original_tracks = pl.tracks
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
+    matcher = DefaultMatcherStrategy()
+    searcher = DefaultSearcherStrategy(matcher)
+
     predicted_tracks = [
-        get_prediction_track(streaming_service, track, threshold=0.7)
+        get_prediction_track(streaming_service, track, matcher, searcher, threshold=0.7)
         for track in tqdm(original_tracks)
     ]
     all_predicted_tracks = [
-        get_predicted_tracks(streaming_service, track) for track in original_tracks
+        get_predicted_tracks(streaming_service, track, searcher)
+        for track in original_tracks
     ]
 
     table = Table(title=f"Uncertain {service.value} search results for {playlist}")

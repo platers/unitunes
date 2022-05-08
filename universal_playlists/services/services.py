@@ -2,7 +2,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 import shelve
 from typing import (
+    Any,
     List,
+    NewType,
     Optional,
 )
 from universal_playlists.matcher import DefaultMatcherStrategy
@@ -73,21 +75,18 @@ class TrackPullable(ABC):
         raise NotImplementedError
 
 
+Query = NewType("Query", Any)
+
+
 class Searchable(ABC):
     @abstractmethod
-    def search_track(self, track: Track) -> List[Track]:
-        """Search for a track in the streaming service. Returns a list of potential matches."""
+    def search_query(self, query: Query) -> List[Track]:
+        """Search for a query in the streaming service. Returns a list of potential matches."""
 
-    def best_match(self, track: Track) -> Optional[Track]:
-        """Returns the best match for a track in the streaming service if found."""
-        matches = self.search_track(track)
-        if not matches:
-            return None
-
-        matches.sort(
-            key=lambda t: DefaultMatcherStrategy().similarity(track, t), reverse=True
-        )  # TODO: dont depend on default matcher
-        return matches[0]
+    @abstractmethod
+    def query_generator(self, track: Track) -> List[Query]:
+        """Returns a list of queries that could be used to search for a track.
+        Sorted from most precise to least precise."""
 
 
 class Pushable(ABC):

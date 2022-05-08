@@ -8,6 +8,7 @@ from ratelimit import sleep_and_retry, limits
 import requests
 from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.services.services import (
+    Query,
     Searchable,
     ServiceWrapper,
     StreamingService,
@@ -128,9 +129,9 @@ class MusicBrainz(StreamingService, Searchable, TrackPullable):
         track = self.parse_track(results)
         return track
 
-    def search_track_fields(self, fields) -> List[Track]:
+    def search_query(self, query: Query) -> List[Track]:
         # remove empty fields
-        fields = {k: v for k, v in fields.items() if v}
+        fields = {k: v for k, v in query.items() if v}
 
         results = self.wrapper.search_recordings(
             limit=5,
@@ -139,7 +140,7 @@ class MusicBrainz(StreamingService, Searchable, TrackPullable):
 
         return list(map(self.parse_track, results["recording-list"]))
 
-    def search_track(self, track: Track, stop_threshold: float = 0.8) -> List[Track]:
+    def query_generator(self, track: Track) -> List[Query]:
         def escape_special_chars(s: str) -> str:
             # + - && || ! ( ) { } [ ] ^ " ~ * ? : \
             special_chars = [
@@ -182,18 +183,7 @@ class MusicBrainz(StreamingService, Searchable, TrackPullable):
             ["artist", "release"],
         ]
 
-        matcher = DefaultMatcherStrategy()
-
-        def can_stop(matches: List[Track]) -> bool:
-            if not matches:
-                return False
-
-            for match in matches:
-                if matcher.similarity(track, match) >= stop_threshold:
-                    return True
-            return False
-
-        matches = []
+        queries = []
         for removed_fields in fields_to_remove:
             fields = {
                 field: all_fields[field]
@@ -203,12 +193,5 @@ class MusicBrainz(StreamingService, Searchable, TrackPullable):
             if not any(fields.values()):
                 continue
 
-            new_matches = self.search_track_fields(fields)
-            for match in new_matches:
-                if match not in matches:
-                    matches.append(match)
-            if can_stop(matches):
-                break
-
-        matches.sort(key=lambda m: m.similarity(track), reverse=True)
-        return matches[:3]
+            queries.append(fields)
+        return queries

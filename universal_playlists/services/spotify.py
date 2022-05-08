@@ -6,6 +6,7 @@ from universal_playlists.playlist import Playlist, PlaylistMetadata
 from universal_playlists.services.services import (
     PlaylistPullable,
     Pushable,
+    Query,
     Searchable,
     ServiceWrapper,
     StreamingService,
@@ -118,7 +119,16 @@ class SpotifyService(
             else [],
         )
 
-    def search_track(self, track: Track) -> List[Track]:
+    def search_query(self, query: str) -> List[Track]:
+        results = self.wrapper.search(query, limit=5, type="track")
+        return list(
+            map(
+                self.raw_to_track,
+                results["tracks"]["items"],
+            )
+        )
+
+    def query_generator(self, track: Track) -> List[str]:
         query = f'track:"{track.name}"'
         if track.artists:
             query += (
@@ -127,13 +137,7 @@ class SpotifyService(
         if track.albums:
             query += f' album:"{track.albums[0].value}"'
 
-        results = self.wrapper.search(query, limit=5, type="track")
-        return list(
-            map(
-                self.raw_to_track,
-                results["tracks"]["items"],
-            )
-        )
+        return [query]
 
     def create_empty_playlist(self, name: str, description: str = "") -> PlaylistURIs:
         playlist = self.wrapper.sp.user_playlist_create(

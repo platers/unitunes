@@ -91,7 +91,10 @@ class YTM(StreamingService, PlaylistPullable, Searchable, TrackPullable):
         track = self.wrapper.get_song(uri.uri)
         return self.raw_to_track(track)
 
-    def search_track(self, track: Track) -> List[Track]:
-        query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
+    def search_query(self, query: str) -> List[Track]:
         results = self.wrapper.search(query)
         return self.results_to_tracks(results)
+
+    def query_generator(self, track: Track) -> List[str]:
+        query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
+        return [query]
