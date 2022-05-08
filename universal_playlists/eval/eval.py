@@ -76,7 +76,7 @@ def search(
         matches = [trackURI_from_url(url) for url in case.matches]
         non_matches = [trackURI_from_url(url) for url in case.non_matches]
         matched_services = [uri.service for uri in matches]
-        if guess_service is not None:
+        if (guess_service is not None) and (guess_service not in matched_services):
             matched_services.append(guess_service)
 
         matcher = DefaultMatcherStrategy()

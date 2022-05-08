@@ -26,13 +26,16 @@
         "non_matches": [
             "https://musicbrainz.org/recording/0199a889-2ab5-4dd4-bfcb-1cbe81c837c7",
             "https://musicbrainz.org/recording/4b029910-f8fd-443d-9c6c-9529897a1194",
-            "https://musicbrainz.org/recording/4585391e-aa64-4d64-8b50-0cdd5b8de6f8"
+            "https://musicbrainz.org/recording/4585391e-aa64-4d64-8b50-0cdd5b8de6f8",
+            "https://musicbrainz.org/recording/ac8fa48d-c640-4f3a-96ee-e9e4ea9b0231"
         ]
     },
     {
         "description": "Uploader is not artist",
         "matches": [
-            "https://music.youtube.com/watch?v=_1sNRmguTIE"
+            "https://music.youtube.com/watch?v=_1sNRmguTIE",
+            "https://musicbrainz.org/recording/c580c2a8-67e7-4a59-ae8a-888c643d2802",
+            "https://musicbrainz.org/recording/28934aea-377b-417c-8b80-f5ce61f236f0"
         ],
         "non_matches": [
             "https://music.youtube.com/watch?v=ZKk8BxAi_yM",
@@ -40,7 +43,11 @@
             "https://music.youtube.com/watch?v=BAdfpfC7Cm8",
             "https://musicbrainz.org/recording/6c028099-6af2-455d-9f88-ed9abe62d1bb",
             "https://musicbrainz.org/recording/3492bdc9-55b5-451b-bbfb-02c0c096a2c3",
-            "https://musicbrainz.org/recording/58e4c3c7-008e-4494-8023-2528c01df56b"
+            "https://musicbrainz.org/recording/58e4c3c7-008e-4494-8023-2528c01df56b",
+            "https://music.youtube.com/watch?v=fZjcQd83zrk",
+            "https://music.youtube.com/watch?v=y8zsVGm6Dpk",
+            "https://music.youtube.com/watch?v=6QM4WIS_bmI",
+            "https://musicbrainz.org/recording/a6379411-40a0-442d-ad75-f3790d9d03d3"
         ]
     }
 ]

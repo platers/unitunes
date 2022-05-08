@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 from ytmusicapi import YTMusic
 from universal_playlists.playlist import PlaylistMetadata
+from youtube_title_parse import get_artist_title
 
 
 from universal_playlists.services.services import (
@@ -68,9 +69,16 @@ class YTM(StreamingService, PlaylistPullable, Searchable, TrackPullable):
         return self.results_to_tracks(tracks)
 
     def parse_video_details(self, details: dict) -> Track:
+        title = details["title"]
+        artist_title_tuple = get_artist_title(title)
+        if artist_title_tuple:
+            artist, title = artist_title_tuple
+        else:
+            artist = None
+
         return Track(
-            name=AliasedString(details["title"]),
-            artists=[AliasedString(details["author"])],
+            name=AliasedString(title),
+            artists=[AliasedString(artist)] if artist else [],
             length=details["lengthSeconds"],
             uris=[YtmTrackURI.from_uri(details["videoId"])],
         )

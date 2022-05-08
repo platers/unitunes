@@ -433,6 +433,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "youtube-title-parse"
+version = "1.0.0"
+description = "Parse the title of a YouTube video to try and get artist & song name"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "ytmusicapi"
 version = "0.21.0"
 description = "Unofficial API for YouTube Music"
@@ -449,7 +457,7 @@ dev = ["pre-commit", "flake8", "yapf", "coverage", "sphinx", "sphinx-rtd-theme"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "83b1acff3807340daa789ca067317baf2defcd677bf62429d951703356bdc9e5"
+content-hash = "74071635f457f37a258714ea12e9142043ef738c4fabba24c16bd70c0e6f6541"
 
 [metadata.files]
 atomicwrites = [
@@ -694,6 +702,10 @@ urllib3 = [
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
     {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
+]
+youtube-title-parse = [
+    {file = "youtube_title_parse-1.0.0-py2.py3-none-any.whl", hash = "sha256:88c9413e9f478affa9152dd234ec55223e4b8785973707f87f67fe1b55f61b85"},
+    {file = "youtube_title_parse-1.0.0.tar.gz", hash = "sha256:350cc055c058e8f639ac7e1cbc67a1fb485a4bb5fcd1f9645d79d1ccc8e3518d"},
 ]
 ytmusicapi = [
     {file = "ytmusicapi-0.21.0-py3-none-any.whl", hash = "sha256:29d8d44e1911458041882a453b05c37021ff850757c648f93a45d1775dddbae2"},
