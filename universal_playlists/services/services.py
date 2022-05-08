@@ -5,6 +5,7 @@ from typing import (
     List,
     Optional,
 )
+from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.playlist import Playlist, PlaylistMetadata
 from universal_playlists.track import Track
 
@@ -83,7 +84,9 @@ class Searchable(ABC):
         if not matches:
             return None
 
-        matches.sort(key=lambda t: t.similarity(track), reverse=True)
+        matches.sort(
+            key=lambda t: DefaultMatcherStrategy().similarity(track, t), reverse=True
+        )  # TODO: dont depend on default matcher
         return matches[0]
 
 

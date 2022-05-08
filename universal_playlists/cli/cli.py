@@ -4,7 +4,6 @@ from universal_playlists.cli.utils import get_playlist_manager
 from universal_playlists.main import (
     Config,
     FileManager,
-    augment_track,
     get_predicted_tracks,
     get_prediction_track,
 )
@@ -15,7 +14,7 @@ from rich.table import Table
 from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
 from universal_playlists.eval.eval import eval_app
-from universal_playlists.services.musicbrainz import MusicBrainz
+from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.services.services import PlaylistPullable, Pushable
 from universal_playlists.track import Track
 
@@ -130,11 +129,18 @@ def pull(
             print_tracks(removed_tracks)
 
         console.print("Augmenting new tracks...")
-        mb = MusicBrainz()
-        for track in tqdm(new_tracks):
-            augment_track(track, mb)
+        matcher = DefaultMatcherStrategy()
 
-        pl.merge_new_tracks(new_tracks)
+        def merge_new_tracks(tracks: List[Track], new_tracks: List[Track]) -> None:
+            for track in new_tracks:
+                matches = [t for t in tracks if matcher.are_same(t, track)]
+                if matches:
+                    for match in matches:
+                        match.merge(track)
+                else:
+                    tracks.append(track)
+
+        merge_new_tracks(pl.tracks, new_tracks)
         pl.remove_tracks(removed_tracks)
 
         pm.save_playlist(pl.name)
@@ -213,25 +219,26 @@ def search(
     table.add_column("Predicted Track")
     table.add_column("Confidence")
     table.show_lines = True
+    matcher = DefaultMatcherStrategy()
 
     for i, (original, predicted) in enumerate(zip(original_tracks, predicted_tracks)):
         if predicted is None:
             if showall or onlyfailed:
                 table.add_row(original, "", "")
                 for track in all_predicted_tracks[i]:
-                    table.add_row("", track, f"{original.similarity(track):.2f}")
+                    table.add_row("", track, f"{matcher.similarity(original, track)}")
             continue
         elif onlyfailed:
             continue
 
-        similarity = original.similarity(predicted)
+        similarity = matcher.similarity(original, predicted)
         if not showall and similarity >= 0.7:
             continue
 
-        table.add_row(original, predicted, f"{original.similarity(predicted):.2f}")
+        table.add_row(original, predicted, f"{similarity:.2f}")
         if debug:
             for track in all_predicted_tracks[i][1:]:
-                table.add_row("", track, f"{original.similarity(track):.2f}")
+                table.add_row("", track, f"{matcher.similarity(original, track):.2f}")
 
     console.print(table)
     num_not_found = len([t for t in predicted_tracks if t is None])

@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import os
 from pydantic import BaseModel
+from universal_playlists.matcher import DefaultMatcherStrategy, MatcherStrategy
 from universal_playlists.playlist import Playlist
 from universal_playlists.services.musicbrainz import MusicBrainz
 from universal_playlists.services.services import (
@@ -172,6 +173,7 @@ class PlaylistManager:
 def get_predicted_tracks(
     target_service: StreamingService,
     track: Track,
+    matcher: MatcherStrategy = DefaultMatcherStrategy(),
 ) -> List[Track]:
     if not isinstance(target_service, Searchable):
         raise ValueError(f"Service {target_service.name} is not searchable")
@@ -179,7 +181,7 @@ def get_predicted_tracks(
     if len(matches) == 0:
         return []
     # sort by score
-    matches.sort(key=lambda m: m.similarity(track), reverse=True)
+    matches.sort(key=lambda m: matcher.similarity(track, m), reverse=True)
     return matches
 
 
@@ -187,16 +189,16 @@ def get_prediction_track(
     target_service: StreamingService,
     track: Track,
     threshold: float = 0.8,
+    matcher: MatcherStrategy = DefaultMatcherStrategy(),
 ) -> Optional[Track]:
     matches = get_predicted_tracks(target_service, track)
     if len(matches) == 0:
         return None
     best_match = matches[0]
 
-    if best_match.similarity(track) < threshold:
-        return None
-
-    return best_match
+    if matcher.similarity(track, best_match) >= threshold:
+        return best_match
+    return None
 
 
 def get_prediction_uri(
@@ -210,10 +212,3 @@ def get_prediction_uri(
     track = source_service.pull_track(uri)
     prediction = get_prediction_track(target_service, track, threshold)
     return prediction.uris[0] if prediction else None
-
-
-def augment_track(track: Track, mb: MusicBrainz):
-    """Tries to find metadata from musicbrainz. Adds metadata to track if found."""
-    match = mb.best_match(track)
-    if match and track.matches(match):
-        track.merge(match)

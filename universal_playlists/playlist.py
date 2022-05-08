@@ -59,20 +59,6 @@ class Playlist(BaseModel):
                 return t
         return None
 
-    def find_matching_track(self, track: Track) -> Optional[Track]:
-        for t in self.tracks:
-            if t.matches(track):
-                return t
-        return None
-
-    def merge_new_tracks(self, new_tracks: List[Track]) -> None:
-        for track in new_tracks:
-            match = self.find_matching_track(track)
-            if match is None:
-                self.tracks.append(track)
-            else:
-                match.merge(track)
-
     def remove_tracks(self, tracks: List[Track]) -> None:
         self.tracks = [track for track in self.tracks if track not in tracks]
 

@@ -1,0 +1,106 @@
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List, Callable, Optional
+from strsimpy.jaro_winkler import JaroWinkler
+
+from universal_playlists.track import AliasedString, Track
+from universal_playlists.uri import URI, URIBase
+
+
+def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> float:
+    mx = 0
+    for i in a:
+        for j in b:
+            mx = max(mx, f(i, j))
+    return mx
+
+
+def normalized_string_similarity(s1: str, s2: str) -> float:
+    return JaroWinkler().similarity(s1.lower(), s2.lower())
+
+
+class MatcherStrategy(ABC):
+    @abstractmethod
+    def similarity(self, track1: Track, track2: Track) -> float:
+        """
+        Returns a similarity score between 0 and 1.
+        """
+
+    def are_same(self, track1: Track, track2: Track, theshold=0.7) -> bool:
+        return self.similarity(track1, track2) >= theshold
+
+
+class DefaultMatcherStrategy(MatcherStrategy):
+    def aliased_string_similarity(self, s1: AliasedString, s2: AliasedString) -> float:
+        return pairwise_max(
+            s1.all_values(), s2.all_values(), normalized_string_similarity
+        )
+
+    def similarity(self, track1: Track, track2: Track) -> float:
+        # check if any uris match
+        if any(uri1 in track2.uris for uri1 in track1.uris):
+            return 1
+
+        def artists_similarity(
+            artists1: List[AliasedString], artists2: List[AliasedString]
+        ) -> float:
+            if len(artists1) == 0 or len(artists2) == 0:
+                return 0
+
+            sim = pairwise_max(artists1, artists2, self.aliased_string_similarity)
+            return sim
+
+        def album_similarity(
+            album1: List[AliasedString], album2: List[AliasedString]
+        ) -> float:
+            sim = pairwise_max(album1, album2, self.aliased_string_similarity)
+            if sim < 0:
+                sim /= 5
+
+            return sim
+
+        def length_similarity(length_sec_1: int, length_sec_2: int) -> float:
+            d = abs(length_sec_1 - length_sec_2)
+            max_dist = 4
+            if d > max_dist:
+                return -1
+            return 1 - d / max_dist
+
+        weights = {
+            "name": 50,
+            "album": 20,
+            "artists": 30,
+            "length": 20,
+        }
+
+        feature_scores: Dict[str, float] = {}
+
+        if track1.name and track2.name:
+            feature_scores["name"] = self.aliased_string_similarity(
+                track1.name, track2.name
+            )
+
+        if track1.artists and track2.artists:
+            feature_scores["artists"] = artists_similarity(
+                track1.artists, track2.artists
+            )
+
+        if track1.albums and track2.albums:
+            feature_scores["album"] = album_similarity(track1.albums, track2.albums)
+
+        if track1.length and track2.length:
+            feature_scores["length"] = length_similarity(track1.length, track2.length)
+
+        used_features = feature_scores.keys()
+        if not used_features:
+            return 0
+
+        weighted_sum = sum(
+            feature_scores[feature] * weights[feature] for feature in used_features
+        )
+        total_weight = sum(weights[feature] for feature in used_features)
+
+        similarity = weighted_sum / total_weight
+        assert -1 <= similarity <= 1
+        similarity = (similarity + 1) / 2
+        assert 0 <= similarity <= 1
+        return similarity

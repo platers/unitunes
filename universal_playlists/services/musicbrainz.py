@@ -6,6 +6,7 @@ from ratelimit import sleep_and_retry, limits
 
 
 import requests
+from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.services.services import (
     Searchable,
     ServiceWrapper,
@@ -181,14 +182,16 @@ class MusicBrainz(StreamingService, Searchable, TrackPullable):
             ["artist", "release"],
         ]
 
+        matcher = DefaultMatcherStrategy()
+
         def can_stop(matches: List[Track]) -> bool:
             if not matches:
                 return False
 
-            max_similarity = max(matches, key=lambda m: track.similarity(m)).similarity(
-                track
-            )
-            return max_similarity >= stop_threshold
+            for match in matches:
+                if matcher.similarity(track, match) >= stop_threshold:
+                    return True
+            return False
 
         matches = []
         for removed_fields in fields_to_remove:
