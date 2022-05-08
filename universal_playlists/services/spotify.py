@@ -11,6 +11,7 @@ from universal_playlists.services.services import (
     ServiceWrapper,
     StreamingService,
     TrackPullable,
+    UserPlaylistPullable,
     cache,
 )
 from universal_playlists.track import AliasedString, Track
@@ -50,7 +51,12 @@ class SpotifyWrapper(ServiceWrapper):
 
 
 class SpotifyService(
-    StreamingService, PlaylistPullable, Searchable, TrackPullable, Pushable
+    StreamingService,
+    PlaylistPullable,
+    Searchable,
+    TrackPullable,
+    Pushable,
+    UserPlaylistPullable,
 ):
     wrapper: SpotifyWrapper
 

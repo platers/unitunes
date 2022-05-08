@@ -11,6 +11,7 @@ from universal_playlists.services.services import (
     ServiceWrapper,
     StreamingService,
     TrackPullable,
+    UserPlaylistPullable,
     cache,
 )
 from universal_playlists.track import AliasedString, Track
@@ -35,7 +36,9 @@ class YtmWrapper(ServiceWrapper):
         return self.ytm.search(*args, **kwargs)
 
 
-class YTM(StreamingService, PlaylistPullable, Searchable, TrackPullable):
+class YTM(
+    StreamingService, PlaylistPullable, Searchable, TrackPullable, UserPlaylistPullable
+):
     wrapper: YtmWrapper
 
     def __init__(self, name: str, wrapper: YtmWrapper) -> None:

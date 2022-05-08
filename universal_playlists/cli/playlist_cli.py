@@ -21,3 +21,11 @@ def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
     else:
         pm.add_playlist(name, uris)
         typer.echo(f"Added playlist {name}")
+
+
+@playlist_app.command()
+def list() -> None:
+    """List all playlists"""
+    pm = get_playlist_manager()
+    for name in pm.playlists:
+        typer.echo(name)

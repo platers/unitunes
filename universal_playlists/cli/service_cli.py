@@ -3,6 +3,7 @@ from typing import List, Optional
 import typer
 
 from universal_playlists.cli.utils import get_playlist_manager
+from universal_playlists.services.services import UserPlaylistPullable
 from universal_playlists.types import ServiceType
 
 from rich.console import Console
@@ -34,11 +35,9 @@ def add(
     typer.echo(f"Added {service.value, service_config_path}")
 
 
-@service_app.callback(invoke_without_command=True)
-def list(ctx: typer.Context) -> None:
+@service_app.command()
+def list() -> None:
     """List all services"""
-    if ctx.invoked_subcommand:
-        return
 
     pm = get_playlist_manager()
     table = Table(title="Services")
@@ -54,3 +53,28 @@ def list(ctx: typer.Context) -> None:
 def remove(name: str) -> None:
     """Remove a service from the config file"""
     raise NotImplementedError  # TODO
+
+
+@service_app.command()
+def playlists(service_name: str) -> None:
+    """List all user playlists on a service"""
+
+    pm = get_playlist_manager()
+    service = pm.services[service_name]
+    if not isinstance(service, UserPlaylistPullable):
+        console.print(f"Cannot fetch user playlists from {service.type}", style="red")
+        raise typer.Exit()
+
+    playlists = service.get_playlist_metadatas()
+
+    table = Table(title="Playlists")
+    table.add_column("Name", justify="left")
+    table.add_column(
+        "Description",
+        justify="left",
+    )
+    table.add_column("URL", justify="left", no_wrap=True)
+
+    for pl in playlists:
+        table.add_row(pl.name, pl.description, pl.uri.url)
+    console.print(table)
