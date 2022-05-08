@@ -129,7 +129,6 @@ def pull(
         if verbose:
             print_tracks(removed_tracks)
 
-        console.print("Augmenting new tracks...")
         matcher = DefaultMatcherStrategy()
 
         def merge_new_tracks(tracks: List[Track], new_tracks: List[Track]) -> None:
@@ -198,7 +197,7 @@ def search(
     showall: bool = False,
     debug: bool = False,
     onlyfailed: bool = False,
-    preview: bool = False,
+    save: bool = False,
 ) -> None:
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
@@ -214,46 +213,55 @@ def search(
         get_prediction_track(streaming_service, track, matcher, searcher, threshold=0.7)
         for track in tqdm(original_tracks)
     ]
-    all_predicted_tracks = [
-        get_predicted_tracks(streaming_service, track, searcher)
-        for track in original_tracks
-    ]
-
-    table = Table(title=f"Uncertain {service.value} search results for {playlist}")
-    table.add_column("Original Track")
-    table.add_column("Predicted Track")
-    table.add_column("Confidence")
-    table.show_lines = True
-
-    for i, (original, predicted) in enumerate(zip(original_tracks, predicted_tracks)):
-        if predicted is None:
-            if showall or onlyfailed:
-                table.add_row(original, "", "")
-                for track in all_predicted_tracks[i]:
-                    table.add_row("", track, f"{matcher.similarity(original, track)}")
-            continue
-        elif onlyfailed:
-            continue
-
-        similarity = matcher.similarity(original, predicted)
-        if not showall and similarity >= 0.7:
-            continue
-
-        table.add_row(original, predicted, f"{similarity:.2f}")
-        if debug:
-            for track in all_predicted_tracks[i][1:]:
-                table.add_row("", track, f"{matcher.similarity(original, track):.2f}")
-
-    console.print(table)
     num_not_found = len([t for t in predicted_tracks if t is None])
     console.print(f"{len(predicted_tracks) - num_not_found} tracks found")
     console.print(f"{num_not_found} tracks not found")
 
-    if not preview:
-        for (original, predicted) in zip(original_tracks, predicted_tracks):
-            if predicted is None:
-                continue
-            console.print(f"{original.name.value} -> {predicted.name.value}")
-            original.merge(predicted)
+    for (original, predicted) in zip(original_tracks, predicted_tracks):
+        if predicted is None:
+            console.print(f"{original.name.value} not found")
+            continue
+        console.print(f"{original.name.value} -> {predicted.name.value}")
+        original.merge(predicted)
 
+    if save:
         pm.save_playlist(playlist)
+
+    if debug:
+        all_predicted_tracks = [
+            get_predicted_tracks(streaming_service, track, searcher)
+            for track in original_tracks
+        ]
+
+        table = Table(title=f"Uncertain {service.value} search results for {playlist}")
+        table.add_column("Original Track")
+        table.add_column("Predicted Track")
+        table.add_column("Confidence")
+        table.show_lines = True
+
+        for i, (original, predicted) in enumerate(
+            zip(original_tracks, predicted_tracks)
+        ):
+            if predicted is None:
+                if showall or onlyfailed:
+                    table.add_row(original, "", "")
+                    for track in all_predicted_tracks[i]:
+                        table.add_row(
+                            "", track, f"{matcher.similarity(original, track):.2f}"
+                        )
+                continue
+            elif onlyfailed:
+                continue
+
+            similarity = matcher.similarity(original, predicted)
+            if not showall and similarity >= 0.7:
+                continue
+
+            table.add_row(original, predicted, f"{similarity:.2f}")
+            if debug:
+                for track in all_predicted_tracks[i][1:]:
+                    table.add_row(
+                        "", track, f"{matcher.similarity(original, track):.2f}"
+                    )
+
+        console.print(table)
