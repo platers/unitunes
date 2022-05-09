@@ -84,5 +84,12 @@ def tracks_to_add(
     ]
 
 
-def tracks_to_remove(current: List[Track], new: List[Track]) -> List[Track]:
-    return [track for track in current if not any(track.uri_matches(t) for t in new)]
+def tracks_to_remove(
+    service: ServiceType, current: List[Track], new: List[Track]
+) -> List[Track]:
+    current_on_service = [track for track in current if track.is_on_service(service)]
+    return [
+        track
+        for track in current_on_service
+        if not any(track.uri_matches(t) for t in new)
+    ]

@@ -46,38 +46,3 @@ class Playlist(BaseModel):
     def add_uri(self, uri: PlaylistURIs) -> None:
         if uri not in self.uris:
             self.uris.append(uri)
-
-    def is_linked_to_service(self, service_name: str) -> bool:
-        for uri in self.uris:
-            if uri.service == service_name:
-                return True
-        return False
-
-    def find_track_with_uri(self, track: Track) -> Optional[Track]:
-        for t in self.tracks:
-            if t.uri_matches(track):
-                return t
-        return None
-
-    def remove_tracks(self, tracks: List[Track]) -> None:
-        self.tracks = [track for track in self.tracks if track not in tracks]
-
-    def tracks_on_service(self, service: ServiceType) -> List[Track]:
-        return [track for track in self.tracks if track.is_on_service(service)]
-
-    def get_new_tracks(self, remote_tracks: List[Track]) -> List[Track]:
-        """Get tracks from a service whose URIs are not in the playlist"""
-        new_tracks = [r for r in remote_tracks if not self.find_track_with_uri(r)]
-        return new_tracks
-
-    def get_removed_tracks(
-        self, service: ServiceType, remote_tracks: List[Track]
-    ) -> List[Track]:
-        """Get tracks from a service whose URIs are not in the playlist"""
-        tracks_on_service = self.tracks_on_service(service)
-        removed_tracks = [
-            r
-            for r in tracks_on_service
-            if not any(r.uri_matches(t) for t in remote_tracks)
-        ]
-        return removed_tracks

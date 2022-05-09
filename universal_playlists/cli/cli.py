@@ -119,8 +119,16 @@ def pull(
             if not uri:
                 continue
             remote_tracks = service.pull_tracks(uri)
-            new_tracks.extend(pl.get_new_tracks(remote_tracks))
-            removed_tracks.extend(pl.get_removed_tracks(service.type, remote_tracks))
+            added = tracks_to_add(service.type, pl.tracks, remote_tracks)
+            removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
+
+            console.print(f"{uri.url} added {len(added)} tracks")
+            print_tracks(added)
+            console.print(f"{uri.url} removed {len(removed)} tracks")
+            print_tracks(removed)
+
+            new_tracks.extend(added)
+            removed_tracks.extend(removed)
 
         console.print(f"{len(new_tracks)} new tracks")
         if verbose:
@@ -141,7 +149,28 @@ def pull(
                     tracks.append(track)
 
         merge_new_tracks(pl.tracks, new_tracks)
-        pl.remove_tracks(removed_tracks)
+
+        def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
+            for track in removed_tracks:
+                matches = [t for t in tracks if t.uri_matches(track)]
+                if not matches:
+                    # already removed
+                    continue
+
+                console.print(f"Track {track.name.value} not found in playlist")
+                incorrect = typer.confirm("Incorrect match?")
+                if incorrect:
+                    # remove uri
+                    for t in matches:
+                        t.uris.remove(track.uris[0])
+                        console.print(f"Removed {track.uris[0]} from {t}")
+                else:
+                    # remove track
+                    for t in matches:
+                        tracks.remove(t)
+                        console.print(f"Removed {t}")
+
+        remove_tracks(pl.tracks, removed_tracks)
 
         pm.save_playlist(pl.name)
 
@@ -156,7 +185,7 @@ def push(
         help="Service to push to",
     ),
 ):
-    """Push a playlist to a service"""
+    """Push a playlist to a service."""
     pm = get_playlist_manager()
 
     if not playlists:
@@ -196,7 +225,7 @@ def push(
 
             current_tracks = service.pull_tracks(uri)
             added = tracks_to_add(service.type, current_tracks, pl.tracks)
-            removed = tracks_to_remove(current_tracks, pl.tracks)
+            removed = tracks_to_remove(service.type, current_tracks, pl.tracks)
             console.print(f"{len(added)} new tracks")
             console.print(f"{len(removed)} removed tracks")
             if added:
