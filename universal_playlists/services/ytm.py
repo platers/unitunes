@@ -158,36 +158,24 @@ class YTM(
         id = self.wrapper.create_playlist(title, description)
         return YtmPlaylistURI.from_uri(id)
 
-    def push_playlist(self, playlist: Playlist) -> PlaylistURIs:
-        p_uri = playlist.find_uri(self.type)
-        if not p_uri:
-            raise ValueError(
-                f"Playlist {playlist.name} does not have a {self.type} URI"
-            )
-        assert isinstance(p_uri, YtmPlaylistURI)
+    def add_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+        assert isinstance(playlist_uri, YtmPlaylistURI)
 
-        current_tracks = self.pull_tracks(p_uri)
-        new_tracks = playlist.tracks
-
-        add = tracks_to_add(current_tracks, new_tracks)
-        remove = tracks_to_remove(current_tracks, new_tracks)
-
-        add_uris: List[str] = []
-        for track in add:
+        track_ids = []
+        for track in tracks:
             uri = track.find_uri(self.type)
             assert uri
-            add_uris.append(uri.uri)
+            track_ids.append(uri.uri)
 
-        remove_uris: List[str] = []
-        for track in remove:
+        self.wrapper.add_tracks(playlist_uri.uri, track_ids)
+
+    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+        assert isinstance(playlist_uri, YtmPlaylistURI)
+
+        track_ids = []
+        for track in tracks:
             uri = track.find_uri(self.type)
             assert uri
-            remove_uris.append(uri.uri)
+            track_ids.append(uri.uri)
 
-        if add_uris:
-            self.wrapper.add_tracks(p_uri.uri, add_uris)
-
-        if remove_uris:
-            self.wrapper.remove_tracks(p_uri.uri, remove_uris)
-
-        return p_uri
+        self.wrapper.remove_tracks(playlist_uri.uri, track_ids)

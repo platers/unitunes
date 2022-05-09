@@ -17,7 +17,7 @@ from universal_playlists.eval.eval import eval_app
 from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.searcher import DefaultSearcherStrategy
 from universal_playlists.services.services import PlaylistPullable, Pushable
-from universal_playlists.track import Track
+from universal_playlists.track import Track, tracks_to_add, tracks_to_remove
 
 from universal_playlists.types import ServiceType
 
@@ -183,7 +183,8 @@ def push(
             if not any([t.find_uri(service.type) for t in pl.tracks]):
                 continue
 
-            if not pl.find_uri(service.type):
+            uri = pl.find_uri(service.type)
+            if not uri:
                 console.print(f"{pl.name} does not have a uri for {service.type}")
                 create_new = typer.confirm("Create new playlist?", default=False)
                 if not create_new:
@@ -193,7 +194,30 @@ def push(
                 pl.add_uri(uri)
                 pm.save_playlist(pl.name)
 
-            uri = service.push_playlist(pl)
+            current_tracks = service.pull_tracks(uri)
+            added = tracks_to_add(service.type, current_tracks, pl.tracks)
+            removed = tracks_to_remove(current_tracks, pl.tracks)
+            console.print(f"{len(added)} new tracks")
+            console.print(f"{len(removed)} removed tracks")
+            if added:
+                console.print("Added tracks:")
+                print_tracks(added)
+            if removed:
+                console.print("Removed tracks:")
+                print_tracks(removed)
+
+            if not added and not removed:
+                console.print("No tracks to add or remove")
+                continue
+
+            if not typer.confirm("Push?", default=False):
+                continue
+
+            if added:
+                service.add_tracks(uri, added)
+            if removed:
+                service.remove_tracks(uri, removed)
+
             console.print(f"Pushed {pl.name} to {uri.url}")
 
 

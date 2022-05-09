@@ -95,9 +95,12 @@ class Pushable(PlaylistPullable):
         """Creates a new playlist"""
 
     @abstractmethod
-    def push_playlist(self, playlist: Playlist) -> PlaylistURIs:
-        """Pushes a playlist to the streaming service.
-        Raises ValueError if the no PlaylistURI is found."""
+    def add_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+        """Adds tracks to a playlist"""
+
+    @abstractmethod
+    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+        """Removes tracks from a playlist"""
 
 
 class StreamingService(ABC):
