@@ -71,3 +71,11 @@ class Track(BaseModel):
             if uri.service == service:
                 return uri
         return None
+
+
+def tracks_to_add(current: List[Track], new: List[Track]) -> List[Track]:
+    return [track for track in new if not any(track.uri_matches(t) for t in current)]
+
+
+def tracks_to_remove(current: List[Track], new: List[Track]) -> List[Track]:
+    return [track for track in current if not any(track.uri_matches(t) for t in new)]

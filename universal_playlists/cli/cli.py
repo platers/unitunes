@@ -155,11 +155,6 @@ def push(
         "-s",
         help="Service to push to",
     ),
-    verbose: bool = typer.Option(
-        False,
-        "--verbose",
-        "-v",
-    ),
 ):
     """Push a playlist to a service"""
     pm = get_playlist_manager()
@@ -183,11 +178,23 @@ def push(
             service = pm.services[service_name]
             if not isinstance(service, Pushable):
                 console.print(f"{service} is not a pushable service", style="red")
-                raise typer.Exit()
+                continue
+
+            if not any([t.find_uri(service.type) for t in pl.tracks]):
+                continue
+
+            if not pl.find_uri(service.type):
+                console.print(f"{pl.name} does not have a uri for {service.type}")
+                create_new = typer.confirm("Create new playlist?", default=False)
+                if not create_new:
+                    continue
+                uri = service.create_playlist(pl.name)
+                console.print(f"Created {uri.url}")
+                pl.add_uri(uri)
+                pm.save_playlist(pl.name)
 
             uri = service.push_playlist(pl)
-            console.print(f"Pushed {pl.name} to {service.name}")
-            console.print(uri)
+            console.print(f"Pushed {pl.name} to {uri.url}")
 
 
 @app.command()

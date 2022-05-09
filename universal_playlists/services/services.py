@@ -12,7 +12,7 @@ from universal_playlists.playlist import Playlist, PlaylistMetadata
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import PlaylistURI, TrackURI
+from universal_playlists.uri import PlaylistURI, PlaylistURIs, TrackURI
 
 
 def cache(method):
@@ -89,13 +89,15 @@ class Searchable(ABC):
         Sorted from most precise to least precise."""
 
 
-class Pushable(ABC):
+class Pushable(PlaylistPullable):
     @abstractmethod
-    def push_playlist(self, playlist: Playlist) -> PlaylistURI:
+    def create_playlist(self, title: str, description: str = "") -> PlaylistURIs:
+        """Creates a new playlist"""
+
+    @abstractmethod
+    def push_playlist(self, playlist: Playlist) -> PlaylistURIs:
         """Pushes a playlist to the streaming service.
-        If a PlaylistURI is given, modifies that playlist.
-        Else creates a new playlist.
-        Returns the playlist URI."""
+        Raises ValueError if the no PlaylistURI is found."""
 
 
 class StreamingService(ABC):

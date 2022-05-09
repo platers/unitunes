@@ -52,7 +52,6 @@ class SpotifyWrapper(ServiceWrapper):
 
 class SpotifyService(
     StreamingService,
-    PlaylistPullable,
     Searchable,
     TrackPullable,
     Pushable,
@@ -145,7 +144,7 @@ class SpotifyService(
 
         return [query]
 
-    def create_empty_playlist(self, name: str, description: str = "") -> PlaylistURIs:
+    def create_playlist(self, name: str, description: str = "") -> PlaylistURIs:
         playlist = self.wrapper.sp.user_playlist_create(
             self.wrapper.sp.current_user()["id"],
             name,
@@ -158,7 +157,7 @@ class SpotifyService(
     def push_playlist(self, playlist: Playlist) -> PlaylistURI:
         uri = playlist.find_uri(self.type)
         if not uri:
-            uri = self.create_empty_playlist(playlist.name, playlist.description)
+            raise ValueError(f"Playlist {playlist} does not have a spotify uri")
 
         track_uris = [track.find_uri(self.type) for track in playlist.tracks]
         track_ids = [uri.uri for uri in track_uris if uri]

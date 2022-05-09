@@ -1,12 +1,14 @@
+from os import remove
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from ytmusicapi import YTMusic
-from universal_playlists.playlist import PlaylistMetadata
+from universal_playlists.playlist import Playlist, PlaylistMetadata
 from youtube_title_parse import get_artist_title
 
 
 from universal_playlists.services.services import (
     PlaylistPullable,
+    Pushable,
     Searchable,
     ServiceWrapper,
     StreamingService,
@@ -14,9 +16,19 @@ from universal_playlists.services.services import (
     UserPlaylistPullable,
     cache,
 )
-from universal_playlists.track import AliasedString, Track
+from universal_playlists.track import (
+    AliasedString,
+    Track,
+    tracks_to_add,
+    tracks_to_remove,
+)
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import YtmPlaylistURI, YtmTrackURI
+from universal_playlists.uri import (
+    PlaylistURI,
+    PlaylistURIs,
+    YtmPlaylistURI,
+    YtmTrackURI,
+)
 
 
 class YtmWrapper(ServiceWrapper):
@@ -35,9 +47,39 @@ class YtmWrapper(ServiceWrapper):
     def search(self, *args, use_cache=True, **kwargs):
         return self.ytm.search(*args, **kwargs)
 
+    def create_playlist(self, title: str, description: str = "") -> str:
+        id = self.ytm.create_playlist(title, description)
+        assert isinstance(id, str)
+        return id
+
+    def edit_title(self, playlist_id: str, title: str) -> None:
+        self.ytm.edit_playlist(playlist_id, title=title)
+
+    def edit_description(self, playlist_id: str, description: str) -> None:
+        self.ytm.edit_playlist(playlist_id, description=description)
+
+    def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
+        """Add tracks to a playlist."""
+        self.ytm.add_playlist_items(playlist_id, track_ids)
+
+    def remove_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
+        """Remove tracks from a playlist."""
+        playlist = self.get_playlist(playlist_id)
+        playlist_items = playlist["tracks"]
+        videos_to_remove = [
+            video
+            for video in playlist_items
+            if "videoId" in video and video["videoId"] in track_ids
+        ]
+        self.ytm.remove_playlist_items(playlist_id, videos_to_remove)
+
 
 class YTM(
-    StreamingService, PlaylistPullable, Searchable, TrackPullable, UserPlaylistPullable
+    StreamingService,
+    Searchable,
+    TrackPullable,
+    Pushable,
+    UserPlaylistPullable,
 ):
     wrapper: YtmWrapper
 
@@ -67,7 +109,7 @@ class YTM(
             )
         )
 
-    def pull_tracks(self, uri: YtmTrackURI) -> List[Track]:
+    def pull_tracks(self, uri: YtmPlaylistURI) -> List[Track]:
         tracks = self.wrapper.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
@@ -111,3 +153,41 @@ class YTM(
     def query_generator(self, track: Track) -> List[str]:
         query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
         return [query]
+
+    def create_playlist(self, title: str, description: str = "") -> PlaylistURIs:
+        id = self.wrapper.create_playlist(title, description)
+        return YtmPlaylistURI.from_uri(id)
+
+    def push_playlist(self, playlist: Playlist) -> PlaylistURIs:
+        p_uri = playlist.find_uri(self.type)
+        if not p_uri:
+            raise ValueError(
+                f"Playlist {playlist.name} does not have a {self.type} URI"
+            )
+        assert isinstance(p_uri, YtmPlaylistURI)
+
+        current_tracks = self.pull_tracks(p_uri)
+        new_tracks = playlist.tracks
+
+        add = tracks_to_add(current_tracks, new_tracks)
+        remove = tracks_to_remove(current_tracks, new_tracks)
+
+        add_uris: List[str] = []
+        for track in add:
+            uri = track.find_uri(self.type)
+            assert uri
+            add_uris.append(uri.uri)
+
+        remove_uris: List[str] = []
+        for track in remove:
+            uri = track.find_uri(self.type)
+            assert uri
+            remove_uris.append(uri.uri)
+
+        if add_uris:
+            self.wrapper.add_tracks(p_uri.uri, add_uris)
+
+        if remove_uris:
+            self.wrapper.remove_tracks(p_uri.uri, remove_uris)
+
+        return p_uri
