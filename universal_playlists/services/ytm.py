@@ -115,11 +115,14 @@ class YTM(
 
     def parse_video_details(self, details: dict) -> Track:
         title = details["title"]
-        artist_title_tuple = get_artist_title(title)
-        if artist_title_tuple:
-            artist, title = artist_title_tuple
+        if details["musicVideoType"] == "MUSIC_VIDEO_TYPE_UGC":
+            artist_title_tuple = get_artist_title(title)
+            if artist_title_tuple:
+                artist, title = artist_title_tuple
+            else:
+                artist = None
         else:
-            artist = None
+            artist = details["author"]
 
         return Track(
             name=AliasedString(title),
@@ -151,7 +154,7 @@ class YTM(
         return self.results_to_tracks(results)
 
     def query_generator(self, track: Track) -> List[str]:
-        query = f"{track.name} - {' '.join([artist.value for artist in track.artists])}"
+        query = f"{track.name.value} - {' '.join([artist.value for artist in track.artists])}"
         return [query]
 
     def create_playlist(self, title: str, description: str = "") -> PlaylistURIs:

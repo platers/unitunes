@@ -120,10 +120,12 @@ def pull(
             added = tracks_to_add(service.type, pl.tracks, remote_tracks)
             removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
 
-            console.print(f"{uri.url} added {len(added)} tracks")
-            print_tracks(added)
-            console.print(f"{uri.url} removed {len(removed)} tracks")
-            print_tracks(removed)
+            if added:
+                console.print(f"{uri.url} added {len(added)} tracks")
+                print_tracks(added)
+            if removed:
+                console.print(f"{uri.url} removed {len(removed)} tracks")
+                print_tracks(removed)
 
             new_tracks.extend(added)
             removed_tracks.extend(removed)
@@ -224,20 +226,19 @@ def push(
             current_tracks = service.pull_tracks(uri)
             added = tracks_to_add(service.type, current_tracks, pl.tracks)
             removed = tracks_to_remove(service.type, current_tracks, pl.tracks)
-            console.print(f"{len(added)} new tracks")
-            console.print(f"{len(removed)} removed tracks")
             if added:
+                console.print(f"{len(added)} new tracks")
                 console.print("Added tracks:")
                 print_tracks(added)
             if removed:
                 console.print("Removed tracks:")
+                console.print(f"{len(removed)} removed tracks")
                 print_tracks(removed)
 
             if not added and not removed:
-                console.print("No tracks to add or remove")
                 continue
 
-            if not typer.confirm("Push?", default=False):
+            if not typer.confirm(f"Push to {uri.url}?", default=False):
                 continue
 
             if added:

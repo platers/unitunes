@@ -64,12 +64,16 @@ def build_service(service_type: ServiceType) -> StreamingService:
 
 @eval_app.command()
 def search(
-    guess_service: Optional[ServiceType] = typer.Option(None, "--guess", "-g")
+    guess_service: Optional[ServiceType] = typer.Option(None, "--guess", "-g"),
+    description: Optional[str] = typer.Option(None, "--description", "-d"),
 ) -> None:
     """
     Evaluate search performance.
     """
     cases = load_cases()
+
+    if description:
+        cases = [case for case in cases if description in case.description]
 
     for case in cases:
         console.print(f"Case: {case.description}", style="bold")
