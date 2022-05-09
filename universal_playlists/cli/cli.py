@@ -1,6 +1,10 @@
 from tqdm import tqdm
 import typer
-from universal_playlists.cli.utils import get_playlist_manager
+from universal_playlists.cli.utils import (
+    get_playlist_manager,
+    print_playlist,
+    print_tracks,
+)
 from universal_playlists.main import (
     Config,
     FileManager,
@@ -27,12 +31,6 @@ app = typer.Typer(no_args_is_help=True)
 app.add_typer(service_app, name="service")
 app.add_typer(playlist_app, name="playlist")
 app.add_typer(eval_app, name="eval")
-
-
-def print_tracks(tracks: List[Track]) -> None:
-    for track in tracks:
-        console.print(track)
-        console.print("")
 
 
 @app.command()
@@ -68,7 +66,7 @@ def view(playlist: str) -> None:
         raise typer.Exit()
     pl = pm.playlists[playlist]
 
-    console.print(pl)
+    print_playlist(pl)
 
 
 @app.command()

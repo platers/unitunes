@@ -5,6 +5,12 @@ import typer
 from universal_playlists.main import FileManager, PlaylistManager
 from rich import print
 from rich.table import Table
+from rich.console import Console
+from universal_playlists.playlist import Playlist
+
+from universal_playlists.track import Track
+
+console = Console()
 
 
 def get_playlist_manager() -> PlaylistManager:
@@ -39,3 +45,26 @@ def print_grid(
             r = map(lambda x: x + "  ", r)
         grid.add_row(*r)
     print(grid)
+
+
+def print_tracks(tracks: List[Track], plain: bool = False) -> None:
+    grid = []
+    for track in tracks:
+        artists = ", ".join([a.__rich__() for a in track.artists])
+        albumms = ", ".join([a.__rich__() for a in track.albums])
+        uris = ", ".join([u.__rich__() for u in track.uris])
+        grid.append([track.name.__rich__(), artists, albumms, track.length, uris])
+
+    print_grid(
+        "Tracks",
+        headers=["Name", "Artists", "Albums", "Length", "URIs"],
+        rows=grid,
+        plain=plain,
+    )
+
+
+def print_playlist(playlist: Playlist, plain: bool = False) -> None:
+    console.print(playlist.name, style="bold")
+    console.print(f"Description: {playlist.description}")
+    console.print(f"{len(playlist.tracks)} tracks")
+    print_tracks(playlist.tracks, plain=plain)
