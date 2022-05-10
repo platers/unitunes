@@ -16,6 +16,11 @@ from universal_playlists.services.services import (
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import TrackURI, URI_from_url, trackURI_from_url
 
+"""
+This is a script to help you test your matcher and searcher.
+I use it to debug tricky cases.
+"""
+
 
 class Case(BaseModel):
     description: str = ""

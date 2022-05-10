@@ -37,6 +37,7 @@ class YtmWrapper(ServiceWrapper):
         self.ytm = YTMusic(config_path.__str__())
 
     def get_playlist(self, *args, **kwargs):
+        kwargs["limit"] = 100000  # probably no playlist this big
         return self.ytm.get_playlist(*args, **kwargs)
 
     @cache
