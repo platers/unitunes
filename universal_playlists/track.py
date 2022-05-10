@@ -1,13 +1,8 @@
 from typing import (
-    Any,
-    Callable,
-    Dict,
     List,
     Optional,
 )
 from pydantic import BaseModel
-from strsimpy.jaro_winkler import JaroWinkler
-from rich import print
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import TrackURIs
 

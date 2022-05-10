@@ -55,7 +55,10 @@ class SpotifyWrapper(ServiceWrapper):
         return id
 
     def add_tracks(self, playlist_id: str, tracks: List[str]) -> None:
-        self.sp.user_playlist_add_tracks(self.sp.me()["id"], playlist_id, tracks)
+        chunk_size = 100
+        chunks = [tracks[i : i + chunk_size] for i in range(0, len(tracks), chunk_size)]
+        for chunk in chunks:
+            self.sp.user_playlist_add_tracks(self.sp.me()["id"], playlist_id, chunk)
 
     def remove_tracks(self, playlist_id: str, tracks: List[str]) -> None:
         self.sp.user_playlist_remove_all_occurrences_of_tracks(

@@ -14,7 +14,23 @@ def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> 
 
 
 def normalized_string_similarity(s1: str, s2: str) -> float:
-    """Returns a similarity score between 0 and 1."""
+    """Returns a similarity score between 0 and 1. Penalizes differences in keywords like 'instrumental'"""
+    special_terms = [
+        "instrumental",
+        "remix",
+        "cover",
+        "live",
+        "version",
+        "edit",
+    ]
+
+    for term in special_terms:
+        in_s1 = term in s1.lower()
+        in_s2 = term in s2.lower()
+
+        if in_s1 ^ in_s2:
+            return 0
+
     return JaroWinkler().similarity(s1.lower(), s2.lower())
 
 
