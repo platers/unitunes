@@ -10,4 +10,26 @@ unitunes defines Universal Playlists (UPs), a service agnostic representation of
 
 The unitunes CLI tool provides a command-line interface to manage UPs. Playlists can be pushed and pulled from streaming services. unitunes automatically searches for missing tracks.
 
+### Supported Streaming Services
+
+| Name          | Pullable | Pushable | Searchable |
+| ------------- | :------: | :------: | :--------: |
+| MusicBrainz   |          |          |     ✅     |
+| Spotify       |    ✅    |    ✅    |     ✅     |
+| Youtube Music |    ✅    |    ✅    |     ✅     |
+
 ## Quickstart
+
+### Install
+
+### Initialize
+
+### Add Services
+
+### Add Playlists
+
+### Pull Playlists
+
+### Search Playlists
+
+### Push Playlists
