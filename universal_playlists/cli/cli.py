@@ -17,7 +17,6 @@ from rich.console import Console
 from rich.table import Table
 from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
-from universal_playlists.eval.eval import eval_app
 from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.searcher import DefaultSearcherStrategy
 from universal_playlists.services.services import PlaylistPullable, Pushable
@@ -30,7 +29,6 @@ console = Console()
 app = typer.Typer(no_args_is_help=True)
 app.add_typer(service_app, name="service")
 app.add_typer(playlist_app, name="playlist")
-app.add_typer(eval_app, name="eval")
 
 
 @app.command()

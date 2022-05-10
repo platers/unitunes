@@ -96,8 +96,10 @@ def search(
                     continue
                 source_track = source_service.pull_track(source_uri)
                 guesses = searcher.search(target_service, source_track)
+                cur_matches = [trackURI_from_url(url) for url in case.matches]
+                cur_non_matches = [trackURI_from_url(url) for url in case.non_matches]
 
-                if guesses and guesses[0].uris[0] in matches:
+                if guesses and guesses[0].uris[0] in cur_matches:
                     console.print(
                         f"{source_uri.service} -> {target_type}",
                         style="green",
@@ -119,9 +121,9 @@ def search(
                     assert len(uris_on_service) == 1
                     guess_uri = uris_on_service[0]
 
-                    if guess_uri in matches:
+                    if guess_uri in cur_matches:
                         console.print(g, style="green")
-                    elif guess_uri in non_matches:
+                    elif guess_uri in cur_non_matches:
                         console.print(g, style="red")
                     else:
                         # ask user if this is the correct match
