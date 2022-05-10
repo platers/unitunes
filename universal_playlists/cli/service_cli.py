@@ -9,7 +9,7 @@ from universal_playlists.types import ServiceType
 from rich.console import Console
 from rich.table import Table
 
-service_app = typer.Typer()
+service_app = typer.Typer(no_args_is_help=True)
 
 console = Console()
 

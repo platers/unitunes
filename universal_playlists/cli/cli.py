@@ -2,6 +2,7 @@ from tqdm import tqdm
 import typer
 from universal_playlists.cli.utils import (
     get_playlist_manager,
+    print_grid,
     print_playlist,
     print_tracks,
 )
@@ -15,7 +16,6 @@ from typing import List, Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
-from universal_playlists.cli.playlist_cli import playlist_app
 from universal_playlists.cli.service_cli import service_app
 from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.searcher import DefaultSearcherStrategy
@@ -23,12 +23,12 @@ from universal_playlists.services.services import PlaylistPullable, Pushable
 from universal_playlists.track import Track, tracks_to_add, tracks_to_remove
 
 from universal_playlists.types import ServiceType
+from universal_playlists.uri import playlistURI_from_url
 
 
 console = Console()
 app = typer.Typer(no_args_is_help=True)
-app.add_typer(service_app, name="service")
-app.add_typer(playlist_app, name="playlist")
+app.add_typer(service_app, name="service", help="Manage services")
 
 
 @app.command()
@@ -278,7 +278,9 @@ def search(
         if predicted is None:
             console.print(f"{original.name.value} ->", style="red")
             continue
-        console.print(f"{original.name.value} -> {predicted.name.value}")
+        print(
+            f"{original.name.value} -> {predicted.name.value}"
+        )  # no highlight for clarity
         original.merge(predicted)
 
     if save:
@@ -322,3 +324,36 @@ def search(
                     )
 
         console.print(table)
+
+
+@app.command()
+def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
+    """Add a playlist to the config file"""
+    pm = get_playlist_manager()
+    urls = urls or []
+    uris = [playlistURI_from_url(url) for url in urls]
+
+    if name in pm.playlists:
+        pm.add_uris_to_playlist(name, uris)
+        typer.echo(f"Added {', '.join(urls)} to {name}")
+    else:
+        pm.add_playlist(name, uris)
+        typer.echo(f"Added playlist {name}")
+
+
+@app.command(name="list")
+def list_cmd(plain: bool = False) -> None:
+    """List all playlists"""
+    pm = get_playlist_manager()
+    grid = [
+        [
+            pl.name,
+            len(pl.uris),
+            len(pl.tracks),
+        ]
+        for pl in pm.playlists.values()
+    ]
+
+    print_grid(
+        "Playlists", headers=["Name", "URIs", "# Tracks"], rows=grid, plain=plain
+    )
