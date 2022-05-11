@@ -150,7 +150,7 @@ def pull(
 
         def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
             for track in removed_tracks:
-                matches = [t for t in tracks if t.uri_matches(track)]
+                matches = [t for t in tracks if t.shares_uri(track)]
                 if not matches:
                     # already removed
                     continue
