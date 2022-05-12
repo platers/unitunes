@@ -26,9 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry==${{ matrix.poetry-version }}
 
-      - name: View poetry --help
-        run: poetry --help
-
       - name: Install dependencies
         shell: bash
         run: python -m poetry install

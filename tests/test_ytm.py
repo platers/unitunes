@@ -8,11 +8,6 @@ from universal_playlists.uri import YtmTrackURI
 
 
 @pytest.fixture(scope="module")
-def vcr_config():
-    return {"filter_headers": ["authorization", "cookie"]}
-
-
-@pytest.fixture(scope="module")
 def ytm_wrapper():
     # delete cache folder
     cache = Path("tests/.cache")
@@ -26,7 +21,6 @@ def ytm_service(ytm_wrapper):
     return YTM("ytmtest", ytm_wrapper)
 
 
-@pytest.mark.vcr
 def test_ytm_can_pull_track(ytm_service):
     track = ytm_service.pull_track(
         YtmTrackURI.from_url("https://music.youtube.com/watch?v=KWLGyeg74es")

@@ -8,11 +8,6 @@ from universal_playlists.uri import SpotifyTrackURI
 
 
 @pytest.fixture(scope="module")
-def vcr_config():
-    return {"filter_headers": ["authorization"]}
-
-
-@pytest.fixture(scope="module")
 def spotify_wrapper():
     with open("tests/service_configs/spotify_config.json") as f:
         config = json.load(f)
@@ -28,7 +23,6 @@ def spotify_service(spotify_wrapper):
     return SpotifyService("spotifytest", spotify_wrapper)
 
 
-@pytest.mark.vcr
 def test_spotify_can_pull_track(spotify_service):
     track = spotify_service.pull_track(
         SpotifyTrackURI.from_url(
