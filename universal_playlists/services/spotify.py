@@ -1,4 +1,5 @@
-from typing import List
+from abc import ABC, abstractmethod
+from typing import Any, List
 import spotipy
 from spotipy import SpotifyOAuth
 from universal_playlists.playlist import Playlist, PlaylistMetadata
@@ -23,7 +24,54 @@ from universal_playlists.uri import (
 )
 
 
-class SpotifyWrapper(ServiceWrapper):
+class SpotifyWrapper(ServiceWrapper, ABC):
+    @abstractmethod
+    def track(self, *args, use_cache=True, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def album_tracks(self, *args, use_cache=True, **kwargs) -> Any:
+        pass
+
+    @cache
+    @abstractmethod
+    def search(self, *args, use_cache=True, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def create_playlist(self, title: str, description: str = "") -> str:
+        pass
+
+    @abstractmethod
+    def add_tracks(self, playlist_id: str, tracks: List[str]) -> None:
+        pass
+
+    @abstractmethod
+    def remove_tracks(self, playlist_id: str, tracks: List[str]) -> None:
+        pass
+
+    @abstractmethod
+    def current_user_playlists(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def user_playlist_replace_tracks(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def user_playlist_tracks(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def current_user(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def user_playlist_create(self, *args, **kwargs) -> Any:
+        pass
+
+
+class SpotifyAPIWrapper(SpotifyWrapper):
     def __init__(self, config, cache_root) -> None:
         super().__init__("spotify", cache_root=cache_root)
         self.sp = spotipy.Spotify(
@@ -63,6 +111,21 @@ class SpotifyWrapper(ServiceWrapper):
             self.sp.me()["id"], playlist_id, tracks
         )
 
+    def current_user_playlists(self, *args, **kwargs):
+        return self.sp.current_user_playlists(*args, **kwargs)
+
+    def user_playlist_replace_tracks(self, *args, **kwargs):
+        return self.sp.user_playlist_replace_tracks(*args, **kwargs)
+
+    def user_playlist_tracks(self, *args, **kwargs):
+        return self.sp.user_playlist_tracks(*args, **kwargs)
+
+    def current_user(self, *args, **kwargs):
+        return self.sp.current_user(*args, **kwargs)
+
+    def user_playlist_create(self, *args, **kwargs):
+        return self.sp.user_playlist_create(*args, **kwargs)
+
 
 class SpotifyService(
     StreamingService,
@@ -78,7 +141,7 @@ class SpotifyService(
         self.wrapper = wrapper
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.wrapper.sp.current_user_playlists()
+        results = self.wrapper.current_user_playlists()
 
         return [
             PlaylistMetadata(
@@ -94,8 +157,8 @@ class SpotifyService(
         playlist_id = uri.uri
 
         def get_tracks(offset: int) -> list[Track]:
-            results = self.wrapper.sp.user_playlist_tracks(
-                user=self.wrapper.sp.current_user()["id"],
+            results = self.wrapper.user_playlist_tracks(
+                user=self.wrapper.current_user()["id"],
                 playlist_id=playlist_id,
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
@@ -159,8 +222,8 @@ class SpotifyService(
         return [query]
 
     def create_playlist(self, name: str, description: str = "") -> PlaylistURIs:
-        playlist = self.wrapper.sp.user_playlist_create(
-            self.wrapper.sp.current_user()["id"],
+        playlist = self.wrapper.user_playlist_create(
+            self.wrapper.current_user()["id"],
             name,
             public=False,
             description=description,
@@ -176,8 +239,8 @@ class SpotifyService(
         track_uris = [track.find_uri(self.type) for track in playlist.tracks]
         track_ids = [uri.uri for uri in track_uris if uri]
 
-        self.wrapper.sp.user_playlist_replace_tracks(
-            self.wrapper.sp.current_user()["id"], uri.uri, track_ids
+        self.wrapper.user_playlist_replace_tracks(
+            self.wrapper.current_user()["id"], uri.uri, track_ids
         )
 
         return uri

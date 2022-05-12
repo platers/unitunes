@@ -1,13 +1,12 @@
-from os import remove
+from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 from ytmusicapi import YTMusic
-from universal_playlists.playlist import Playlist, PlaylistMetadata
+from universal_playlists.playlist import PlaylistMetadata
 from youtube_title_parse import get_artist_title
 
 
 from universal_playlists.services.services import (
-    PlaylistPullable,
     Pushable,
     Searchable,
     ServiceWrapper,
@@ -19,8 +18,6 @@ from universal_playlists.services.services import (
 from universal_playlists.track import (
     AliasedString,
     Track,
-    tracks_to_add,
-    tracks_to_remove,
 )
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import (
@@ -31,7 +28,45 @@ from universal_playlists.uri import (
 )
 
 
-class YtmWrapper(ServiceWrapper):
+class YtmWrapper(ServiceWrapper, ABC):
+    @abstractmethod
+    def get_playlist(self, *args, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def get_song(self, *args, use_cache=True, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def search(self, *args, use_cache=True, **kwargs) -> Any:
+        pass
+
+    @abstractmethod
+    def create_playlist(self, title: str, description: str = "") -> str:
+        pass
+
+    @abstractmethod
+    def edit_title(self, playlist_id: str, title: str) -> None:
+        pass
+
+    @abstractmethod
+    def edit_description(self, playlist_id: str, description: str) -> None:
+        pass
+
+    @abstractmethod
+    def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
+        """Add tracks to a playlist."""
+
+    @abstractmethod
+    def remove_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
+        """Remove tracks from a playlist."""
+
+    @abstractmethod
+    def get_library_playlists(self, *args, **kwargs) -> Any:
+        pass
+
+
+class YtmAPIWrapper(YtmWrapper):
     def __init__(self, config_path: Path, cache_root: Path) -> None:
         super().__init__("ytm", cache_root=cache_root)
         self.ytm = YTMusic(config_path.__str__())
@@ -74,6 +109,9 @@ class YtmWrapper(ServiceWrapper):
         ]
         self.ytm.remove_playlist_items(playlist_id, videos_to_remove)
 
+    def get_library_playlists(self, *args, **kwargs):
+        return self.ytm.get_library_playlists(*args, **kwargs)
+
 
 class YTM(
     StreamingService,
@@ -89,7 +127,7 @@ class YTM(
         self.wrapper = wrapper
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        results = self.wrapper.ytm.get_library_playlists()
+        results = self.wrapper.get_library_playlists()
 
         def playlistFromResponse(response):
             return PlaylistMetadata(

@@ -14,8 +14,12 @@ from universal_playlists.services.services import (
 )
 
 
-from universal_playlists.services.spotify import SpotifyService, SpotifyWrapper
-from universal_playlists.services.ytm import YTM, YtmWrapper
+from universal_playlists.services.spotify import (
+    SpotifyAPIWrapper,
+    SpotifyService,
+    SpotifyWrapper,
+)
+from universal_playlists.services.ytm import YTM, YtmAPIWrapper, YtmWrapper
 from universal_playlists.track import Track
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import PlaylistURIs, TrackURI
@@ -60,10 +64,10 @@ def service_factory(
     if service_type == ServiceType.SPOTIFY:
         assert config_path is not None
         config = json.load(config_path.open())
-        return SpotifyService(name, SpotifyWrapper(config, cache_path))
+        return SpotifyService(name, SpotifyAPIWrapper(config, cache_path))
     elif service_type == ServiceType.YTM:
         assert config_path is not None
-        return YTM(name, YtmWrapper(config_path, cache_path))
+        return YTM(name, YtmAPIWrapper(config_path, cache_path))
     elif service_type == ServiceType.MB:
         return MusicBrainz()
     else:

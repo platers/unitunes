@@ -1,6 +1,6 @@
 *.pyc
 service_configs
 .cache
+*/eval/data/cache
 *-raw
-cache
 .vscode
