@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-import shutil
 
 import pytest
 from universal_playlists.services.spotify import SpotifyService, SpotifyWrapper
@@ -8,9 +7,14 @@ from universal_playlists.uri import SpotifyTrackURI
 
 
 @pytest.fixture(scope="module")
-def spotify_wrapper():
-    with open("tests/service_configs/spotify_config.json") as f:
-        config = json.load(f)
+def spotify_wrapper(pytestconfig):
+    config_path = pytestconfig.getoption("config")
+    if not config_path:
+        raise ValueError("config-path option is required for now")
+    else:
+        config_path = Path(config_path) / "spotify_config.json"
+        with config_path.open() as f:
+            config = json.load(f)
     cache = Path("tests/cache")
     return SpotifyWrapper(config, cache)
 
