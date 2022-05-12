@@ -11,10 +11,7 @@ from universal_playlists.uri import SpotifyTrackURI
 def spotify_wrapper():
     with open("tests/service_configs/spotify_config.json") as f:
         config = json.load(f)
-    # delete cache folder
-    cache = Path("tests/.cache")
-    if cache.exists():
-        shutil.rmtree(cache)
+    cache = Path("tests/cache")
     return SpotifyWrapper(config, cache)
 
 

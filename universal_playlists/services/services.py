@@ -1,14 +1,12 @@
 from abc import ABC, abstractmethod
+import json
 from pathlib import Path
-import shelve
 from typing import (
     Any,
     List,
     NewType,
-    Optional,
 )
-from universal_playlists.matcher import DefaultMatcherStrategy
-from universal_playlists.playlist import Playlist, PlaylistMetadata
+from universal_playlists.playlist import PlaylistMetadata
 from universal_playlists.track import Track
 
 from universal_playlists.types import ServiceType
@@ -17,15 +15,25 @@ from universal_playlists.uri import PlaylistURI, PlaylistURIs, TrackURI
 
 def cache(method):
     def wrapper(self, *args, use_cache=True, **kwargs):
-        file_path = self.cache_path / f"{method.__name__}.shelve"
-        d = shelve.open(file_path.__str__())
+        file_path = self.cache_path / f"{method.__name__}.json"
+        if use_cache and file_path.exists():
+            with file_path.open("r") as f:
+                try:
+                    d = json.load(f)
+                except json.JSONDecodeError:
+                    d = {}
+        else:
+            d = {}
+
         cache_key = f"{args}_{kwargs}"
-        if use_cache:
-            if cache_key in d:
-                return d[cache_key]
+        if use_cache and cache_key in d:
+            return d[cache_key]
         result = method(self, *args, **kwargs)
-        d[cache_key] = result
-        d.close()
+        d[cache_key] = method(self, *args, **kwargs)
+
+        with file_path.open("w") as f:
+            json.dump(d, f, indent=4)
+
         return result
 
     return wrapper
@@ -35,17 +43,13 @@ class ServiceWrapper:
     cache_path: Path
     cache_name: str
 
-    def create_cache_dir(self, cache_dir: Path):
-        if not cache_dir.exists():
-            cache_dir.mkdir()
-        if not self.cache_path.exists():
-            print(f"Creating cache dir: {self.cache_path}")
-            self.cache_path.mkdir()
-
     def __init__(self, cache_name: str, cache_root: Path = Path("cache")) -> None:
         self.cache_name = cache_name
         self.cache_path = cache_root / cache_name
-        self.create_cache_dir(cache_root)
+        if not cache_root.exists():
+            cache_root.mkdir()
+        if not self.cache_path.exists():
+            self.cache_path.mkdir()
 
 
 class UserPlaylistPullable(ABC):

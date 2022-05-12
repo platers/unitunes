@@ -10,9 +10,7 @@ from universal_playlists.uri import YtmTrackURI
 @pytest.fixture(scope="module")
 def ytm_wrapper():
     # delete cache folder
-    cache = Path("tests/.cache")
-    if cache.exists():
-        shutil.rmtree(cache)
+    cache = Path("tests/cache")
     return YtmWrapper(Path("tests") / "service_configs" / "ytm_config.json", cache)
 
 
