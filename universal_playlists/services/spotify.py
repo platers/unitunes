@@ -4,9 +4,7 @@ from spotipy import SpotifyOAuth
 from universal_playlists.playlist import Playlist, PlaylistMetadata
 
 from universal_playlists.services.services import (
-    PlaylistPullable,
     Pushable,
-    Query,
     Searchable,
     ServiceWrapper,
     StreamingService,
