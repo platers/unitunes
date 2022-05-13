@@ -76,13 +76,15 @@ def service_factory(
 
 class FileManager:
     dir: Path
-    config_path = Path("config.json")
-    playlist_folder = Path("playlists")
-    cache_path = Path("cache")
+    config_path: Path
+    playlist_folder: Path
+    cache_path: Path
 
     def __init__(self, dir: Path) -> None:
         self.dir = dir
-        os.chdir(self.dir)
+        self.config_path = dir / "config.json"
+        self.playlist_folder = dir / "playlists"
+        self.cache_path = dir / "cache"
 
     def get_playlist_path(self, name: str) -> Path:
         return self.playlist_folder / f"{name}.json"

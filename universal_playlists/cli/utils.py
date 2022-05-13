@@ -13,8 +13,7 @@ from universal_playlists.track import Track
 console = Console()
 
 
-def get_playlist_manager() -> PlaylistManager:
-    dir = Path.cwd()
+def get_playlist_manager(dir: Path = Path.cwd()) -> PlaylistManager:
     fm = FileManager(dir)
 
     try:
