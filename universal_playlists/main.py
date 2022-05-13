@@ -53,6 +53,13 @@ class Config(BaseModel):
     def playlist_names(self) -> List[str]:
         return list(self.playlists.keys())
 
+    def add_service(self, name: str, service: str, config_path: str):
+        if name in self.services:
+            raise ValueError(f"Service {name} already exists")
+        self.services[name] = ConfigServiceEntry(
+            name=name, service=service, config_path=config_path
+        )
+
 
 def service_factory(
     service_type: ServiceType,
@@ -139,21 +146,9 @@ class PlaylistManager:
             self.playlists[name] = self.file_manager.load_playlist(name)
 
     def add_service(
-        self, service: ServiceType, service_config_path: Path, name=""
+        self, service: ServiceType, service_config_path: Path, name: str
     ) -> None:
-        if name == "":
-            name = service.value
-            # check if service is already in config
-            for s in self.config.services.values():
-                if s.service == service.value:
-                    name = service.value + " " + service_config_path.name
-
-        self.config.services[name] = ConfigServiceEntry(
-            name=name,
-            service=service.value,
-            config_path=service_config_path.__str__(),
-        )
-
+        self.config.add_service(name, service.value, service_config_path.as_posix())
         self.file_manager.save_config(self.config)
 
     def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:

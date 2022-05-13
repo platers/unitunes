@@ -24,15 +24,14 @@ def add(
     """Add a service to the config file"""
 
     pm = get_playlist_manager(Path.cwd())
-    # check if service is already added
-    for s in pm.config.services.values():
-        if s.service == service.value and s.config_path == service_config_path:
-            typer.echo(f"{service.value, service_config_path} is already added")
-            typer.Exit(1)
-
     if not name:
-        name = ""
-    pm.add_service(service, Path(service_config_path), name)
+        name = service.value
+    assert name
+    try:
+        pm.add_service(service, Path(service_config_path), name)
+    except ValueError as e:
+        console.print(f"Service with name {name} already exists")
+        raise typer.Exit(1)
     typer.echo(f"Added {service.value, service_config_path}")
 
 
