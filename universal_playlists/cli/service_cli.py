@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import List, Optional
 import typer
@@ -22,12 +23,12 @@ def add(
 ) -> None:
     """Add a service to the config file"""
 
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     # check if service is already added
     for s in pm.config.services.values():
         if s.service == service.value and s.config_path == service_config_path:
             typer.echo(f"{service.value, service_config_path} is already added")
-            return
+            typer.Exit(1)
 
     if not name:
         name = ""
@@ -39,7 +40,7 @@ def add(
 def list(plain: bool = False) -> None:
     """List all services"""
 
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     grid = [[s.name, s.service, s.config_path] for s in pm.config.services.values()]
     print_grid(
         "Services", headers=["Name", "Service", "Config Path"], rows=grid, plain=plain
@@ -56,7 +57,7 @@ def remove(name: str) -> None:
 def playlists(service_name: str) -> None:
     """List all user playlists on a service"""
 
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     service = pm.services[service_name]
     if not isinstance(service, UserPlaylistPullable):
         console.print(f"Cannot fetch user playlists from {service.type}", style="red")

@@ -58,7 +58,7 @@ def init(
 @app.command()
 def view(playlist: str) -> None:
     """View a playlist"""
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     if playlist not in pm.playlists:
         console.print(f"{playlist} is not a playlist", style="red")
         raise typer.Exit()
@@ -83,7 +83,7 @@ def pull(
     ),
 ):
     """Pull a playlist from a service"""
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
 
     if not playlists:
         playlists = list(pm.config.playlists.keys())
@@ -184,7 +184,7 @@ def push(
     ),
 ):
     """Push a playlist to a service."""
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
 
     if not playlists:
         playlists = list(pm.config.playlists.keys())
@@ -259,7 +259,7 @@ def search(
     """Search for every track in the playlist on the service"""
     typer.echo(f"Searching {service.value} for {playlist}")
 
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     pl = pm.playlists[playlist]
     original_tracks = pl.tracks
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
@@ -329,7 +329,7 @@ def search(
 @app.command()
 def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
     """Add a playlist to the config file"""
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     urls = urls or []
     uris = [playlistURI_from_url(url) for url in urls]
 
@@ -344,7 +344,7 @@ def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
 @app.command(name="list")
 def list_cmd(plain: bool = False) -> None:
     """List all playlists"""
-    pm = get_playlist_manager()
+    pm = get_playlist_manager(Path.cwd())
     grid = [
         [
             pl.name,

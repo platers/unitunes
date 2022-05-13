@@ -57,14 +57,12 @@ class LocalSpotifyWrapper(SpotifyWrapper):
 
 @pytest.fixture(scope="module")
 def spotify_wrapper(pytestconfig):
-    config_path = pytestconfig.getoption("spotify")
-    if not config_path:
+    spotify_config_path = pytestconfig.getoption("spotify")
+    if not spotify_config_path:
         return LocalSpotifyWrapper(cache_path)
     else:
-        config_path = Path(config_path)
-        with config_path.open() as f:
-            config = json.load(f)
-    return SpotifyAPIWrapper(config, cache_path)
+        with open(spotify_config_path) as f:
+            return SpotifyAPIWrapper(json.load(f), cache_path)
 
 
 @pytest.fixture(scope="module")

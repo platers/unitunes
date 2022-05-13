@@ -46,11 +46,11 @@ class YtmLocalWrapper(YtmWrapper):
 
 @pytest.fixture(scope="module")
 def ytm_wrapper(pytestconfig):
-    config_path = pytestconfig.getoption("ytm")
-    if not config_path:
+    ytm_config_path = pytestconfig.getoption("ytm")
+    if not ytm_config_path:
         return YtmLocalWrapper(cache_path)
     else:
-        return YtmAPIWrapper(Path(config_path), cache_path)
+        return YtmAPIWrapper(ytm_config_path, cache_path)
 
 
 @pytest.fixture(scope="module")
