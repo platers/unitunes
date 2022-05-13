@@ -14,11 +14,7 @@ console = Console()
 
 
 def get_playlist_manager(dir: Path) -> PlaylistManager:
-    print(f"Loading playlist manager from {dir}")
     fm = FileManager(dir)
-    print(f"config: {fm.config_path}")
-    # config = fm.load_config()
-
     try:
         config = fm.load_config()
     except FileNotFoundError:

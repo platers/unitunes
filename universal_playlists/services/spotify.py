@@ -59,7 +59,7 @@ class SpotifyWrapper(ServiceWrapper, ABC):
         pass
 
     @abstractmethod
-    def user_playlist_tracks(self, *args, **kwargs) -> Any:
+    def playlist_tracks(self, *args, **kwargs) -> Any:
         pass
 
     @abstractmethod
@@ -117,8 +117,8 @@ class SpotifyAPIWrapper(SpotifyWrapper):
     def user_playlist_replace_tracks(self, *args, **kwargs):
         return self.sp.user_playlist_replace_tracks(*args, **kwargs)
 
-    def user_playlist_tracks(self, *args, **kwargs):
-        return self.sp.user_playlist_tracks(*args, **kwargs)
+    def playlist_tracks(self, *args, **kwargs):
+        return self.sp.playlist_items(*args, **kwargs)
 
     def current_user(self, *args, **kwargs):
         return self.sp.current_user(*args, **kwargs)
@@ -157,8 +157,7 @@ class SpotifyService(
         playlist_id = uri.uri
 
         def get_tracks(offset: int) -> list[Track]:
-            results = self.wrapper.user_playlist_tracks(
-                user=self.wrapper.current_user()["id"],
+            results = self.wrapper.playlist_tracks(
                 playlist_id=playlist_id,
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,

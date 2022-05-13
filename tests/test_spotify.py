@@ -9,7 +9,7 @@ from universal_playlists.services.spotify import (
     SpotifyService,
     SpotifyWrapper,
 )
-from universal_playlists.uri import SpotifyTrackURI
+from universal_playlists.uri import SpotifyPlaylistURI, SpotifyTrackURI
 
 from tests.conftest import cache_path
 
@@ -45,7 +45,7 @@ class LocalSpotifyWrapper(SpotifyWrapper):
     def user_playlist_replace_tracks(self, *args, **kwargs):
         raise NotImplementedError
 
-    def user_playlist_tracks(self, *args, **kwargs) -> Any:
+    def playlist_tracks(self, *args, **kwargs) -> Any:
         raise NotImplementedError
 
     def current_user(self, *args, **kwargs) -> Any:
@@ -79,3 +79,12 @@ def test_spotify_can_pull_track(spotify_service):
 
     assert track.name.value == "Fireflies"
     assert track.artists[0].value == "Owl City"
+
+
+def test_spotify_can_pull_playlist(spotify_service):
+    tracks = spotify_service.pull_tracks(
+        SpotifyPlaylistURI.from_url(
+            "https://open.spotify.com/playlist/19TGUNYKnJ8N1bFe0oA5lv"
+        )
+    )
+    assert len(tracks) > 5
