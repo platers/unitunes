@@ -9,6 +9,7 @@ from universal_playlists.cli.utils import (
 from universal_playlists.main import (
     Config,
     FileManager,
+    PlaylistManager,
     get_predicted_tracks,
     get_prediction_track,
 )
@@ -18,8 +19,13 @@ from rich.console import Console
 from rich.table import Table
 from universal_playlists.cli.service_cli import service_app
 from universal_playlists.matcher import DefaultMatcherStrategy
+from universal_playlists.playlist import Playlist
 from universal_playlists.searcher import DefaultSearcherStrategy
-from universal_playlists.services.services import PlaylistPullable, Pushable
+from universal_playlists.services.services import (
+    PlaylistPullable,
+    Pushable,
+    StreamingService,
+)
 from universal_playlists.track import Track, tracks_to_add, tracks_to_remove
 
 from universal_playlists.types import ServiceType
@@ -67,10 +73,40 @@ def view(playlist: str) -> None:
     print_playlist(pl)
 
 
+def expand_playlists(
+    pm: PlaylistManager, playlist_names: Optional[List[str]]
+) -> List[Playlist]:
+    if not playlist_names:
+        playlist_names = list(pm.config.playlists.keys())
+
+    for playlist_name in playlist_names:
+        if playlist_name not in pm.playlists:
+            console.print(f"{playlist_name} is not a playlist", style="red")
+            raise typer.Exit()
+
+    return [pm.playlists[playlist_name] for playlist_name in playlist_names]
+
+
+def expand_services(
+    pm: PlaylistManager, service_names: Optional[List[str]]
+) -> List[StreamingService]:
+    if not service_names:
+        service_names = list(pm.config.services.keys())
+
+    for service_name in service_names:
+        if service_name not in pm.services:
+            console.print(f"{service_name} is not a service", style="red")
+            raise typer.Exit()
+
+    return [pm.services[service_name] for service_name in service_names]
+
+
 @app.command()
 def pull(
-    playlists: Optional[List[str]] = typer.Argument(None),
-    services: Optional[List[str]] = typer.Option(
+    playlist_names: Optional[List[str]] = typer.Argument(
+        None, help="Playlist names to pull from services"
+    ),
+    service_names: Optional[List[str]] = typer.Option(
         None,
         "--service",
         "-s",
@@ -85,35 +121,18 @@ def pull(
     """Pull a playlist from a service"""
     pm = get_playlist_manager(Path.cwd())
 
-    if not playlists:
-        playlists = list(pm.config.playlists.keys())
+    playlists = expand_playlists(pm, playlist_names)
+    services = expand_services(pm, service_names)
 
-    if not services:
-        services = list(pm.config.services.keys())
-
-    for playlist_name in playlists:
-        if playlist_name not in pm.playlists:
-            console.print(f"{playlist_name} is not a playlist", style="red")
-            raise typer.Exit()
-        pl = pm.playlists[playlist_name]
-
+    for pl in playlists:
         new_tracks: List[Track] = []
         removed_tracks: List[Track] = []
 
-        for service_name in services:
-            if service_name not in pm.services:
-                console.print(f"{service_name} is not a service", style="red")
-                raise typer.Exit()
-            service = pm.services[service_name]
-            if not isinstance(service, PlaylistPullable):
-                console.print(
-                    f"{service} is not a playlist pullable service", style="red"
-                )
-                raise typer.Exit()
-
+        for service in services:
             uri = pl.find_uri(service.type)
             if not uri:
                 continue
+            assert isinstance(service, PlaylistPullable)
             remote_tracks = service.pull_tracks(uri)
             added = tracks_to_add(service.type, pl.tracks, remote_tracks)
             removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
