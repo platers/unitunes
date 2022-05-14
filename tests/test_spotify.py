@@ -67,7 +67,17 @@ def spotify_wrapper(pytestconfig):
 
 @pytest.fixture(scope="module")
 def spotify_service(spotify_wrapper):
+    """Returns a SpotifyService object. Abstract if no config is provided."""
     return SpotifyService("spotifytest", spotify_wrapper)
+
+
+@pytest.fixture(scope="module")
+def spotify_api_service(pytestconfig):
+    """Returns a real SpotifyService object. Config is required."""
+    spotify_config_path = pytestconfig.getoption("spotify", skip=True)
+    with open(spotify_config_path) as f:
+        wrapper = SpotifyAPIWrapper(json.load(f), cache_path)
+    return SpotifyService("spotifytest", wrapper)
 
 
 def test_spotify_can_pull_track(spotify_service):
@@ -81,8 +91,8 @@ def test_spotify_can_pull_track(spotify_service):
     assert track.artists[0].value == "Owl City"
 
 
-def test_spotify_can_pull_playlist(spotify_service):
-    tracks = spotify_service.pull_tracks(
+def test_spotify_can_pull_playlist(spotify_api_service):
+    tracks = spotify_api_service.pull_tracks(
         SpotifyPlaylistURI.from_url(
             "https://open.spotify.com/playlist/19TGUNYKnJ8N1bFe0oA5lv"
         )
