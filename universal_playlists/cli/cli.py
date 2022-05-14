@@ -18,7 +18,7 @@ from pathlib import Path
 from rich.console import Console
 from rich.table import Table
 from universal_playlists.cli.service_cli import service_app
-from universal_playlists.matcher import DefaultMatcherStrategy
+from universal_playlists.matcher import DefaultMatcherStrategy, MatcherStrategy
 from universal_playlists.playlist import Playlist
 from universal_playlists.searcher import DefaultSearcherStrategy
 from universal_playlists.services.services import (
@@ -101,6 +101,39 @@ def expand_services(
     return [pm.services[service_name] for service_name in service_names]
 
 
+def merge_new_tracks(
+    tracks: List[Track], new_tracks: List[Track], matcher: MatcherStrategy
+) -> None:
+    for track in new_tracks:
+        matches = [t for t in tracks if matcher.are_same(t, track)]
+        if matches:
+            for match in matches:
+                match.merge(track)
+        else:
+            tracks.append(track)
+
+
+def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
+    for track in removed_tracks:
+        matches = [t for t in tracks if t.shares_uri(track)]
+        if not matches:
+            # already removed
+            continue
+
+        console.print(f"Track {track.name.value} not found in playlist")
+        incorrect = typer.confirm("Incorrect match?")
+        if incorrect:
+            # remove uri
+            for t in matches:
+                t.uris.remove(track.uris[0])
+                console.print(f"Removed {track.uris[0]} from {t}")
+        else:
+            # remove track
+            for t in matches:
+                tracks.remove(t)
+                console.print(f"Removed {t}")
+
+
 @app.command()
 def pull(
     playlist_names: Optional[List[str]] = typer.Argument(
@@ -122,7 +155,11 @@ def pull(
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
-    services = expand_services(pm, service_names)
+    services = [
+        service
+        for service in expand_services(pm, service_names)
+        if isinstance(service, PlaylistPullable)
+    ]
 
     for pl in playlists:
         new_tracks: List[Track] = []
@@ -132,16 +169,21 @@ def pull(
             uri = pl.find_uri(service.type)
             if not uri:
                 continue
-            assert isinstance(service, PlaylistPullable)
+
             remote_tracks = service.pull_tracks(uri)
+
             added = tracks_to_add(service.type, pl.tracks, remote_tracks)
             removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
 
             if added:
-                console.print(f"{uri.url} added {len(added)} tracks")
+                console.print(
+                    f"{uri.url} added {len(added)} tracks from {service.name}"
+                )
                 print_tracks(added)
             if removed:
-                console.print(f"{uri.url} removed {len(removed)} tracks")
+                console.print(
+                    f"{uri.url} removed {len(removed)} tracks from {service.name}"
+                )
                 print_tracks(removed)
 
             new_tracks.extend(added)
@@ -154,39 +196,7 @@ def pull(
         if verbose:
             print_tracks(removed_tracks)
 
-        matcher = DefaultMatcherStrategy()
-
-        def merge_new_tracks(tracks: List[Track], new_tracks: List[Track]) -> None:
-            for track in new_tracks:
-                matches = [t for t in tracks if matcher.are_same(t, track)]
-                if matches:
-                    for match in matches:
-                        match.merge(track)
-                else:
-                    tracks.append(track)
-
-        merge_new_tracks(pl.tracks, new_tracks)
-
-        def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
-            for track in removed_tracks:
-                matches = [t for t in tracks if t.shares_uri(track)]
-                if not matches:
-                    # already removed
-                    continue
-
-                console.print(f"Track {track.name.value} not found in playlist")
-                incorrect = typer.confirm("Incorrect match?")
-                if incorrect:
-                    # remove uri
-                    for t in matches:
-                        t.uris.remove(track.uris[0])
-                        console.print(f"Removed {track.uris[0]} from {t}")
-                else:
-                    # remove track
-                    for t in matches:
-                        tracks.remove(t)
-                        console.print(f"Removed {t}")
-
+        merge_new_tracks(pl.tracks, new_tracks, DefaultMatcherStrategy())
         remove_tracks(pl.tracks, removed_tracks)
 
         pm.save_playlist(pl.name)
@@ -194,8 +204,10 @@ def pull(
 
 @app.command()
 def push(
-    playlists: Optional[List[str]] = typer.Argument(None),
-    services: Optional[List[str]] = typer.Option(
+    playlist_names: Optional[List[str]] = typer.Argument(
+        None, help="Playlist names to push to services"
+    ),
+    service_names: Optional[List[str]] = typer.Option(
         None,
         "--service",
         "-s",
@@ -205,27 +217,15 @@ def push(
     """Push a playlist to a service."""
     pm = get_playlist_manager(Path.cwd())
 
-    if not playlists:
-        playlists = list(pm.config.playlists.keys())
+    playlists = expand_playlists(pm, playlist_names)
+    services = [
+        service
+        for service in expand_services(pm, service_names)
+        if isinstance(service, Pushable)
+    ]
 
-    if not services:
-        services = list(pm.config.services.keys())
-
-    for playlist_name in playlists:
-        if playlist_name not in pm.playlists:
-            console.print(f"{playlist_name} is not a playlist", style="red")
-            raise typer.Exit()
-        pl = pm.playlists[playlist_name]
-        for service_name in services:
-            if service_name not in pm.services:
-                console.print(f"{service_name} is not a service", style="red")
-                raise typer.Exit()
-
-            service = pm.services[service_name]
-            if not isinstance(service, Pushable):
-                console.print(f"{service} is not a pushable service", style="red")
-                continue
-
+    for pl in playlists:
+        for service in services:
             if not any([t.find_uri(service.type) for t in pl.tracks]):
                 continue
 
