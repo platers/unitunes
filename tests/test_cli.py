@@ -116,6 +116,16 @@ def test_add_playlist(pm_added_playlist):
     assert "spotify" in pl.uris
 
 
+def test_remove_service(pm_added_playlist):
+    result = invoke_cli(["service", "remove", "spotify", "-f"])
+    assert result.exit_code == 0
+    assert "Removed" in result.stdout
+    pm = get_playlist_manager(test_dir)
+    assert "spotify" not in pm.config.services
+    assert "spotify" not in pm.services
+    assert "spotify" not in pm.playlists["headphones"].uris
+
+
 @pytest.fixture
 def pm_pulled_playlist(pm_added_playlist, spotify_config_path):
     # Pull a playlist with spotify service first to ensure .cache is created

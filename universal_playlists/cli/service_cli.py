@@ -47,9 +47,23 @@ def list(plain: bool = False) -> None:
 
 
 @service_app.command()
-def remove(name: str) -> None:
+def remove(
+    name: str, force: Optional[bool] = typer.Option(False, "--force", "-f")
+) -> None:
     """Remove a service from the config file"""
-    raise NotImplementedError  # TODO
+
+    pm = get_playlist_manager(Path.cwd())
+    if name not in pm.config.services:
+        console.print(f"Service with name {name} does not exist")
+        raise typer.Exit(1)
+
+    if not force:
+        typer.confirm(
+            f"Are you sure you want to remove service{name}? This will remove {name} from all playlists.",
+            abort=True,
+        )
+    pm.remove_service(name)
+    typer.echo(f"Removed {name}")
 
 
 @service_app.command()

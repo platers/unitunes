@@ -40,3 +40,6 @@ class Playlist(BaseModel):
 
     def set_uri(self, service_name: str, uri: PlaylistURIs) -> None:
         self.uris[service_name] = uri
+
+    def remove_uri(self, service_name: str) -> None:
+        del self.uris[service_name]

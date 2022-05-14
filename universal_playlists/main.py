@@ -45,6 +45,11 @@ class Config(BaseModel):
             name=name, service=service, config_path=config_path
         )
 
+    def remove_service(self, name: str):
+        if name not in self.services:
+            raise ValueError(f"Service {name} does not exist")
+        del self.services[name]
+
 
 def service_factory(
     service_type: ServiceType,
@@ -107,14 +112,22 @@ class FileManager:
 class PlaylistManager:
     config: Config
     file_manager: FileManager
-    playlists: Dict[str, Playlist] = {}
-    services: Dict[str, StreamingService] = {}
+    playlists: Dict[str, Playlist]
+    services: Dict[str, StreamingService]
 
     def __init__(self, config: Config, file_manager: FileManager) -> None:
         self.config = config
         self.file_manager = file_manager
+        self.playlists = {}
+        self.services = {}
 
-        # create service objects
+        self.load_services()
+
+        # create playlist objects
+        for name in self.config.playlists:
+            self.playlists[name] = self.file_manager.load_playlist(name)
+
+    def load_services(self) -> None:
         self.services[ServiceType.MB.value] = MusicBrainz()
         for s in self.config.services.values():
             service_config_path = Path(s.config_path)
@@ -125,14 +138,22 @@ class PlaylistManager:
                 cache_path=self.file_manager.cache_path,
             )
 
-        # create playlist objects
-        for name in self.config.playlists:
-            self.playlists[name] = self.file_manager.load_playlist(name)
-
     def add_service(
         self, service: ServiceType, service_config_path: Path, name: str
     ) -> None:
         self.config.add_service(name, service.value, service_config_path.as_posix())
+        self.load_services()
+        self.file_manager.save_config(self.config)
+
+    def remove_service(self, name: str) -> None:
+        if name not in self.config.services:
+            raise ValueError(f"Service {name} not found")
+        self.config.remove_service(name)
+
+        for playlist in self.playlists.values():
+            playlist.remove_uri(name)
+            self.file_manager.save_playlist(playlist)
+
         self.file_manager.save_config(self.config)
 
     def add_playlist(self, name: str) -> None:
