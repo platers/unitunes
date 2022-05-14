@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from universal_playlists.matcher import MatcherStrategy
 from universal_playlists.playlist import Playlist
 from universal_playlists.searcher import SearcherStrategy
-from universal_playlists.services.musicbrainz import MusicBrainz
+from universal_playlists.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
 from universal_playlists.services.services import (
     Searchable,
     StreamingService,
@@ -66,7 +66,7 @@ def service_factory(
         assert config_path is not None
         return YTM(name, YtmAPIWrapper(config_path, cache_path))
     elif service_type == ServiceType.MB:
-        return MusicBrainz()
+        return MusicBrainz(MusicBrainzWrapper(cache_path))
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 
@@ -128,7 +128,11 @@ class PlaylistManager:
             self.playlists[name] = self.file_manager.load_playlist(name)
 
     def load_services(self) -> None:
-        self.services[ServiceType.MB.value] = MusicBrainz()
+        self.services[ServiceType.MB.value] = service_factory(
+            ServiceType.MB,
+            "MusicBrainz",
+            cache_path=self.file_manager.cache_path,
+        )
         for s in self.config.services.values():
             service_config_path = Path(s.config_path)
             self.services[s.name] = service_factory(

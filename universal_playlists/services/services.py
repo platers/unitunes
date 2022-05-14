@@ -43,7 +43,7 @@ class ServiceWrapper:
     cache_path: Path
     cache_name: str
 
-    def __init__(self, cache_name: str, cache_root: Path = Path("cache")) -> None:
+    def __init__(self, cache_name: str, cache_root: Path) -> None:
         self.cache_name = cache_name
         self.cache_path = cache_root / cache_name
         if not cache_root.exists():

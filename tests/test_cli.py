@@ -10,8 +10,8 @@ from universal_playlists.cli.cli import app
 from universal_playlists.cli.utils import get_playlist_manager
 from universal_playlists.main import PlaylistManager
 from universal_playlists.services.spotify import SpotifyAPIWrapper, SpotifyService
+from universal_playlists.types import ServiceType
 from universal_playlists.uri import SpotifyPlaylistURI
-from tests.test_spotify import spotify_service, spotify_wrapper
 
 
 runner = CliRunner()
@@ -38,9 +38,9 @@ def playlist_manager():
 
     yield get_playlist_manager(test_dir)
 
-    # delete all files except .cache
+    # delete all files except .cache and cache
     for f in test_dir.glob("*"):
-        if f.name == ".cache":
+        if f.name == ".cache" or f.name == "cache":
             continue
         if f.is_dir():
             shutil.rmtree(f)
@@ -156,3 +156,27 @@ def test_pull_playlist(pm_pulled_playlist):
     pl = pm_pulled_playlist.playlists["headphones"]
     assert len(pl.tracks) > 5
     assert pl.tracks[0].name.value == "Wilderness"
+
+
+@pytest.fixture
+def pm_searched_playlist(pm_pulled_playlist):
+    result = invoke_cli(["search", "mb", "headphones"])
+    assert result.exit_code == 0
+    yield get_playlist_manager(test_dir)
+
+
+def test_search_playlist(pm_searched_playlist):
+    assert "mb" in pm_searched_playlist.services
+    assert len(pm_searched_playlist.playlists) == 1
+    assert "headphones" in pm_searched_playlist.playlists
+    pl = pm_searched_playlist.playlists["headphones"]
+    assert len(pl.tracks) > 5
+    assert pl.tracks[0].name.value == "Wilderness"
+    print(pl.tracks[0])
+    track1 = pl.tracks[0]
+    assert track1.find_uri(ServiceType.MB)
+    assert track1.find_uri(ServiceType.SPOTIFY)
+    assert (
+        track1.find_uri(ServiceType.MB).url
+        == "https://musicbrainz.org/recording/8c7959e9-7487-485e-be9d-f00cd7e1d2be"
+    )

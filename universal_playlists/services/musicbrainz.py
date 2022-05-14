@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 from typing import List, Optional
 import musicbrainzngs as mb
@@ -6,7 +5,6 @@ from ratelimit import sleep_and_retry, limits
 
 
 import requests
-from universal_playlists.matcher import DefaultMatcherStrategy
 from universal_playlists.services.services import (
     Query,
     Searchable,
@@ -21,8 +19,8 @@ from universal_playlists.uri import MB_RECORDING_URI
 
 
 class MusicBrainzWrapper(ServiceWrapper):
-    def __init__(self) -> None:
-        super().__init__("musicbrainz")
+    def __init__(self, cache_root: Path) -> None:
+        super().__init__("musicbrainz", cache_root)
         mb.set_useragent("universal-playlist", "0.1")
 
     @sleep_and_retry
@@ -59,11 +57,9 @@ class MusicBrainzWrapper(ServiceWrapper):
 class MusicBrainz(StreamingService, Searchable, TrackPullable):
     wrapper: MusicBrainzWrapper
 
-    def __init__(
-        self,
-    ) -> None:
+    def __init__(self, wrapper: MusicBrainzWrapper) -> None:
         super().__init__("MusicBrainz", ServiceType.MB)
-        self.wrapper = MusicBrainzWrapper()
+        self.wrapper = wrapper
 
     @staticmethod
     def parse_track(recording):
