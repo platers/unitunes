@@ -25,11 +25,12 @@ from universal_playlists.services.services import (
     PlaylistPullable,
     Pushable,
     StreamingService,
+    UserPlaylistPullable,
 )
 from universal_playlists.track import Track, tracks_to_add, tracks_to_remove
 
 from universal_playlists.types import ServiceType
-from universal_playlists.uri import playlistURI_from_url
+from universal_playlists.uri import PlaylistURIs, playlistURI_from_url
 
 
 console = Console()
@@ -376,3 +377,39 @@ def list_cmd(plain: bool = False) -> None:
     print_grid(
         "Playlists", headers=["Name", "URIs", "# Tracks"], rows=grid, plain=plain
     )
+
+
+@app.command()
+def fetch(service_name: str) -> None:
+    """Quickly add playlists from a service to Universal Playlists"""
+
+    pm = get_playlist_manager(Path.cwd())
+    service = pm.services[service_name]
+    if not isinstance(service, UserPlaylistPullable):
+        console.print(f"Cannot fetch user playlists from {service.type}", style="red")
+        raise typer.Exit()
+
+    playlists = service.get_playlist_metadatas()
+    console.print(f"Found {len(playlists)} playlists")
+
+    for pl in playlists:
+        if pm.is_tracking_playlist(pl.uri):
+            console.print(f"Already tracking {pl.name}")
+            continue
+
+        track_pl = typer.confirm(
+            f"Add {pl.name} ({pl.uri.url}) to Universal Playlist?", default=True
+        )
+        if not track_pl:
+            continue
+
+        up_name = typer.prompt(f"UP name for {pl.name}", default=pl.name)
+        if up_name in pm.playlists:
+            pm.add_uri_to_playlist(up_name, service_name, pl.uri)
+            console.print(f"Added {pl.uri.url} to {up_name}")
+        else:
+            pm.add_playlist(up_name)
+            pm.add_uri_to_playlist(up_name, service_name, pl.uri)
+            console.print(f"Created playlist {up_name}")
+
+        pm.save_playlist(up_name)

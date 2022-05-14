@@ -161,6 +161,7 @@ class PlaylistManager:
         self.file_manager.save_config(self.config)
 
     def add_playlist(self, name: str) -> None:
+        """Initialize a UP. Raise ValueError if the playlist already exists."""
         self.config.add_playlist(name)
         self.playlists[name] = Playlist(name=name)
         self.file_manager.save_config(self.config)
@@ -169,6 +170,7 @@ class PlaylistManager:
     def add_uri_to_playlist(
         self, playlist_name: str, service_name: str, uri: PlaylistURIs
     ) -> None:
+        """Link a playlist URI to a UP. UP must exist."""
         pl = self.playlists[playlist_name]
         pl.set_uri(service_name, uri)
 
@@ -177,6 +179,12 @@ class PlaylistManager:
 
     def save_playlist(self, playlist_name: str) -> None:
         self.file_manager.save_playlist(self.playlists[playlist_name])
+
+    def is_tracking_playlist(self, uri: PlaylistURIs) -> bool:
+        for playlist in self.playlists.values():
+            if uri in playlist.uris.values():
+                return True
+        return False
 
 
 def get_predicted_tracks(

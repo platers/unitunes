@@ -65,4 +65,5 @@ def print_playlist(playlist: Playlist, plain: bool = False) -> None:
     console.print(playlist.name, style="bold")
     console.print(f"Description: {playlist.description}")
     console.print(f"{len(playlist.tracks)} tracks")
+    console.print(f"URIs: {', '.join([u.url for u in playlist.uris.values()])}")
     print_tracks(playlist.tracks, plain=plain)

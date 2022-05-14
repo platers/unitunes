@@ -180,3 +180,9 @@ def test_search_playlist(pm_searched_playlist):
         track1.find_uri(ServiceType.MB).url
         == "https://musicbrainz.org/recording/8c7959e9-7487-485e-be9d-f00cd7e1d2be"
     )
+
+
+def test_fetch(pm_with_spotify_service):
+    result = invoke_cli(["fetch", "spotify"])
+    assert result.exit_code == 0
+    # cant test much more, user specific
