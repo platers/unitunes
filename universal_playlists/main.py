@@ -1,11 +1,10 @@
 import json
 from typing import Dict, List, Optional
 from pathlib import Path
-import os
 from pydantic import BaseModel
-from universal_playlists.matcher import DefaultMatcherStrategy, MatcherStrategy
+from universal_playlists.matcher import MatcherStrategy
 from universal_playlists.playlist import Playlist
-from universal_playlists.searcher import DefaultSearcherStrategy, SearcherStrategy
+from universal_playlists.searcher import SearcherStrategy
 from universal_playlists.services.musicbrainz import MusicBrainz
 from universal_playlists.services.services import (
     Searchable,
@@ -17,9 +16,8 @@ from universal_playlists.services.services import (
 from universal_playlists.services.spotify import (
     SpotifyAPIWrapper,
     SpotifyService,
-    SpotifyWrapper,
 )
-from universal_playlists.services.ytm import YTM, YtmAPIWrapper, YtmWrapper
+from universal_playlists.services.ytm import YTM, YtmAPIWrapper
 from universal_playlists.track import Track
 from universal_playlists.types import ServiceType
 from universal_playlists.uri import PlaylistURIs, TrackURI
@@ -31,27 +29,14 @@ class ConfigServiceEntry(BaseModel):
     config_path: str
 
 
-class UPRelations(BaseModel):
-    uris: List[PlaylistURIs] = []
-
-    def add_uri(self, uri: PlaylistURIs):
-        if uri not in self.uris:
-            self.uris.append(uri)
-
-
 class Config(BaseModel):
     services: Dict[str, ConfigServiceEntry] = {}
-    playlists: Dict[str, UPRelations] = {}
+    playlists: List[str] = []
 
-    def add_playlist(self, name: str, uris: List[PlaylistURIs] = []):
+    def add_playlist(self, name: str):
         if name in self.playlists:
-            for uri in uris:
-                self.playlists[name].add_uri(uri)
-        else:
-            self.playlists[name] = UPRelations(uris=uris)
-
-    def playlist_names(self) -> List[str]:
-        return list(self.playlists.keys())
+            raise ValueError(f"Playlist {name} already exists")
+        self.playlists.append(name)
 
     def add_service(self, name: str, service: str, config_path: str):
         if name in self.services:
@@ -141,8 +126,7 @@ class PlaylistManager:
             )
 
         # create playlist objects
-        names = self.config.playlist_names()
-        for name in names:
+        for name in self.config.playlists:
             self.playlists[name] = self.file_manager.load_playlist(name)
 
     def add_service(
@@ -151,19 +135,17 @@ class PlaylistManager:
         self.config.add_service(name, service.value, service_config_path.as_posix())
         self.file_manager.save_config(self.config)
 
-    def add_playlist(self, name: str, uris: List[PlaylistURIs]) -> None:
-        self.config.add_playlist(name, uris)
-        self.playlists[name] = Playlist(name=name, uris=uris)
+    def add_playlist(self, name: str) -> None:
+        self.config.add_playlist(name)
+        self.playlists[name] = Playlist(name=name)
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(self.playlists[name])
 
-    def add_uris_to_playlist(
-        self, playlist_name: str, uris: List[PlaylistURIs]
+    def add_uri_to_playlist(
+        self, playlist_name: str, service_name: str, uri: PlaylistURIs
     ) -> None:
-        self.config.add_playlist(playlist_name, uris)
         pl = self.playlists[playlist_name]
-        for uri in uris:
-            pl.add_uri(uri)
+        pl.set_uri(service_name, uri)
 
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(pl)

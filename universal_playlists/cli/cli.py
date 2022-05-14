@@ -77,7 +77,7 @@ def expand_playlists(
     pm: PlaylistManager, playlist_names: Optional[List[str]]
 ) -> List[Playlist]:
     if not playlist_names:
-        playlist_names = list(pm.config.playlists.keys())
+        playlist_names = pm.config.playlists
 
     for playlist_name in playlist_names:
         if playlist_name not in pm.playlists:
@@ -237,7 +237,7 @@ def push(
                     continue
                 uri = service.create_playlist(pl.name)
                 console.print(f"Created {uri.url}")
-                pl.add_uri(uri)
+                pl.set_uri(service.name, uri)
                 pm.save_playlist(pl.name)
 
             current_tracks = service.pull_tracks(uri)
@@ -346,18 +346,18 @@ def search(
 
 
 @app.command()
-def add(name: str, urls: Optional[List[str]] = typer.Argument(None)) -> None:
+def add(name: str, service_name: str, url: Optional[str] = typer.Argument(None)):
     """Add a playlist to the config file"""
     pm = get_playlist_manager(Path.cwd())
-    urls = urls or []
-    uris = [playlistURI_from_url(url) for url in urls]
 
-    if name in pm.playlists:
-        pm.add_uris_to_playlist(name, uris)
-        typer.echo(f"Added {', '.join(urls)} to {name}")
-    else:
-        pm.add_playlist(name, uris)
-        typer.echo(f"Added playlist {name}")
+    if name not in pm.playlists:
+        pm.add_playlist(name)
+        console.print(f"Created playlist {name}")
+
+    if url is not None:
+        uri = playlistURI_from_url(url)
+        pm.add_uri_to_playlist(name, service_name, uri)
+        console.print(f"Added {uri.url} to {name}")
 
 
 @app.command(name="list")

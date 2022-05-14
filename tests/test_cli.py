@@ -99,6 +99,7 @@ def pm_added_playlist(pm_with_spotify_service):
         [
             "add",
             "headphones",
+            "spotify",
             "https://open.spotify.com/playlist/19TGUNYKnJ8N1bFe0oA5lv",
         ],
     )
@@ -111,6 +112,8 @@ def test_add_playlist(pm_added_playlist):
     assert "spotify" in pm_added_playlist.services
     assert len(pm_added_playlist.playlists) == 1
     assert "headphones" in pm_added_playlist.playlists
+    pl = pm_added_playlist.playlists["headphones"]
+    assert "spotify" in pl.uris
 
 
 @pytest.fixture
