@@ -380,7 +380,7 @@ def list_cmd(plain: bool = False) -> None:
 
 
 @app.command()
-def fetch(service_name: str) -> None:
+def fetch(service_name: str, force: bool = typer.Option(False, "--force", "-f")):
     """Quickly add playlists from a service to Universal Playlists"""
 
     pm = get_playlist_manager(Path.cwd())
@@ -397,13 +397,17 @@ def fetch(service_name: str) -> None:
             console.print(f"Already tracking {pl.name}")
             continue
 
-        track_pl = typer.confirm(
+        track_pl = force or typer.confirm(
             f"Add {pl.name} ({pl.uri.url}) to Universal Playlist?", default=True
         )
         if not track_pl:
             continue
 
-        up_name = typer.prompt(f"UP name for {pl.name}", default=pl.name)
+        up_name = (
+            pl.name
+            if force
+            else typer.prompt(f"UP name for {pl.name}", default=pl.name)
+        )
         if up_name in pm.playlists:
             pm.add_uri_to_playlist(up_name, service_name, pl.uri)
             console.print(f"Added {pl.uri.url} to {up_name}")
