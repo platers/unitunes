@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 import spotipy
 from spotipy import SpotifyOAuth
-from universal_playlists.playlist import Playlist, PlaylistMetadata
+from unitunes.playlist import Playlist, PlaylistMetadata
 
-from universal_playlists.services.services import (
+from unitunes.services.services import (
     Pushable,
     Searchable,
     ServiceWrapper,
@@ -13,9 +13,9 @@ from universal_playlists.services.services import (
     UserPlaylistPullable,
     cache,
 )
-from universal_playlists.track import AliasedString, Track
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import (
+from unitunes.track import AliasedString, Track
+from unitunes.types import ServiceType
+from unitunes.uri import (
     URI,
     PlaylistURI,
     PlaylistURIs,

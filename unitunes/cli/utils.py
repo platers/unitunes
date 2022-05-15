@@ -2,13 +2,13 @@ from pathlib import Path
 from typing import Any, List
 
 import typer
-from universal_playlists.main import FileManager, PlaylistManager
+from unitunes.main import FileManager, PlaylistManager
 from rich import print
 from rich.table import Table
 from rich.console import Console
-from universal_playlists.playlist import Playlist
+from unitunes.playlist import Playlist
 
-from universal_playlists.track import Track
+from unitunes.track import Track
 
 console = Console()
 
@@ -19,7 +19,7 @@ def get_playlist_manager(dir: Path) -> PlaylistManager:
         config = fm.load_config()
     except FileNotFoundError:
         typer.echo(
-            "Config file not found. Please run `universal-playlists init` to create a config file."
+            "Config file not found. Please run `unitunes init` to create a config file."
         )
         raise typer.Exit()
 

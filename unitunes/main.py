@@ -2,25 +2,25 @@ import json
 from typing import Dict, List, Optional
 from pathlib import Path
 from pydantic import BaseModel
-from universal_playlists.matcher import MatcherStrategy
-from universal_playlists.playlist import Playlist
-from universal_playlists.searcher import SearcherStrategy
-from universal_playlists.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
-from universal_playlists.services.services import (
+from unitunes.matcher import MatcherStrategy
+from unitunes.playlist import Playlist
+from unitunes.searcher import SearcherStrategy
+from unitunes.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
+from unitunes.services.services import (
     Searchable,
     StreamingService,
     TrackPullable,
 )
 
 
-from universal_playlists.services.spotify import (
+from unitunes.services.spotify import (
     SpotifyAPIWrapper,
     SpotifyService,
 )
-from universal_playlists.services.ytm import YTM, YtmAPIWrapper
-from universal_playlists.track import Track
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import PlaylistURIs, TrackURI
+from unitunes.services.ytm import YTM, YtmAPIWrapper
+from unitunes.track import Track
+from unitunes.types import ServiceType
+from unitunes.uri import PlaylistURIs, TrackURI
 
 
 class ConfigServiceEntry(BaseModel):

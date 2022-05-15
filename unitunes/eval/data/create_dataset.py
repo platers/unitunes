@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
-from universal_playlists.services.services import *
+from unitunes.services.services import *
 import os
 import pandas as pd
 from tqdm import tqdm
 
-from universal_playlists.services.spotify import SpotifyService
-from universal_playlists.uri import SpotifyTrackURI
+from unitunes.services.spotify import SpotifyService
+from unitunes.uri import SpotifyTrackURI
 
 
 def main():

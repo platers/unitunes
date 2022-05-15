@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Literal, Union
 from pydantic import BaseModel
 from pydantic.validators import dict_validator
-from universal_playlists.types import EntityType, ServiceType
+from unitunes.types import EntityType, ServiceType
 
 
 class URIBase(BaseModel, ABC):

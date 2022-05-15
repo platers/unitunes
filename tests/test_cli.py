@@ -6,12 +6,12 @@ import pytest
 from typer.testing import CliRunner
 import shutil
 
-from universal_playlists.cli.cli import app
-from universal_playlists.cli.utils import get_playlist_manager
-from universal_playlists.main import PlaylistManager
-from universal_playlists.services.spotify import SpotifyAPIWrapper, SpotifyService
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import SpotifyPlaylistURI
+from unitunes.cli.cli import app
+from unitunes.cli.utils import get_playlist_manager
+from unitunes.main import PlaylistManager
+from unitunes.services.spotify import SpotifyAPIWrapper, SpotifyService
+from unitunes.types import ServiceType
+from unitunes.uri import SpotifyPlaylistURI
 
 
 runner = CliRunner()

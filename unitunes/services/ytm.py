@@ -2,11 +2,11 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, List, Optional
 from ytmusicapi import YTMusic
-from universal_playlists.playlist import PlaylistMetadata
+from unitunes.playlist import PlaylistMetadata
 from youtube_title_parse import get_artist_title
 
 
-from universal_playlists.services.services import (
+from unitunes.services.services import (
     Pushable,
     Searchable,
     ServiceWrapper,
@@ -15,12 +15,12 @@ from universal_playlists.services.services import (
     UserPlaylistPullable,
     cache,
 )
-from universal_playlists.track import (
+from unitunes.track import (
     AliasedString,
     Track,
 )
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import (
+from unitunes.types import ServiceType
+from unitunes.uri import (
     PlaylistURI,
     PlaylistURIs,
     YtmPlaylistURI,

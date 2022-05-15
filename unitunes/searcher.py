@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List
-from universal_playlists.matcher import MatcherStrategy
-from universal_playlists.services.services import Searchable
+from unitunes.matcher import MatcherStrategy
+from unitunes.services.services import Searchable
 
-from universal_playlists.track import Track
+from unitunes.track import Track
 
 
 class SearcherStrategy(ABC):

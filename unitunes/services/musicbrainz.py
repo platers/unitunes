@@ -5,7 +5,7 @@ from ratelimit import sleep_and_retry, limits
 
 
 import requests
-from universal_playlists.services.services import (
+from unitunes.services.services import (
     Query,
     Searchable,
     ServiceWrapper,
@@ -13,20 +13,20 @@ from universal_playlists.services.services import (
     TrackPullable,
     cache,
 )
-from universal_playlists.track import AliasedString, Track
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import MB_RECORDING_URI
+from unitunes.track import AliasedString, Track
+from unitunes.types import ServiceType
+from unitunes.uri import MB_RECORDING_URI
 
 
 class MusicBrainzWrapper(ServiceWrapper):
     def __init__(self, cache_root: Path) -> None:
         super().__init__("musicbrainz", cache_root)
-        mb.set_useragent("universal-playlist", "0.1")
+        mb.set_useragent("unitunes", "0.1")
 
     @sleep_and_retry
     @limits(calls=1, period=1)
     def query_mb_api(self, query: str, params):
-        headers = {"User-Agent": "universal-playlist"}
+        headers = {"User-Agent": "unitunes"}
         r = requests.get(query, params=params, headers=headers)
         if r.status_code != 200:
             raise Exception(f"MusicBrainz API returned {r.status_code}")

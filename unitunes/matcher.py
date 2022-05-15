@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Callable
 from strsimpy.jaro_winkler import JaroWinkler
 
-from universal_playlists.track import AliasedString, Track
+from unitunes.track import AliasedString, Track
 
 
 def pairwise_max(a: List[Any], b: List[Any], f: Callable[[Any, Any], float]) -> float:

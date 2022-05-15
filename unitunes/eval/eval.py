@@ -4,17 +4,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 import typer
 from rich.console import Console
-from universal_playlists.main import service_factory
-from universal_playlists.matcher import DefaultMatcherStrategy
-from universal_playlists.searcher import DefaultSearcherStrategy
-from universal_playlists.services.services import (
+from unitunes.main import service_factory
+from unitunes.matcher import DefaultMatcherStrategy
+from unitunes.searcher import DefaultSearcherStrategy
+from unitunes.services.services import (
     Searchable,
     StreamingService,
     TrackPullable,
 )
 
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import TrackURI, URI_from_url, trackURI_from_url
+from unitunes.types import ServiceType
+from unitunes.uri import TrackURI, URI_from_url, trackURI_from_url
 
 """
 This is a script to help you test your matcher and searcher.

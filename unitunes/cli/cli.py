@@ -1,12 +1,12 @@
 from tqdm import tqdm
 import typer
-from universal_playlists.cli.utils import (
+from unitunes.cli.utils import (
     get_playlist_manager,
     print_grid,
     print_playlist,
     print_tracks,
 )
-from universal_playlists.main import (
+from unitunes.main import (
     Config,
     FileManager,
     PlaylistManager,
@@ -17,20 +17,20 @@ from typing import List, Optional
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
-from universal_playlists.cli.service_cli import service_app
-from universal_playlists.matcher import DefaultMatcherStrategy, MatcherStrategy
-from universal_playlists.playlist import Playlist
-from universal_playlists.searcher import DefaultSearcherStrategy
-from universal_playlists.services.services import (
+from unitunes.cli.service_cli import service_app
+from unitunes.matcher import DefaultMatcherStrategy, MatcherStrategy
+from unitunes.playlist import Playlist
+from unitunes.searcher import DefaultSearcherStrategy
+from unitunes.services.services import (
     PlaylistPullable,
     Pushable,
     StreamingService,
     UserPlaylistPullable,
 )
-from universal_playlists.track import Track, tracks_to_add, tracks_to_remove
+from unitunes.track import Track, tracks_to_add, tracks_to_remove
 
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import PlaylistURIs, playlistURI_from_url
+from unitunes.types import ServiceType
+from unitunes.uri import PlaylistURIs, playlistURI_from_url
 
 
 console = Console()

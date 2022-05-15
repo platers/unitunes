@@ -3,9 +3,9 @@ from pathlib import Path
 from typing import List, Optional
 import typer
 
-from universal_playlists.cli.utils import get_playlist_manager, print_grid
-from universal_playlists.services.services import UserPlaylistPullable
-from universal_playlists.types import ServiceType
+from unitunes.cli.utils import get_playlist_manager, print_grid
+from unitunes.services.services import UserPlaylistPullable
+from unitunes.types import ServiceType
 
 from rich.console import Console
 from rich.table import Table

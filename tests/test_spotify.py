@@ -3,13 +3,13 @@ from pathlib import Path
 from typing import Any, List
 
 import pytest
-from universal_playlists.services.services import cache
-from universal_playlists.services.spotify import (
+from unitunes.services.services import cache
+from unitunes.services.spotify import (
     SpotifyAPIWrapper,
     SpotifyService,
     SpotifyWrapper,
 )
-from universal_playlists.uri import SpotifyPlaylistURI, SpotifyTrackURI
+from unitunes.uri import SpotifyPlaylistURI, SpotifyTrackURI
 
 from tests.conftest import cache_path
 

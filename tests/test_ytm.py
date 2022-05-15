@@ -2,9 +2,9 @@ from pathlib import Path
 from typing import Any, List
 
 import pytest
-from universal_playlists.services.services import cache
-from universal_playlists.services.ytm import YTM, YtmAPIWrapper, YtmWrapper
-from universal_playlists.uri import YtmTrackURI
+from unitunes.services.services import cache
+from unitunes.services.ytm import YTM, YtmAPIWrapper, YtmWrapper
+from unitunes.uri import YtmTrackURI
 
 from tests.conftest import cache_path
 

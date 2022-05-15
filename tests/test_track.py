@@ -1,5 +1,5 @@
-from universal_playlists.track import AliasedString, Track
-from universal_playlists.uri import SpotifyTrackURI, YtmTrackURI
+from unitunes.track import AliasedString, Track
+from unitunes.uri import SpotifyTrackURI, YtmTrackURI
 
 
 def test_track_uri_matches():

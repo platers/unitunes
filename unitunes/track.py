@@ -3,8 +3,8 @@ from typing import (
     Optional,
 )
 from pydantic import BaseModel
-from universal_playlists.types import ServiceType
-from universal_playlists.uri import TrackURIs
+from unitunes.types import ServiceType
+from unitunes.uri import TrackURIs
 
 
 class AliasedString(BaseModel):
