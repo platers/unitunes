@@ -1,4 +1,5 @@
 import json
+import string
 from typing import Dict, List, Optional
 from pathlib import Path
 from pydantic import BaseModel
@@ -84,7 +85,18 @@ class FileManager:
         self.cache_path = dir / "cache"
 
     def get_playlist_path(self, name: str) -> Path:
-        return self.playlist_folder / f"{name}.json"
+        def format_filename(s):
+            """Take a string and return a valid filename constructed from the string.
+            Uses a whitelist approach: any characters not present in valid_chars are
+            removed. Also spaces are replaced with underscores.
+            Source: https://gist.github.com/seanh/93666
+            """
+            valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+            filename = "".join(c for c in s if c in valid_chars)
+            filename = filename.replace(" ", "_")
+            return filename
+
+        return self.playlist_folder / f"{format_filename(name)}.json"
 
     def make_playlist_dir(self) -> None:
         self.playlist_folder.mkdir(exist_ok=True)

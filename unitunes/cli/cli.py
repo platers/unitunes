@@ -190,10 +190,10 @@ def pull(
             new_tracks.extend(added)
             removed_tracks.extend(removed)
 
-        console.print(f"{len(new_tracks)} new tracks")
+        console.print(f"{len(new_tracks)} new tracks in {pl.name}")
         if verbose:
             print_tracks(new_tracks)
-        console.print(f"{len(removed_tracks)} removed tracks")
+        console.print(f"{len(removed_tracks)} removed tracks in {pl.name}")
         if verbose:
             print_tracks(removed_tracks)
 

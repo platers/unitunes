@@ -3,6 +3,7 @@ name = "unitunes"
 version = "0.1.0"
 description = ""
 authors = ["platers <platers81@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.scripts]
 unitunes = "unitunes.cli.cli:app"

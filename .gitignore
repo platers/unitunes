@@ -4,3 +4,4 @@ service_configs
 */eval/data/cache
 *-raw
 .vscode
+dist

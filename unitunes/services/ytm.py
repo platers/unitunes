@@ -142,9 +142,12 @@ class YTM(
     def results_to_tracks(self, results: list[dict]) -> List[Track]:
         songs = filter(lambda x: "videoId" in x or "videoDetails" in x, results)
         return list(
-            map(
-                self.raw_to_track,
-                songs,
+            filter(
+                None,
+                map(
+                    self.raw_to_track,
+                    songs,
+                ),
             )
         )
 
@@ -152,9 +155,9 @@ class YTM(
         tracks = self.wrapper.get_playlist(uri.uri)["tracks"]
         return self.results_to_tracks(tracks)
 
-    def parse_video_details(self, details: dict) -> Track:
+    def parse_video_details(self, details: dict) -> Optional[Track]:
         title = details["title"]
-        if details["musicVideoType"] == "MUSIC_VIDEO_TYPE_UGC":
+        if details["musicVideoType"] == "MUSIC_VIDEO_TYPE_UGC":  # messy title
             artist_title_tuple = get_artist_title(title)
             if artist_title_tuple:
                 artist, title = artist_title_tuple
@@ -163,6 +166,9 @@ class YTM(
         else:
             artist = details["author"]
 
+        if "videoId" not in details:
+            return None
+
         return Track(
             name=AliasedString(title),
             artists=[AliasedString(artist)] if artist else [],
@@ -170,9 +176,12 @@ class YTM(
             uris=[YtmTrackURI.from_uri(details["videoId"])],
         )
 
-    def raw_to_track(self, raw: dict) -> Track:
+    def raw_to_track(self, raw: dict) -> Optional[Track]:
         if "videoDetails" in raw:
             return self.parse_video_details(raw["videoDetails"])
+
+        if "videoId" not in raw or raw["videoId"] is None:
+            return None
 
         return Track(
             name=AliasedString(raw["title"]),
@@ -185,8 +194,10 @@ class YTM(
         )
 
     def pull_track(self, uri: YtmTrackURI) -> Track:
-        track = self.wrapper.get_song(uri.uri)
-        return self.raw_to_track(track)
+        raw = self.wrapper.get_song(uri.uri)
+        track = self.raw_to_track(raw)
+        assert track is not None
+        return track
 
     def search_query(self, query: str) -> List[Track]:
         results = self.wrapper.search(query)
