@@ -1,6 +1,6 @@
 # `unitunes`
 
-Unitunes playlist manager
+Unitunes playlist manager.
 
 **Usage**:
 
@@ -23,7 +23,7 @@ $ unitunes [OPTIONS] COMMAND [ARGS]...
 * `pull`: Pull playlist tracks from services.
 * `push`: Push playlist tracks to services.
 * `search`: Search for tracks on a service.
-* `service`: Manage services
+* `service`: Manage services.
 * `view`: Show a playlists metadata and tracks.
 
 ## `unitunes add`
@@ -36,12 +36,12 @@ Otherwise, a new playlist will be created.
 **Usage**:
 
 ```console
-$ unitunes add [OPTIONS] NAME SERVICE_NAME [URL]
+$ unitunes add [OPTIONS] PLAYLIST_NAME SERVICE_NAME [URL]
 ```
 
 **Arguments**:
 
-* `NAME`: [required]
+* `PLAYLIST_NAME`: [required]
 * `SERVICE_NAME`: [required]
 * `[URL]`
 
@@ -56,16 +56,16 @@ Quickly add playlists from a service.
 **Usage**:
 
 ```console
-$ unitunes fetch [OPTIONS] SERVICE_NAME
+$ unitunes fetch [OPTIONS] [SERVICE_NAME]
 ```
 
 **Arguments**:
 
-* `SERVICE_NAME`: [required]
+* `[SERVICE_NAME]`: Service to fetch from.
 
 **Options**:
 
-* `-f, --force`: [default: False]
+* `-f, --force`: Auto accept prompts.  [default: False]
 * `--help`: Show this message and exit.
 
 ## `unitunes init`
@@ -80,7 +80,7 @@ $ unitunes init [OPTIONS] [DIRECTORY]
 
 **Arguments**:
 
-* `[DIRECTORY]`: Directory to store playlist files in  [default: .]
+* `[DIRECTORY]`: Directory to store playlist files in.  [default: .]
 
 **Options**:
 
@@ -105,6 +105,9 @@ $ unitunes list [OPTIONS]
 
 Pull playlist tracks from services.
 
+If no playlist is specified, all playlists are pulled.
+If no service is specified, all services are used.
+
 **Usage**:
 
 ```console
@@ -113,17 +116,20 @@ $ unitunes pull [OPTIONS] [PLAYLIST_NAMES]...
 
 **Arguments**:
 
-* `[PLAYLIST_NAMES]...`: Playlist names to pull from services
+* `[PLAYLIST_NAMES]...`: Playlists to pull from services. If not specified, all playlists are pulled.
 
 **Options**:
 
-* `-s, --service TEXT`: Services to pull from
+* `-s, --service TEXT`: Services to pull from. If not specified, all services are used.
 * `-v, --verbose`: [default: False]
 * `--help`: Show this message and exit.
 
 ## `unitunes push`
 
 Push playlist tracks to services.
+
+If no playlist is specified, all playlists are pushed.
+If no service is specified, all services are used.
 
 **Usage**:
 
@@ -133,11 +139,11 @@ $ unitunes push [OPTIONS] [PLAYLIST_NAMES]...
 
 **Arguments**:
 
-* `[PLAYLIST_NAMES]...`: Playlist names to push to services
+* `[PLAYLIST_NAMES]...`: Playlists to push to services. If not specified, all playlists are pushed.
 
 **Options**:
 
-* `-s, --service TEXT`: Service to push to
+* `-s, --service TEXT`: Services to push to. If not specified, all services are used.
 * `--help`: Show this message and exit.
 
 ## `unitunes search`
@@ -159,15 +165,15 @@ $ unitunes search [OPTIONS] SERVICE:[spotify|ytm|mb] PLAYLIST
 
 **Options**:
 
-* `--showall / --no-showall`: [default: False]
-* `--debug / --no-debug`: [default: False]
-* `--onlyfailed / --no-onlyfailed`: [default: False]
-* `-p, --preview`: Preview tracks to add  [default: False]
+* `-p, --preview`: Preview tracks to add without adding them.  [default: False]
+* `-d, --debug`: Show debug information  [default: False]
+* `--onlyfailed`: Only show failed tracks in debug information.  [default: False]
+* `--showall`: Show all tracks in debug information.  [default: False]
 * `--help`: Show this message and exit.
 
 ## `unitunes service`
 
-Manage services
+Manage services.
 
 **Usage**:
 
@@ -190,17 +196,19 @@ $ unitunes service [OPTIONS] COMMAND [ARGS]...
 
 Add a service.
 
+If no namm is provided, the service type will be used as the name.
+
 **Usage**:
 
 ```console
-$ unitunes service add [OPTIONS] SERVICE:[spotify|ytm|mb] SERVICE_CONFIG_PATH [NAME]
+$ unitunes service add [OPTIONS] [SERVICE_TYPE]:[spotify|ytm|mb] [SERVICE_CONFIG_PATH] [SERVICE_NAME]
 ```
 
 **Arguments**:
 
-* `SERVICE:[spotify|ytm|mb]`: [required]
-* `SERVICE_CONFIG_PATH`: [required]
-* `[NAME]`
+* `[SERVICE_TYPE]:[spotify|ytm|mb]`: Service to add.
+* `[SERVICE_CONFIG_PATH]`: Path to service config.
+* `[SERVICE_NAME]`: Name of service. Defaults to service type.
 
 **Options**:
 
@@ -246,12 +254,12 @@ Remove a service.
 **Usage**:
 
 ```console
-$ unitunes service remove [OPTIONS] NAME
+$ unitunes service remove [OPTIONS] SERVICE_NAME
 ```
 
 **Arguments**:
 
-* `NAME`: [required]
+* `SERVICE_NAME`: [required]
 
 **Options**:
 

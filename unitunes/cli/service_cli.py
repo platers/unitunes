@@ -16,22 +16,28 @@ console = Console()
 
 @service_app.command()
 def add(
-    service: ServiceType,
-    service_config_path: str,
-    name: Optional[str] = typer.Argument(None),
+    service_type: ServiceType = typer.Argument(None, help="Service to add."),
+    service_config_path: str = typer.Argument(None, help="Path to service config."),
+    service_name: Optional[str] = typer.Argument(
+        None, help="Name of service. Defaults to service type."
+    ),
 ) -> None:
-    """Add a service."""
+    """
+    Add a service.
+
+    If no namm is provided, the service type will be used as the name.
+    """
 
     pm = get_playlist_manager(Path.cwd())
-    if not name:
-        name = service.value
-    assert name
+    if not service_name:
+        service_name = service_type.value
+    assert service_name
     try:
-        pm.add_service(service, Path(service_config_path), name)
+        pm.add_service(service_type, Path(service_config_path), service_name)
     except ValueError as e:
-        console.print(f"Service with name {name} already exists")
+        console.print(f"Service with name {service_name} already exists")
         raise typer.Exit(1)
-    typer.echo(f"Added {service.value, service_config_path}")
+    typer.echo(f"Added {service_type.value, service_config_path}")
 
 
 @service_app.command()
@@ -47,22 +53,22 @@ def list(plain: bool = False) -> None:
 
 @service_app.command()
 def remove(
-    name: str, force: Optional[bool] = typer.Option(False, "--force", "-f")
+    service_name: str, force: Optional[bool] = typer.Option(False, "--force", "-f")
 ) -> None:
     """Remove a service."""
 
     pm = get_playlist_manager(Path.cwd())
-    if name not in pm.config.services:
-        console.print(f"Service with name {name} does not exist")
+    if service_name not in pm.config.services:
+        console.print(f"Service with name {service_name} does not exist")
         raise typer.Exit(1)
 
     if not force:
         typer.confirm(
-            f"Are you sure you want to remove service{name}? This will remove {name} from all playlists.",
+            f"Are you sure you want to remove service{service_name}? This will remove {service_name} from all playlists.",
             abort=True,
         )
-    pm.remove_service(name)
-    typer.echo(f"Removed {name}")
+    pm.remove_service(service_name)
+    typer.echo(f"Removed {service_name}")
 
 
 @service_app.command()

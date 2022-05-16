@@ -34,15 +34,15 @@ from unitunes.uri import playlistURI_from_url
 
 
 console = Console()
-app = typer.Typer(no_args_is_help=True, help="Unitunes playlist manager")
-app.add_typer(service_app, name="service", help="Manage services")
+app = typer.Typer(no_args_is_help=True, help="Unitunes playlist manager.")
+app.add_typer(service_app, name="service", help="Manage services.")
 
 
 @app.command()
 def init(
     directory: Optional[Path] = typer.Argument(
         Path("."),
-        help="Directory to store playlist files in",
+        help="Directory to store playlist files in.",
     )
 ) -> None:
     """Create a new playlist manager."""
@@ -138,13 +138,14 @@ def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
 @app.command()
 def pull(
     playlist_names: Optional[List[str]] = typer.Argument(
-        None, help="Playlist names to pull from services"
+        None,
+        help="Playlists to pull from services. If not specified, all playlists are pulled.",
     ),
     service_names: Optional[List[str]] = typer.Option(
         None,
         "--service",
         "-s",
-        help="Services to pull from",
+        help="Services to pull from. If not specified, all services are used.",
     ),
     verbose: bool = typer.Option(
         False,
@@ -152,7 +153,12 @@ def pull(
         "-v",
     ),
 ):
-    """Pull playlist tracks from services."""
+    """
+    Pull playlist tracks from services.
+
+    If no playlist is specified, all playlists are pulled.
+    If no service is specified, all services are used.
+    """
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
@@ -206,16 +212,22 @@ def pull(
 @app.command()
 def push(
     playlist_names: Optional[List[str]] = typer.Argument(
-        None, help="Playlist names to push to services"
+        None,
+        help="Playlists to push to services. If not specified, all playlists are pushed.",
     ),
     service_names: Optional[List[str]] = typer.Option(
         None,
         "--service",
         "-s",
-        help="Service to push to",
+        help="Services to push to. If not specified, all services are used.",
     ),
 ):
-    """Push playlist tracks to services."""
+    """
+    Push playlist tracks to services.
+
+    If no playlist is specified, all playlists are pushed.
+    If no service is specified, all services are used.
+    """
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
@@ -271,14 +283,27 @@ def push(
 def search(
     service: ServiceType,
     playlist: str,
-    showall: bool = False,
-    debug: bool = False,  # TODO: clean up api
-    onlyfailed: bool = False,
     preview: bool = typer.Option(
         False,
         "--preview",
         "-p",
-        help="Preview tracks to add",
+        help="Preview tracks to add without adding them.",
+    ),
+    debug: bool = typer.Option(
+        False,
+        "--debug",
+        "-d",
+        help="Show debug information",
+    ),
+    onlyfailed: bool = typer.Option(
+        False,
+        "--onlyfailed",
+        help="Only show failed tracks in debug information.",
+    ),
+    showall: bool = typer.Option(
+        False,
+        "--showall",
+        help="Show all tracks in debug information.",
     ),
 ) -> None:
     """
@@ -356,7 +381,9 @@ def search(
 
 
 @app.command()
-def add(name: str, service_name: str, url: Optional[str] = typer.Argument(None)):
+def add(
+    playlist_name: str, service_name: str, url: Optional[str] = typer.Argument(None)
+):
     """
     Add a playlist to the config file.
 
@@ -365,14 +392,14 @@ def add(name: str, service_name: str, url: Optional[str] = typer.Argument(None))
     """
     pm = get_playlist_manager(Path.cwd())
 
-    if name not in pm.playlists:
-        pm.add_playlist(name)
-        console.print(f"Created playlist {name}")
+    if playlist_name not in pm.playlists:
+        pm.add_playlist(playlist_name)
+        console.print(f"Created playlist {playlist_name}")
 
     if url is not None:
         uri = playlistURI_from_url(url)
-        pm.add_uri_to_playlist(name, service_name, uri)
-        console.print(f"Added {uri.url} to {name}")
+        pm.add_uri_to_playlist(playlist_name, service_name, uri)
+        console.print(f"Added {uri.url} to {playlist_name}")
 
 
 @app.command(name="list")
@@ -394,7 +421,10 @@ def list_cmd(plain: bool = False) -> None:
 
 
 @app.command()
-def fetch(service_name: str, force: bool = typer.Option(False, "--force", "-f")):
+def fetch(
+    service_name: str = typer.Argument(None, help="Service to fetch from."),
+    force: bool = typer.Option(False, "--force", "-f", help="Auto accept prompts."),
+) -> None:
     """Quickly add playlists from a service."""
 
     pm = get_playlist_manager(Path.cwd())
