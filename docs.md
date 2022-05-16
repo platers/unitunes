@@ -1,6 +1,6 @@
 # `unitunes`
 
-Unitunes playlist manager.
+Unitunes playlist manager. https://github.com/platers/unitunes
 
 **Usage**:
 
@@ -53,6 +53,8 @@ $ unitunes add [OPTIONS] PLAYLIST_NAME SERVICE_NAME [URL]
 
 Quickly add playlists from a service.
 
+Asks for confirmation before adding each playlist unless the force flag is set.
+
 **Usage**:
 
 ```console
@@ -71,6 +73,8 @@ $ unitunes fetch [OPTIONS] [SERVICE_NAME]
 ## `unitunes init`
 
 Create a new playlist manager.
+
+Creates a new playlist manager in the given directory.
 
 **Usage**:
 
@@ -128,6 +132,8 @@ $ unitunes pull [OPTIONS] [PLAYLIST_NAMES]...
 
 Push playlist tracks to services.
 
+Asks for confirmation before pushing.
+
 If no playlist is specified, all playlists are pushed.
 If no service is specified, all services are used.
 
@@ -148,20 +154,20 @@ $ unitunes push [OPTIONS] [PLAYLIST_NAMES]...
 
 ## `unitunes search`
 
-Search for tracks on a service.
+Search for tracks on a service. Adds found URI's to tracks.
 
-If preview is set, URI's will not be added to the playlist.
+If the preview flag is set, URI's will not be added.
 
 **Usage**:
 
 ```console
-$ unitunes search [OPTIONS] SERVICE:[spotify|ytm|mb] PLAYLIST
+$ unitunes search [OPTIONS] SERVICE:[spotify|ytm|mb] PLAYLIST_NAME
 ```
 
 **Arguments**:
 
 * `SERVICE:[spotify|ytm|mb]`: [required]
-* `PLAYLIST`: [required]
+* `PLAYLIST_NAME`: [required]
 
 **Options**:
 

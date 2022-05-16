@@ -231,6 +231,8 @@ def push(
     """
     Push playlist tracks to services.
 
+    Asks for confirmation before pushing.
+
     If no playlist is specified, all playlists are pushed.
     If no service is specified, all services are used.
     """
@@ -288,7 +290,7 @@ def push(
 @app.command()
 def search(
     service: ServiceType,
-    playlist: str,
+    playlist_name: str,
     preview: bool = typer.Option(
         False,
         "--preview",
@@ -313,14 +315,14 @@ def search(
     ),
 ) -> None:
     """
-    Search for tracks on a service.
+    Search for tracks on a service. Adds found URI's to tracks.
 
-    If preview is set, URI's will not be added to the playlist.
+    If the preview flag is set, URI's will not be added.
     """
-    typer.echo(f"Searching {service.value} for {playlist}")
+    typer.echo(f"Searching {service.value} for {playlist_name}")
 
     pm = get_playlist_manager(Path.cwd())
-    pl = pm.playlists[playlist]
+    pl = pm.playlists[playlist_name]
     original_tracks = pl.tracks
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
     matcher = DefaultMatcherStrategy()
@@ -344,7 +346,7 @@ def search(
         original.merge(predicted)
 
     if not preview:
-        pm.save_playlist(playlist)
+        pm.save_playlist(playlist_name)
 
     if debug:
         all_predicted_tracks = [
@@ -352,7 +354,9 @@ def search(
             for track in original_tracks
         ]
 
-        table = Table(title=f"Uncertain {service.value} search results for {playlist}")
+        table = Table(
+            title=f"Uncertain {service.value} search results for {playlist_name}"
+        )
         table.add_column("Original Track")
         table.add_column("Predicted Track")
         table.add_column("Confidence")
@@ -431,7 +435,11 @@ def fetch(
     service_name: str = typer.Argument(None, help="Service to fetch from."),
     force: bool = typer.Option(False, "--force", "-f", help="Auto accept prompts."),
 ) -> None:
-    """Quickly add playlists from a service."""
+    """
+    Quickly add playlists from a service.
+
+    Asks for confirmation before adding each playlist unless the force flag is set.
+    """
 
     pm = get_playlist_manager(Path.cwd())
     service = pm.services[service_name]
