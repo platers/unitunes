@@ -1,6 +1,5 @@
-# unitunes
+# unitunes [![PyPI version](https://badge.fury.io/py/unitunes.svg)](https://badge.fury.io/py/unitunes) ![example workflow](https://github.com/platers/unitunes/actions/workflows/github-actions.yml/badge.svg)
 
-[![PyPI version](https://badge.fury.io/py/unitunes.svg)](https://badge.fury.io/py/unitunes)
 ![unituneslogo](https://github.com/platers/unitunes/blob/master/unitunes.png?raw=true)
 
 A command-line interface tool to manage playlists across music streaming services.
