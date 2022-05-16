@@ -1,9 +1,20 @@
 [tool.poetry]
 name = "unitunes"
 version = "0.1.0"
-description = ""
+description = "A CLI tool to manage playlists across music streaming services."
 authors = ["platers <platers81@gmail.com>"]
 readme = "README.md"
+license = "GPLv3"
+homepage = "https://github.com/platers/unitunes"
+keywords = ["cli", "music", "playlist", "playlists", "spotify", "ytmusic", "musicbrainz"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Topic :: Utilities",
+]
 
 [tool.poetry.scripts]
 unitunes = "unitunes.cli.cli:app"
