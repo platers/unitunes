@@ -1,5 +1,7 @@
 # unitunes
 
+![unituneslogo](unitunes.png)
+
 A command-line interface tool to manage playlists across music streaming services.
 
 unitunes is in alpha stage. The CLI will change and is sparsely documented. Contributors and testers are very welcome.
