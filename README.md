@@ -19,7 +19,7 @@ unitunes stores your playlists in plain text, allowing you to version control yo
 | Spotify       |    ✅    |    ✅    |     ✅     |
 | Youtube Music |    ✅    |    ✅    |     ✅     |
 
-Want to add support for another streaming service? See [contributing](#contributing).
+Want to add support for another service? See [contributing](#contributing).
 
 ## Documentation
 
@@ -112,8 +112,19 @@ unitunes is in alpha. Contributions are very welcome. I am looking for collabora
 
 Take a look at the open issues!
 
-To develop, fork the repository and clone it into your local directory. Install [poetry](https://python-poetry.org/).
-Run `pytest` to run tests. Add a service config to run more tests.
+### Development Setup
+
+1. Fork and clone the repository.
+2. Install [poetry](https://python-poetry.org/).
+3. In the root directory, run `poetry shell`.
+4. Run `poetry install`.
+5. `unitunes` should now be runnable.
+
+#### Testing
+
+Run `pytest` to run tests. With no arguments, it will skip tests that require service configs.
+
+Add a service config to run more tests.
 
 ```bash
 pytest --spotify spotify_config.json --ytm ytm_config.json # may need to run with -s to paste spotify redirect URL the first time
