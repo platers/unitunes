@@ -34,7 +34,10 @@ from unitunes.uri import playlistURI_from_url
 
 
 console = Console()
-app = typer.Typer(no_args_is_help=True, help="Unitunes playlist manager.")
+app = typer.Typer(
+    no_args_is_help=True,
+    help="Unitunes playlist manager. https://github.com/platers/unitunes",
+)
 app.add_typer(service_app, name="service", help="Manage services.")
 
 
@@ -45,7 +48,11 @@ def init(
         help="Directory to store playlist files in.",
     )
 ) -> None:
-    """Create a new playlist manager."""
+    """
+    Create a new playlist manager.
+
+    Creates a new playlist manager in the given directory.
+    """
     if not directory:
         directory = Path(".")
     fm = FileManager(directory)
@@ -102,39 +109,6 @@ def expand_services(
     return [pm.services[service_name] for service_name in service_names]
 
 
-def merge_new_tracks(
-    tracks: List[Track], new_tracks: List[Track], matcher: MatcherStrategy
-) -> None:
-    for track in new_tracks:
-        matches = [t for t in tracks if matcher.are_same(t, track)]
-        if matches:
-            for match in matches:
-                match.merge(track)
-        else:
-            tracks.append(track)
-
-
-def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
-    for track in removed_tracks:
-        matches = [t for t in tracks if t.shares_uri(track)]
-        if not matches:
-            # already removed
-            continue
-
-        console.print(f"Track {track.name.value} not found in playlist")
-        incorrect = typer.confirm("Incorrect match?")
-        if incorrect:
-            # remove uri
-            for t in matches:
-                t.uris.remove(track.uris[0])
-                console.print(f"Removed {track.uris[0]} from {t}")
-        else:
-            # remove track
-            for t in matches:
-                tracks.remove(t)
-                console.print(f"Removed {t}")
-
-
 @app.command()
 def pull(
     playlist_names: Optional[List[str]] = typer.Argument(
@@ -159,6 +133,38 @@ def pull(
     If no playlist is specified, all playlists are pulled.
     If no service is specified, all services are used.
     """
+
+    def merge_new_tracks(
+        tracks: List[Track], new_tracks: List[Track], matcher: MatcherStrategy
+    ) -> None:
+        for track in new_tracks:
+            matches = [t for t in tracks if matcher.are_same(t, track)]
+            if matches:
+                for match in matches:
+                    match.merge(track)
+            else:
+                tracks.append(track)
+
+    def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
+        for track in removed_tracks:
+            matches = [t for t in tracks if t.shares_uri(track)]
+            if not matches:
+                # already removed
+                continue
+
+            console.print(f"Track {track.name.value} not found in playlist")
+            incorrect = typer.confirm("Incorrect match?")
+            if incorrect:
+                # remove uri
+                for t in matches:
+                    t.uris.remove(track.uris[0])
+                    console.print(f"Removed {track.uris[0]} from {t}")
+            else:
+                # remove track
+                for t in matches:
+                    tracks.remove(t)
+                    console.print(f"Removed {t}")
+
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
