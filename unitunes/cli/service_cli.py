@@ -1,6 +1,5 @@
-import os
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 import typer
 
 from unitunes.cli.utils import get_playlist_manager, print_grid
@@ -21,7 +20,7 @@ def add(
     service_config_path: str,
     name: Optional[str] = typer.Argument(None),
 ) -> None:
-    """Add a service to the config file"""
+    """Add a service."""
 
     pm = get_playlist_manager(Path.cwd())
     if not name:
@@ -37,7 +36,7 @@ def add(
 
 @service_app.command()
 def list(plain: bool = False) -> None:
-    """List all services"""
+    """List all services."""
 
     pm = get_playlist_manager(Path.cwd())
     grid = [[s.name, s.service, s.config_path] for s in pm.config.services.values()]
@@ -50,7 +49,7 @@ def list(plain: bool = False) -> None:
 def remove(
     name: str, force: Optional[bool] = typer.Option(False, "--force", "-f")
 ) -> None:
-    """Remove a service from the config file"""
+    """Remove a service."""
 
     pm = get_playlist_manager(Path.cwd())
     if name not in pm.config.services:
@@ -68,7 +67,7 @@ def remove(
 
 @service_app.command()
 def playlists(service_name: str) -> None:
-    """List all user playlists on a service"""
+    """List all user playlists on a service."""
 
     pm = get_playlist_manager(Path.cwd())
     service = pm.services[service_name]

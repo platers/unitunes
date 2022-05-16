@@ -30,11 +30,11 @@ from unitunes.services.services import (
 from unitunes.track import Track, tracks_to_add, tracks_to_remove
 
 from unitunes.types import ServiceType
-from unitunes.uri import PlaylistURIs, playlistURI_from_url
+from unitunes.uri import playlistURI_from_url
 
 
 console = Console()
-app = typer.Typer(no_args_is_help=True)
+app = typer.Typer(no_args_is_help=True, help="Unitunes playlist manager")
 app.add_typer(service_app, name="service", help="Manage services")
 
 
@@ -45,7 +45,7 @@ def init(
         help="Directory to store playlist files in",
     )
 ) -> None:
-    """Initialize a new playlist manager"""
+    """Create a new playlist manager."""
     if not directory:
         directory = Path(".")
     fm = FileManager(directory)
@@ -64,7 +64,7 @@ def init(
 
 @app.command()
 def view(playlist: str) -> None:
-    """View a playlist"""
+    """Show a playlists metadata and tracks."""
     pm = get_playlist_manager(Path.cwd())
     if playlist not in pm.playlists:
         console.print(f"{playlist} is not a playlist", style="red")
@@ -144,7 +144,7 @@ def pull(
         None,
         "--service",
         "-s",
-        help="Service to pull from",
+        help="Services to pull from",
     ),
     verbose: bool = typer.Option(
         False,
@@ -152,7 +152,7 @@ def pull(
         "-v",
     ),
 ):
-    """Pull a playlist from a service"""
+    """Pull playlist tracks from services."""
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
@@ -215,7 +215,7 @@ def push(
         help="Service to push to",
     ),
 ):
-    """Push a playlist to a service."""
+    """Push playlist tracks to services."""
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
@@ -272,11 +272,20 @@ def search(
     service: ServiceType,
     playlist: str,
     showall: bool = False,
-    debug: bool = False,
+    debug: bool = False,  # TODO: clean up api
     onlyfailed: bool = False,
-    save: bool = True,
+    preview: bool = typer.Option(
+        False,
+        "--preview",
+        "-p",
+        help="Preview tracks to add",
+    ),
 ) -> None:
-    """Search for every track in the playlist on the service"""
+    """
+    Search for tracks on a service.
+
+    If preview is set, URI's will not be added to the playlist.
+    """
     typer.echo(f"Searching {service.value} for {playlist}")
 
     pm = get_playlist_manager(Path.cwd())
@@ -303,7 +312,7 @@ def search(
         )  # no highlight for clarity
         original.merge(predicted)
 
-    if save:
+    if not preview:
         pm.save_playlist(playlist)
 
     if debug:
@@ -348,7 +357,12 @@ def search(
 
 @app.command()
 def add(name: str, service_name: str, url: Optional[str] = typer.Argument(None)):
-    """Add a playlist to the config file"""
+    """
+    Add a playlist to the config file.
+
+    If a playlist with the same name already exists, the url will be added to the playlist.
+    Otherwise, a new playlist will be created.
+    """
     pm = get_playlist_manager(Path.cwd())
 
     if name not in pm.playlists:
@@ -363,7 +377,7 @@ def add(name: str, service_name: str, url: Optional[str] = typer.Argument(None))
 
 @app.command(name="list")
 def list_cmd(plain: bool = False) -> None:
-    """List all playlists"""
+    """List all playlists."""
     pm = get_playlist_manager(Path.cwd())
     grid = [
         [
@@ -381,7 +395,7 @@ def list_cmd(plain: bool = False) -> None:
 
 @app.command()
 def fetch(service_name: str, force: bool = typer.Option(False, "--force", "-f")):
-    """Quickly add playlists from a service to Universal Playlists"""
+    """Quickly add playlists from a service."""
 
     pm = get_playlist_manager(Path.cwd())
     service = pm.services[service_name]
@@ -398,7 +412,7 @@ def fetch(service_name: str, force: bool = typer.Option(False, "--force", "-f"))
             continue
 
         track_pl = force or typer.confirm(
-            f"Add {pl.name} ({pl.uri.url}) to Universal Playlist?", default=True
+            f"Add {pl.name} ({pl.uri.url})?", default=True
         )
         if not track_pl:
             continue
