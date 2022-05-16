@@ -7,12 +7,9 @@ A command-line interface tool to manage playlists across music streaming service
 
 ## Introduction
 
-unitunes is designed to keep playlists in sync across multiple streaming services.
-unitunes is a free, local, replacement for services like Soundiiz and TuneMyMusic.
+unitunes manages playlists across streaming services. unitunes can transfer songs between services and keep playlists in sync.
 
-unitunes defines Universal Playlists (UPs), a service agnostic representation of a playlist. UPs are the source of truth for playlists on streaming services. UPs are stored as plain text JSON, enabling them to be checked into version control systems.
-
-The unitunes CLI tool provides a command-line interface to manage UPs. Playlists can be pushed and pulled from streaming services. unitunes automatically searches for missing tracks.
+unitunes stores your playlists in plain text, allowing you to version control your music. Playlists can be pushed and pulled from streaming services. Tracks from one service can be searched on another.
 
 ### Current Supported Streaming Services
 
@@ -22,7 +19,7 @@ The unitunes CLI tool provides a command-line interface to manage UPs. Playlists
 | Spotify       |    ✅    |    ✅    |     ✅     |
 | Youtube Music |    ✅    |    ✅    |     ✅     |
 
-Want to add support for a new streaming service? See [contributing](#contributing).
+Want to add support for another streaming service? See [contributing](#contributing).
 
 ## Documentation
 
