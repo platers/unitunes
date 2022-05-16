@@ -4,6 +4,8 @@
 
 A command-line interface tool to manage playlists across music streaming services.
 
+![demo](demo.gif)
+
 ## Introduction
 
 unitunes manages playlists across streaming services. unitunes can transfer songs between services and keep playlists in sync.
