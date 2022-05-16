@@ -1,6 +1,7 @@
 # unitunes
 
-![unituneslogo](unitunes.png)
+[![PyPI version](https://badge.fury.io/py/unitunes.svg)](https://badge.fury.io/py/unitunes)
+![unituneslogo](https://github.com/platers/unitunes/blob/master/unitunes.png?raw=true)
 
 A command-line interface tool to manage playlists across music streaming services.
 
@@ -25,14 +26,14 @@ Want to add support for a new streaming service? See [contributing](#contributin
 
 ## Documentation
 
-[Documentation](docs.md)
+[Documentation](https://github.com/platers/unitunes/blob/master/docs.md)
 
 ## Quickstart
 
-### Install
+### Installation
 
 ```bash
-pip install --user git+https://github.com/platers/unitunes
+pip install unitunes
 ```
 
 ### Initialize
