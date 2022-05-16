@@ -98,7 +98,7 @@ unitunes pull
 Search for tracks on another service:
 
 ```bash
-unitunes search SERVICE_NAME PLAYLIST_NAME
+unitunes search SERVICE_TYPE PLAYLIST_NAME
 ```
 
 ### Push Playlists
