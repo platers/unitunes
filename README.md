@@ -92,7 +92,7 @@ unitunes pull
 
 ### Search Playlists
 
-Search for tracks on anoter service:
+Search for tracks on another service:
 
 ```bash
 unitunes search SERVICE_NAME PLAYLIST_NAME
