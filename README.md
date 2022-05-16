@@ -4,8 +4,6 @@
 
 A command-line interface tool to manage playlists across music streaming services.
 
-unitunes is in alpha stage. The CLI will change and is sparsely documented. Contributors and testers are very welcome.
-
 ## Introduction
 
 unitunes is designed to keep playlists in sync across multiple streaming services.
@@ -24,6 +22,10 @@ The unitunes CLI tool provides a command-line interface to manage UPs. Playlists
 | Youtube Music |    ✅    |    ✅    |     ✅     |
 
 Want to add support for a new streaming service? See [contributing](#contributing).
+
+## Documentation
+
+[Documentation](docs.md)
 
 ## Quickstart
 
@@ -108,17 +110,9 @@ unitunes push
 
 ## Contributing
 
-unitunes is in alpha. Contributions are very welcome. I am looking for core collaborators.
+unitunes is in alpha. Contributions are very welcome. I am looking for collaborators to grow unitunes into a foundation for user controlled music software.
 
-Some important tasks:
-
-- Polish the CLI
-  - Improve the documentation
-- Add new services
-- Automate the evaluation of matching and searching algorithms
-- Improve match and search algorithms
-
-Please create an issue if you would like to contribute.
+Take a look at the open issues!
 
 To develop, fork the repository and clone it into your local directory. Install [poetry](https://python-poetry.org/).
 Run `pytest` to run tests. Add a service config to run more tests.
