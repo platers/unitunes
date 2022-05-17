@@ -87,6 +87,9 @@ class SpotifyPlaylistURI(PlaylistURI):
     def from_uri(cls, uri: str) -> "SpotifyPlaylistURI":
         return cls(uri=uri, url=cls.uri_to_url(uri))
 
+    def is_liked_songs(self) -> bool:
+        return self.uri == "Liked Songs"
+
     @staticmethod
     def uri_to_url(uri: str) -> str:
         if uri == "Liked Songs":

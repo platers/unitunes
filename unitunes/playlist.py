@@ -38,6 +38,11 @@ class Playlist(BaseModel):
                 return uri
         return None
 
+    def get_uri(self, service_name: str) -> PlaylistURIs:
+        if service_name not in self.uris:
+            raise ValueError(f"Playlist {self.name} does not have a {service_name} uri")
+        return self.uris[service_name]
+
     def set_uri(self, service_name: str, uri: PlaylistURIs) -> None:
         self.uris[service_name] = uri
 

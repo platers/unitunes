@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, List
+from unicodedata import name
 import spotipy
 from spotipy import SpotifyOAuth
 from unitunes.playlist import Playlist, PlaylistMetadata
@@ -70,6 +71,18 @@ class SpotifyWrapper(ServiceWrapper, ABC):
     def user_playlist_create(self, *args, **kwargs) -> Any:
         pass
 
+    @abstractmethod
+    def current_user_saved_tracks(self, limit: int = 20, offset: int = 0) -> Any:
+        pass
+
+    @abstractmethod
+    def current_user_saved_tracks_add(self, tracks: List[str]) -> None:
+        pass
+
+    @abstractmethod
+    def current_user_saved_tracks_delete(self, tracks: List[str]) -> None:
+        pass
+
 
 class SpotifyAPIWrapper(SpotifyWrapper):
     def __init__(self, config, cache_root) -> None:
@@ -126,6 +139,15 @@ class SpotifyAPIWrapper(SpotifyWrapper):
     def user_playlist_create(self, *args, **kwargs):
         return self.sp.user_playlist_create(*args, **kwargs)
 
+    def current_user_saved_tracks(self, limit: int = 20, offset: int = 0):
+        return self.sp.current_user_saved_tracks(limit=limit, offset=offset)
+
+    def current_user_saved_tracks_add(self, tracks: List[str]):
+        self.sp.current_user_saved_tracks_add(tracks)
+
+    def current_user_saved_tracks_delete(self, tracks: List[str]):
+        self.sp.current_user_saved_tracks_delete(tracks)
+
 
 class SpotifyService(
     StreamingService,
@@ -150,24 +172,37 @@ class SpotifyService(
                 uri=SpotifyPlaylistURI.from_url(playlist["external_urls"]["spotify"]),
             )
             for playlist in results["items"]
+        ] + [
+            PlaylistMetadata(
+                name="Liked Songs",
+                description="",
+                uri=SpotifyPlaylistURI.from_url("spotify:liked_songs"),
+            )
         ]
 
-    def pull_tracks(self, uri: URI) -> List[Track]:
+    def pull_tracks(self, uri: SpotifyPlaylistURI) -> List[Track]:
         # query spotify until we get all tracks
-        playlist_id = uri.uri
 
-        def get_tracks(offset: int) -> list[Track]:
+        def get_playlist_tracks(offset: int) -> list[Track]:
             results = self.wrapper.playlist_tracks(
-                playlist_id=playlist_id,
+                playlist_id=uri.uri,
                 fields="items(track(name,artists(name),album,duration_ms,id,external_urls))",
                 offset=offset,
             )
             return [self.raw_to_track(track["track"]) for track in results["items"]]
 
+        def get_liked_tracks(offset: int) -> list[Track]:
+            results = self.wrapper.current_user_saved_tracks(limit=50, offset=offset)
+            return [self.raw_to_track(track["track"]) for track in results["items"]]
+
         tracks = []
         offset = 0
         while True:
-            new_tracks = get_tracks(offset)
+            new_tracks = (
+                get_liked_tracks(offset)
+                if uri.is_liked_songs()
+                else get_playlist_tracks(offset)
+            )
             if not new_tracks:
                 break
             tracks.extend(new_tracks)
@@ -230,20 +265,6 @@ class SpotifyService(
         uri = SpotifyPlaylistURI.from_url(playlist["external_urls"]["spotify"])
         return uri
 
-    def push_playlist(self, playlist: Playlist) -> PlaylistURI:
-        uri = playlist.find_uri(self.type)
-        if not uri:
-            raise ValueError(f"Playlist {playlist} does not have a spotify uri")
-
-        track_uris = [track.find_uri(self.type) for track in playlist.tracks]
-        track_ids = [uri.uri for uri in track_uris if uri]
-
-        self.wrapper.user_playlist_replace_tracks(
-            self.wrapper.current_user()["id"], uri.uri, track_ids
-        )
-
-        return uri
-
     def add_tracks(self, playlist_uri: SpotifyPlaylistURI, tracks: List[Track]) -> None:
         track_ids = []
         for track in tracks:
@@ -251,7 +272,10 @@ class SpotifyService(
             assert uri
             track_ids.append(uri.uri)
 
-        self.wrapper.add_tracks(playlist_uri.uri, track_ids)
+        if playlist_uri.is_liked_songs():
+            self.wrapper.current_user_saved_tracks_add(track_ids)
+        else:
+            self.wrapper.add_tracks(playlist_uri.uri, track_ids)
 
     def remove_tracks(
         self, playlist_uri: SpotifyPlaylistURI, tracks: List[Track]
@@ -262,4 +286,7 @@ class SpotifyService(
             assert uri
             track_ids.append(uri.uri)
 
-        self.wrapper.remove_tracks(playlist_uri.uri, track_ids)
+        if playlist_uri.is_liked_songs():
+            self.wrapper.current_user_saved_tracks_delete(track_ids)
+        else:
+            self.wrapper.remove_tracks(playlist_uri.uri, track_ids)

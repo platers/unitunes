@@ -27,7 +27,7 @@ from unitunes.services.services import (
     StreamingService,
     UserPlaylistPullable,
 )
-from unitunes.track import Track, tracks_to_add, tracks_to_remove
+from unitunes.track import Track
 
 from unitunes.types import ServiceType
 from unitunes.uri import playlistURI_from_url
@@ -107,6 +107,41 @@ def expand_services(
             raise typer.Exit()
 
     return [pm.services[service_name] for service_name in service_names]
+
+
+def tracks_match_on_and_on_service(
+    service: ServiceType,
+    t1: Track,
+    t2: Track,
+    matcher: MatcherStrategy = DefaultMatcherStrategy(),
+) -> bool:
+    return (
+        matcher.are_same(t1, t2)
+        and t1.is_on_service(service)
+        and t2.is_on_service(service)
+    )
+
+
+def tracks_to_add(
+    service: ServiceType, current: List[Track], new: List[Track]
+) -> List[Track]:
+    new_on_service = [track for track in new if track.is_on_service(service)]
+    return [
+        track
+        for track in new_on_service
+        if not any(tracks_match_on_and_on_service(service, track, t) for t in current)
+    ]
+
+
+def tracks_to_remove(
+    service: ServiceType, current: List[Track], new: List[Track]
+) -> List[Track]:
+    current_on_service = [track for track in current if track.is_on_service(service)]
+    return [
+        track
+        for track in current_on_service
+        if not any(tracks_match_on_and_on_service(service, t, track) for t in new)
+    ]
 
 
 @app.command()
@@ -441,11 +476,15 @@ def fetch(
     Asks for confirmation before adding each playlist unless the force flag is set.
     """
 
+    if service_name is None:
+        console.print("Please specify a service.")
+        raise typer.Exit(1)
+
     pm = get_playlist_manager(Path.cwd())
     service = pm.services[service_name]
     if not isinstance(service, UserPlaylistPullable):
         console.print(f"Cannot fetch user playlists from {service.type}", style="red")
-        raise typer.Exit()
+        raise typer.Exit(1)
 
     playlists = service.get_playlist_metadatas()
     console.print(f"Found {len(playlists)} playlists")

@@ -106,25 +106,3 @@ class Track(BaseModel):
             if uri.service == service:
                 return uri
         return None
-
-
-def tracks_to_add(
-    service: ServiceType, current: List[Track], new: List[Track]
-) -> List[Track]:
-    new_on_service = [track for track in new if track.is_on_service(service)]
-    return [
-        track
-        for track in new_on_service
-        if not any(track.shares_uri(t) for t in current)
-    ]
-
-
-def tracks_to_remove(
-    service: ServiceType, current: List[Track], new: List[Track]
-) -> List[Track]:
-    current_on_service = [track for track in current if track.is_on_service(service)]
-    return [
-        track
-        for track in current_on_service
-        if not any(track.shares_uri(t) for t in new)
-    ]

@@ -54,6 +54,15 @@ class LocalSpotifyWrapper(SpotifyWrapper):
     def user_playlist_create(self, *args, **kwargs) -> Any:
         raise NotImplementedError
 
+    def current_user_saved_tracks(self, limit: int = 20, offset: int = 0) -> Any:
+        raise NotImplementedError
+
+    def current_user_saved_tracks_add(self, tracks: List[str]) -> None:
+        raise NotImplementedError
+
+    def current_user_saved_tracks_delete(self, tracks: List[str]) -> None:
+        raise NotImplementedError
+
 
 @pytest.fixture(scope="module")
 def spotify_wrapper(pytestconfig):
@@ -104,3 +113,11 @@ def test_liked_songs_uri():
     uri = SpotifyPlaylistURI.from_url("spotify:liked_songs")
     assert uri.uri == "Liked Songs"
     assert uri.type == "playlist"
+    assert uri.is_liked_songs()
+
+
+def test_pull_liked_tracks(spotify_api_service):
+    tracks = spotify_api_service.pull_tracks(
+        SpotifyPlaylistURI.from_url("spotify:liked_songs")
+    )
+    assert len(tracks) > 5
