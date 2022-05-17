@@ -109,7 +109,7 @@ def expand_services(
     return [pm.services[service_name] for service_name in service_names]
 
 
-def tracks_match_on_and_on_service(
+def tracks_match_and_on_service(
     service: ServiceType,
     t1: Track,
     t2: Track,
@@ -129,7 +129,7 @@ def tracks_to_add(
     return [
         track
         for track in new_on_service
-        if not any(tracks_match_on_and_on_service(service, track, t) for t in current)
+        if not any(tracks_match_and_on_service(service, track, t) for t in current)
     ]
 
 
@@ -140,7 +140,7 @@ def tracks_to_remove(
     return [
         track
         for track in current_on_service
-        if not any(tracks_match_on_and_on_service(service, t, track) for t in new)
+        if not any(tracks_match_and_on_service(service, t, track) for t in new)
     ]
 
 
@@ -155,6 +155,12 @@ def pull(
         "--service",
         "-s",
         help="Services to pull from. If not specified, all services are used.",
+    ),
+    dont_remove: bool = typer.Option(
+        False,
+        "--dont-remove",
+        "-d",
+        help="Remove tracks from playlist that are not on the service anymore.",
     ),
     verbose: bool = typer.Option(
         False,
@@ -188,7 +194,9 @@ def pull(
                 continue
 
             console.print(f"Track {track.name.value} not found in playlist")
-            incorrect = typer.confirm("Incorrect match?")
+            incorrect = typer.confirm(
+                "Remove this URI from track (y), or remove track from playlist (n)?"
+            )
             if incorrect:
                 # remove uri
                 for t in matches:
@@ -198,7 +206,7 @@ def pull(
                 # remove track
                 for t in matches:
                     tracks.remove(t)
-                    console.print(f"Removed {t}")
+                    console.print(f"Removed {t.name.value}")
 
     pm = get_playlist_manager(Path.cwd())
 
@@ -221,21 +229,23 @@ def pull(
             remote_tracks = service.pull_tracks(uri)
 
             added = tracks_to_add(service.type, pl.tracks, remote_tracks)
-            removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
 
             if added:
                 console.print(
                     f"{uri.url} added {len(added)} tracks from {service.name}"
                 )
                 print_tracks(added)
-            if removed:
-                console.print(
-                    f"{uri.url} removed {len(removed)} tracks from {service.name}"
-                )
-                print_tracks(removed)
-
             new_tracks.extend(added)
-            removed_tracks.extend(removed)
+
+            if not dont_remove:
+                removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
+                if removed:
+                    console.print(
+                        f"{uri.url} removed {len(removed)} tracks from {service.name}"
+                    )
+                    print_tracks(removed)
+
+                removed_tracks.extend(removed)
 
         console.print(f"{len(new_tracks)} new tracks in {pl.name}")
         if verbose:

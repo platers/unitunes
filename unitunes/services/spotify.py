@@ -92,7 +92,7 @@ class SpotifyAPIWrapper(SpotifyWrapper):
                 client_id=config["client_id"],
                 client_secret=config["client_secret"],
                 redirect_uri=config["redirect_uri"],
-                scope="user-library-read playlist-modify-private, playlist-modify-public",
+                scope="user-library-read playlist-modify-private, playlist-modify-public, user-library-modify",
             )
         )
 
@@ -143,10 +143,18 @@ class SpotifyAPIWrapper(SpotifyWrapper):
         return self.sp.current_user_saved_tracks(limit=limit, offset=offset)
 
     def current_user_saved_tracks_add(self, tracks: List[str]):
-        self.sp.current_user_saved_tracks_add(tracks)
+        # max 50 tracks per request
+        chunk_size = 50
+        chunks = [tracks[i : i + chunk_size] for i in range(0, len(tracks), chunk_size)]
+        for chunk in chunks:
+            self.sp.current_user_saved_tracks_add(chunk)
 
     def current_user_saved_tracks_delete(self, tracks: List[str]):
-        self.sp.current_user_saved_tracks_delete(tracks)
+        # max 50 tracks per request
+        chunk_size = 50
+        chunks = [tracks[i : i + chunk_size] for i in range(0, len(tracks), chunk_size)]
+        for chunk in chunks:
+            self.sp.current_user_saved_tracks_delete(chunk)
 
 
 class SpotifyService(
