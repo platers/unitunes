@@ -63,6 +63,12 @@ class Track(BaseModel):
     def shares_uri(self, track: "Track") -> bool:
         return any(uri in track.uris for uri in self.uris)
 
+    def shared_uri(self, track: "Track") -> Optional[TrackURIs]:
+        for uri in self.uris:
+            if uri in track.uris:
+                return uri
+        return None
+
     def merge(self, other: "Track") -> None:
         def merge_aliased_str_into_list(
             astr: AliasedString, list_: List[AliasedString]

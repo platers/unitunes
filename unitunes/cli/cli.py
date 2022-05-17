@@ -30,7 +30,7 @@ from unitunes.services.services import (
 from unitunes.track import Track
 
 from unitunes.types import ServiceType
-from unitunes.uri import playlistURI_from_url
+from unitunes.uri import TrackURIs, playlistURI_from_url
 
 
 console = Console()
@@ -144,6 +144,20 @@ def tracks_to_remove(
     ]
 
 
+def get_missing_uris(
+    service: ServiceType, current: List[Track], new: List[Track]
+) -> List[TrackURIs]:
+    def tracks_to_uris(tracks: List[Track]) -> List[TrackURIs]:
+        uris = [track.uris for track in tracks]
+        flat_uris = [uri for uri_list in uris for uri in uri_list]
+        return flat_uris
+
+    uris_on_service = [uri for uri in tracks_to_uris(current) if uri.service == service]
+    remote = tracks_to_uris(new)
+    missing = [uri for uri in uris_on_service if uri not in remote]
+    return missing
+
+
 @app.command()
 def pull(
     playlist_names: Optional[List[str]] = typer.Argument(
@@ -186,27 +200,26 @@ def pull(
             else:
                 tracks.append(track)
 
-    def remove_tracks(tracks: List[Track], removed_tracks: List[Track]) -> None:
-        for track in removed_tracks:
-            matches = [t for t in tracks if t.shares_uri(track)]
-            if not matches:
-                # already removed
-                continue
+    def remove_tracks(current_tracks: List[Track], missing: List[TrackURIs]) -> None:
+        for missing_uri in missing:
+            matches = [t for t in current_tracks if missing_uri in t.uris]
+            for t in matches:
+                console.print(f"Track {t.name.value} not found in playlist")
+                prompt: str = typer.prompt(
+                    f"Remove {missing_uri.url} from track (u), remove track from playlist (r), or skip (s)?",
+                    default="s",
+                )
 
-            console.print(f"Track {track.name.value} not found in playlist")
-            incorrect = typer.confirm(
-                "Remove this URI from track (y), or remove track from playlist (n)?"
-            )
-            if incorrect:
-                # remove uri
-                for t in matches:
-                    t.uris.remove(track.uris[0])
-                    console.print(f"Removed {track.uris[0]} from {t}")
-            else:
-                # remove track
-                for t in matches:
-                    tracks.remove(t)
+                if prompt.startswith("u"):
+                    # remove uri
+                    t.uris.remove(missing_uri)
+                    console.print(f"Removed {missing_uri.url} from {t.name.value}")
+                elif prompt.startswith("r"):
+                    # remove track
+                    current_tracks.remove(t)
                     console.print(f"Removed {t.name.value}")
+                elif prompt.startswith("s"):
+                    console.print("Skipping")
 
     pm = get_playlist_manager(Path.cwd())
 
@@ -219,43 +232,41 @@ def pull(
 
     for pl in playlists:
         new_tracks: List[Track] = []
-        removed_tracks: List[Track] = []
+        missing_uris: List[TrackURIs] = []
 
         for service in services:
-            uri = pl.find_uri(service.type)
-            if not uri:
-                continue
+            playlist_uri = pl.get_uri(service.name)
 
-            remote_tracks = service.pull_tracks(uri)
+            remote_tracks = service.pull_tracks(playlist_uri)
 
             added = tracks_to_add(service.type, pl.tracks, remote_tracks)
+            print(f"Added {len(added)} tracks")
 
             if added:
                 console.print(
-                    f"{uri.url} added {len(added)} tracks from {service.name}"
+                    f"{playlist_uri.url} added {len(added)} tracks from {service.name}"
                 )
                 print_tracks(added)
             new_tracks.extend(added)
 
             if not dont_remove:
-                removed = tracks_to_remove(service.type, pl.tracks, remote_tracks)
-                if removed:
+                missing = get_missing_uris(service.type, pl.tracks, remote_tracks)
+                if missing:
                     console.print(
-                        f"{uri.url} removed {len(removed)} tracks from {service.name}"
+                        f"{playlist_uri.url} missing {len(missing)} tracks on {service.name}"
                     )
-                    print_tracks(removed)
 
-                removed_tracks.extend(removed)
+                missing_uris.extend(missing)
 
-        console.print(f"{len(new_tracks)} new tracks in {pl.name}")
         if verbose:
             print_tracks(new_tracks)
-        console.print(f"{len(removed_tracks)} removed tracks in {pl.name}")
+        console.print(f"{len(missing_uris)} missing tracks")
         if verbose:
-            print_tracks(removed_tracks)
+            for playlist_uri in missing_uris:
+                console.print(f"{playlist_uri.url}")
 
         merge_new_tracks(pl.tracks, new_tracks, DefaultMatcherStrategy())
-        remove_tracks(pl.tracks, removed_tracks)
+        remove_tracks(pl.tracks, missing_uris)
 
         pm.save_playlist(pl.name)
 
@@ -291,24 +302,27 @@ def push(
     ]
 
     for pl in playlists:
+        console.print(f"Calculating changes to {pl.name}")
         for service in services:
             if not any([t.find_uri(service.type) for t in pl.tracks]):
                 continue
 
-            uri = pl.find_uri(service.type)
-            if not uri:
+            if service.name in pl.uris:
+                playlist_uri = pl.get_uri(service.name)
+            else:
                 console.print(f"{pl.name} does not have a uri for {service.type}")
                 create_new = typer.confirm("Create new playlist?", default=False)
                 if not create_new:
                     continue
-                uri = service.create_playlist(pl.name)
-                console.print(f"Created {uri.url}")
-                pl.set_uri(service.name, uri)
+                playlist_uri = service.create_playlist(pl.name)
+                console.print(f"Created {playlist_uri.url}")
+                pl.set_uri(service.name, playlist_uri)
                 pm.save_playlist(pl.name)
 
-            current_tracks = service.pull_tracks(uri)
+            current_tracks = service.pull_tracks(playlist_uri)
             added = tracks_to_add(service.type, current_tracks, pl.tracks)
             removed = tracks_to_remove(service.type, current_tracks, pl.tracks)
+
             if added:
                 console.print(f"{len(added)} new tracks")
                 console.print("Added tracks:")
@@ -321,15 +335,15 @@ def push(
             if not added and not removed:
                 continue
 
-            if not typer.confirm(f"Push to {uri.url}?", default=False):
+            if not typer.confirm(f"Push to {playlist_uri.url}?", default=False):
                 continue
 
             if added:
-                service.add_tracks(uri, added)
+                service.add_tracks(playlist_uri, added)
             if removed:
-                service.remove_tracks(uri, removed)
+                service.remove_tracks(playlist_uri, removed)
 
-            console.print(f"Pushed {pl.name} to {uri.url}")
+            console.print(f"Pushed {pl.name} to {playlist_uri.url}")
 
 
 @app.command()
