@@ -244,8 +244,7 @@ class SpotifyService(
 
         return uri
 
-    def add_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
-        assert isinstance(playlist_uri, SpotifyPlaylistURI)
+    def add_tracks(self, playlist_uri: SpotifyPlaylistURI, tracks: List[Track]) -> None:
         track_ids = []
         for track in tracks:
             uri = track.find_uri(self.type)
@@ -254,8 +253,9 @@ class SpotifyService(
 
         self.wrapper.add_tracks(playlist_uri.uri, track_ids)
 
-    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
-        assert isinstance(playlist_uri, SpotifyPlaylistURI)
+    def remove_tracks(
+        self, playlist_uri: SpotifyPlaylistURI, tracks: List[Track]
+    ) -> None:
         track_ids = []
         for track in tracks:
             uri = track.find_uri(self.type)

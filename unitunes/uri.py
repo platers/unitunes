@@ -89,15 +89,22 @@ class SpotifyPlaylistURI(PlaylistURI):
 
     @staticmethod
     def uri_to_url(uri: str) -> str:
+        if uri == "Liked Songs":
+            return f"spotify:liked_songs"
         return f"https://open.spotify.com/playlist/{uri}"
 
     @staticmethod
     def url_to_uri(url: str) -> str:
+        if url == "spotify:liked_songs":
+            return "Liked Songs"
         return url.split("/")[-1]
 
     @staticmethod
     def valid_url(url: str) -> bool:
-        return url.startswith("https://open.spotify.com/playlist/")
+        return (
+            url.startswith("https://open.spotify.com/playlist/")
+            or url == "spotify:liked_songs"
+        )
 
     @staticmethod
     def from_url(url: str) -> "SpotifyPlaylistURI":

@@ -98,3 +98,9 @@ def test_spotify_can_pull_playlist(spotify_api_service):
         )
     )
     assert len(tracks) > 5
+
+
+def test_liked_songs_uri():
+    uri = SpotifyPlaylistURI.from_url("spotify:liked_songs")
+    assert uri.uri == "Liked Songs"
+    assert uri.type == "playlist"
