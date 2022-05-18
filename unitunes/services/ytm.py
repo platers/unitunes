@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
+import time
 from typing import Any, List, Optional
+from tqdm import tqdm
 from ytmusicapi import YTMusic
 from unitunes.playlist import PlaylistMetadata
 from youtube_title_parse import get_artist_title
@@ -96,10 +98,23 @@ class YtmAPIWrapper(YtmWrapper):
 
     def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
         """Add tracks to a playlist."""
-        self.ytm.add_playlist_items(playlist_id, track_ids)
+        if playlist_id == "LM":
+            for track_id in tqdm(track_ids, desc="Rating songs"):
+                self.ytm.rate_song(track_id, "LIKE")
+                time.sleep(0.8)
+
+        else:
+            self.ytm.add_playlist_items(playlist_id, track_ids)
 
     def remove_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
         """Remove tracks from a playlist."""
+
+        if playlist_id == "LM":
+            for track_id in tqdm(track_ids, desc="Unrating songs"):
+                self.ytm.rate_song(track_id, "INDIFFERENT")
+                time.sleep(0.8)
+            return
+
         playlist = self.get_playlist(playlist_id)
         playlist_items = playlist["tracks"]
         videos_to_remove = [
