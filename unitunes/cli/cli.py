@@ -231,11 +231,14 @@ def pull(
     ]
 
     for pl in playlists:
+        console.print(f"Pulling {pl.name}...")
         new_tracks: List[Track] = []
         missing_uris: List[TrackURIs] = []
 
         for service in services:
             playlist_uri = pl.get_uri(service.name)
+            if not playlist_uri:
+                continue
 
             remote_tracks = service.pull_tracks(playlist_uri)
 
@@ -253,7 +256,7 @@ def pull(
                 missing = get_missing_uris(service.type, pl.tracks, remote_tracks)
                 if missing:
                     console.print(
-                        f"{playlist_uri.url} missing {len(missing)} tracks on {service.name}"
+                        f"{playlist_uri.url} missing {len(missing)} tracks from {pl.name}"
                     )
 
                 missing_uris.extend(missing)
@@ -307,9 +310,8 @@ def push(
             if not any([t.find_uri(service.type) for t in pl.tracks]):
                 continue
 
-            if service.name in pl.uris:
-                playlist_uri = pl.get_uri(service.name)
-            else:
+            playlist_uri = pl.get_uri(service.name)
+            if not playlist_uri:
                 console.print(f"{pl.name} does not have a uri for {service.type}")
                 create_new = typer.confirm("Create new playlist?", default=False)
                 if not create_new:
@@ -382,7 +384,7 @@ def search(
 
     pm = get_playlist_manager(Path.cwd())
     pl = pm.playlists[playlist_name]
-    original_tracks = pl.tracks
+    original_tracks = [track for track in pl.tracks if not track.find_uri(service)]
     streaming_service = [s for s in pm.services.values() if s.type == service][0]
     matcher = DefaultMatcherStrategy()
     searcher = DefaultSearcherStrategy(matcher)
