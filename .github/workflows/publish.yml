@@ -1,13 +1,13 @@
-name: Upload Python Package
-
+name: Python package
 on:
-  release:
-    types: [published]
-
+  push:
+    tags:
+      - "v*.*.*"
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Build and publish to pypi
         uses: JRubics/poetry-publish@v1.11
         with:
