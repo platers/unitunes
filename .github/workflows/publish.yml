@@ -1,0 +1,14 @@
+name: Upload Python Package
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v1.11
+        with:
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
