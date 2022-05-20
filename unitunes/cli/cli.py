@@ -569,3 +569,21 @@ def merge(
     new_length = len(target_playlist.tracks)
     console.print(f"Merged {source_playlist_name} into {target_playlist_name}")
     console.print(f"{original_length} -> {new_length} tracks")
+
+
+@app.command()
+def remove(
+    playlist_name: str,
+):
+    """
+    Remove a playlist.
+    """
+
+    pm = get_playlist_manager(Path.cwd())
+
+    if playlist_name not in pm.playlists:
+        console.print(f"Playlist {playlist_name} not found", style="red")
+        raise typer.Exit(1)
+
+    pm.remove_playlist(playlist_name)
+    console.print(f"Removed playlist {playlist_name}")

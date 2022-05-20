@@ -51,6 +51,11 @@ class Config(BaseModel):
             raise ValueError(f"Service {name} does not exist")
         del self.services[name]
 
+    def remove_playlist(self, name: str):
+        if name not in self.playlists:
+            raise ValueError(f"Playlist {name} does not exist")
+        self.playlists.remove(name)
+
 
 def service_factory(
     service_type: ServiceType,
@@ -120,6 +125,12 @@ class FileManager:
             raise FileNotFoundError(f"Playlist file not found: {path}")
         return Playlist.parse_file(path)
 
+    def delete_playlist(self, name: str) -> None:
+        path = self.get_playlist_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Playlist file not found: {path}")
+        path.unlink()
+
 
 class PlaylistManager:
     config: Config
@@ -178,6 +189,15 @@ class PlaylistManager:
         self.playlists[name] = Playlist(name=name)
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(self.playlists[name])
+
+    def remove_playlist(self, name: str) -> None:
+        """Remove a playlist from the config and filesystem."""
+        if name not in self.config.playlists:
+            raise ValueError(f"Playlist {name} not found")
+        self.file_manager.delete_playlist(name)
+        del self.playlists[name]
+        self.config.remove_playlist(name)
+        self.file_manager.save_config(self.config)
 
     def add_uri_to_playlist(
         self, playlist_name: str, service_name: str, uri: PlaylistURIs
