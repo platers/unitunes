@@ -1,0 +1,13 @@
+{
+    "services": {
+        "spotify": {
+            "name": "spotify",
+            "service": "spotify",
+            "config_path": "/Users/victor/dev/unitunes/tests/service_configs/spotify_config.json"
+        }
+    },
+    "playlists": [
+        "headphones",
+        "other"
+    ]
+}

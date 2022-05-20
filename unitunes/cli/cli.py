@@ -544,3 +544,28 @@ def fetch(
             console.print(f"Created playlist {up_name}")
 
         pm.save_playlist(up_name)
+
+
+@app.command()
+def merge(
+    source_playlist_name: str,
+    target_playlist_name: str,
+) -> None:
+    """
+    Merge a playlist into another playlist.
+    """
+
+    pm = get_playlist_manager(Path.cwd())
+
+    source_playlist = pm.playlists[source_playlist_name]
+    target_playlist = pm.playlists[target_playlist_name]
+    original_length = len(target_playlist.tracks)
+
+    matcher = DefaultMatcherStrategy()
+
+    target_playlist.merge_playlist(source_playlist, matcher)
+    pm.save_playlist(target_playlist_name)
+
+    new_length = len(target_playlist.tracks)
+    console.print(f"Merged {source_playlist_name} into {target_playlist_name}")
+    console.print(f"{original_length} -> {new_length} tracks")

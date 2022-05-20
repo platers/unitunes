@@ -4,6 +4,7 @@ from typing import (
     Optional,
 )
 from pydantic import BaseModel
+from unitunes.matcher import MatcherStrategy
 from unitunes.track import Track
 from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURIs
@@ -53,3 +54,27 @@ class Playlist(BaseModel):
             if uri in uris:
                 return True
         return False
+
+    def merge_track(self, track: Track, matcher: MatcherStrategy) -> None:
+        for t in self.tracks:
+            if matcher.are_same(t, track):
+                t.merge(track)
+                return
+
+        self.tracks.append(track)
+
+    def merge_playlist(self, playlist: "Playlist", matcher: MatcherStrategy) -> None:
+        """Merges another playlist into this one."""
+
+        def merge_uris():
+            for service_name, uris in playlist.uris.items():
+                if service_name not in self.uris:
+                    self.uris[service_name] = []
+                for uri in uris:
+                    if uri not in self.uris[service_name]:
+                        self.uris[service_name].append(uri)
+
+        merge_uris()
+
+        for track in playlist.tracks:
+            self.merge_track(track, matcher)

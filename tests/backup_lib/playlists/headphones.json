@@ -1,0 +1,393 @@
+{
+    "name": "headphones",
+    "description": "",
+    "uris": {
+        "spotify": [
+            {
+                "service": "spotify",
+                "type": "playlist",
+                "uri": "19TGUNYKnJ8N1bFe0oA5lv",
+                "url": "https://open.spotify.com/playlist/19TGUNYKnJ8N1bFe0oA5lv"
+            }
+        ]
+    },
+    "tracks": [
+        {
+            "name": {
+                "value": "Wilderness",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "The Wilderness",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Explosions In The Sky",
+                    "aliases": []
+                }
+            ],
+            "length": 276,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6g4kp44s78nDvvnmL31nOG",
+                    "url": "https://open.spotify.com/track/6g4kp44s78nDvvnmL31nOG"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Paper Trails",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Psychic",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "DARKSIDE",
+                    "aliases": []
+                }
+            ],
+            "length": 289,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6rqONVHOT73QecUdJ5HVHy",
+                    "url": "https://open.spotify.com/track/6rqONVHOT73QecUdJ5HVHy"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "You've Got To Have Freedom",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Africa",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Pharoah Sanders",
+                    "aliases": []
+                }
+            ],
+            "length": 606,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1rD9sOqJSlzvLHtpuEW4El",
+                    "url": "https://open.spotify.com/track/1rD9sOqJSlzvLHtpuEW4El"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Symphony No. 1 in D Minor, \"The Gothic\": Part 1: II. Lento espressivo e solenne: section 1",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Brian: Symphony No. 1, 'Gothic'",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Havergal Brian",
+                    "aliases": []
+                },
+                {
+                    "value": "Vladimir Dolezal",
+                    "aliases": []
+                },
+                {
+                    "value": "Eva Jenisova",
+                    "aliases": []
+                },
+                {
+                    "value": "Peter Mikulas",
+                    "aliases": []
+                },
+                {
+                    "value": "Dagmar Peckova",
+                    "aliases": []
+                },
+                {
+                    "value": "Pavol Proch\u00e1zka",
+                    "aliases": []
+                },
+                {
+                    "value": "Bratislava Children's Choir",
+                    "aliases": []
+                },
+                {
+                    "value": "Bratislava City Chorus",
+                    "aliases": []
+                },
+                {
+                    "value": "Lucnica Chorus",
+                    "aliases": []
+                },
+                {
+                    "value": "Slovak Folk Ensemble Chorus",
+                    "aliases": []
+                },
+                {
+                    "value": "Slovak Opera Chorus",
+                    "aliases": []
+                },
+                {
+                    "value": "Slovak Philharmonic Choir",
+                    "aliases": []
+                },
+                {
+                    "value": "Echo Youth Choir",
+                    "aliases": []
+                },
+                {
+                    "value": "Slovak Philharmonic",
+                    "aliases": []
+                },
+                {
+                    "value": "Slovak Radio Symphony Orchestra",
+                    "aliases": []
+                },
+                {
+                    "value": "Ondrej Lenard",
+                    "aliases": []
+                }
+            ],
+            "length": 369,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "4NyMVnAyXUflBxdsee8ohJ",
+                    "url": "https://open.spotify.com/track/4NyMVnAyXUflBxdsee8ohJ"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Small Hours",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "One World",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "John Martyn",
+                    "aliases": []
+                }
+            ],
+            "length": 525,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2OqcBW2mw4OcnkLw8o6CYF",
+                    "url": "https://open.spotify.com/track/2OqcBW2mw4OcnkLw8o6CYF"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Speaking Gently",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "IV",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "BADBADNOTGOOD",
+                    "aliases": []
+                }
+            ],
+            "length": 247,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "58po9G5zNiJnG6lxxNMPi4",
+                    "url": "https://open.spotify.com/track/58po9G5zNiJnG6lxxNMPi4"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Tabula rasa: 1. Ludus: Con moto",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "P\u00e4rt: Tabula Rasa",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Arvo P\u00e4rt",
+                    "aliases": []
+                },
+                {
+                    "value": "Gil Shaham",
+                    "aliases": []
+                },
+                {
+                    "value": "Adele Anthony",
+                    "aliases": []
+                },
+                {
+                    "value": "Erik Risberg",
+                    "aliases": []
+                },
+                {
+                    "value": "Gothenburg Symphony Orchestra",
+                    "aliases": []
+                },
+                {
+                    "value": "Neeme J\u00e4rvi",
+                    "aliases": []
+                }
+            ],
+            "length": 590,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6qTYOhdjm500uy5SSUyjHd",
+                    "url": "https://open.spotify.com/track/6qTYOhdjm500uy5SSUyjHd"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Lj\u00f3si\u00f0",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Found Songs",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "\u00d3lafur Arnalds",
+                    "aliases": []
+                }
+            ],
+            "length": 209,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7m72yYvAUkMh9sLGdSZMlh",
+                    "url": "https://open.spotify.com/track/7m72yYvAUkMh9sLGdSZMlh"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Helplessly Hoping",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Live: Lakehurst, New York City, June 1970",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Crosby, Stills, Nash & Young",
+                    "aliases": []
+                }
+            ],
+            "length": 346,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "41UCQC3MxrMQk2OXP7it4w",
+                    "url": "https://open.spotify.com/track/41UCQC3MxrMQk2OXP7it4w"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Watching You Without Me",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Hounds Of Love",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Kate Bush",
+                    "aliases": []
+                }
+            ],
+            "length": 247,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0ZYBIpXWHbQVHx5vOf9mFT",
+                    "url": "https://open.spotify.com/track/0ZYBIpXWHbQVHx5vOf9mFT"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Pepas",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Pepas",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Farruko",
+                    "aliases": []
+                }
+            ],
+            "length": 287,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "5fwSHlTEWpluwOM0Sxnh5k",
+                    "url": "https://open.spotify.com/track/5fwSHlTEWpluwOM0Sxnh5k"
+                }
+            ]
+        }
+    ]
+}

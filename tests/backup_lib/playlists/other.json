@@ -1,0 +1,1639 @@
+{
+    "name": "other",
+    "description": "",
+    "uris": {
+        "spotify": [
+            {
+                "service": "spotify",
+                "type": "playlist",
+                "uri": "2LeJcP06AuR1V6zg85Dpzy",
+                "url": "https://open.spotify.com/playlist/2LeJcP06AuR1V6zg85Dpzy"
+            }
+        ]
+    },
+    "tracks": [
+        {
+            "name": {
+                "value": "As the World Caves In",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "As the World Caves In",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Matt Maltese",
+                    "aliases": []
+                }
+            ],
+            "length": 218,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "4JE6agBLHGA5TaF6FlqfBD",
+                    "url": "https://open.spotify.com/track/4JE6agBLHGA5TaF6FlqfBD"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Line Without a Hook",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Montgomery Ricky",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Ricky Montgomery",
+                    "aliases": []
+                }
+            ],
+            "length": 249,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "5jvgec3P4jyoZUPTy2pWDR",
+                    "url": "https://open.spotify.com/track/5jvgec3P4jyoZUPTy2pWDR"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Ribs",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Pure Heroine (Extended)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Lorde",
+                    "aliases": []
+                }
+            ],
+            "length": 258,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0TEekvXTomKt3hdXDZxxeW",
+                    "url": "https://open.spotify.com/track/0TEekvXTomKt3hdXDZxxeW"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Fine Line",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Fine Line",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Harry Styles",
+                    "aliases": []
+                }
+            ],
+            "length": 377,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6VzcQuzTNTMFnJ6rBSaLH9",
+                    "url": "https://open.spotify.com/track/6VzcQuzTNTMFnJ6rBSaLH9"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "505",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Favourite Worst Nightmare (Standard Version)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Arctic Monkeys",
+                    "aliases": []
+                }
+            ],
+            "length": 253,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "58ge6dfP91o9oXMzq3XkIS",
+                    "url": "https://open.spotify.com/track/58ge6dfP91o9oXMzq3XkIS"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Daddy Issues",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Wiped Out!",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Neighbourhood",
+                    "aliases": []
+                }
+            ],
+            "length": 260,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "5E30LdtzQTGqRvNd7l6kG5",
+                    "url": "https://open.spotify.com/track/5E30LdtzQTGqRvNd7l6kG5"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Arcade",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Arcade",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Duncan Laurence",
+                    "aliases": []
+                }
+            ],
+            "length": 183,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1Xi84slp6FryDSCbzq4UCD",
+                    "url": "https://open.spotify.com/track/1Xi84slp6FryDSCbzq4UCD"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Mind Over Matter (Reprise)",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Mirrorball / Mind Over Matter (Reprise)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Young the Giant",
+                    "aliases": []
+                }
+            ],
+            "length": 230,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "77KnJc8o5G1eKVwX5ywMeZ",
+                    "url": "https://open.spotify.com/track/77KnJc8o5G1eKVwX5ywMeZ"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Wonder",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Wonder",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Shawn Mendes",
+                    "aliases": []
+                }
+            ],
+            "length": 172,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "5KCbr5ndeby4y4ggthdiAb",
+                    "url": "https://open.spotify.com/track/5KCbr5ndeby4y4ggthdiAb"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "My Blood",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Halcyon",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Ellie Goulding",
+                    "aliases": []
+                }
+            ],
+            "length": 234,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6knYNyQupBIbBxV8TMOMYM",
+                    "url": "https://open.spotify.com/track/6knYNyQupBIbBxV8TMOMYM"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Falling",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Fine Line",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Harry Styles",
+                    "aliases": []
+                }
+            ],
+            "length": 240,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1ZMiCix7XSAbfAJlEZWMCp",
+                    "url": "https://open.spotify.com/track/1ZMiCix7XSAbfAJlEZWMCp"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Godspeed",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Blonde",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Frank Ocean",
+                    "aliases": []
+                }
+            ],
+            "length": 177,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "34xTFwjPQ1dC6uJmleno7x",
+                    "url": "https://open.spotify.com/track/34xTFwjPQ1dC6uJmleno7x"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Someone New",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Hozier (Expanded Edition)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Hozier",
+                    "aliases": []
+                }
+            ],
+            "length": 222,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2DNXgvkyv35vTWvdgjs7qn",
+                    "url": "https://open.spotify.com/track/2DNXgvkyv35vTWvdgjs7qn"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Feels Like We Only Go Backwards",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Lonerism",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Tame Impala",
+                    "aliases": []
+                }
+            ],
+            "length": 192,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0LtOwyZoSNZKJWHqjzADpW",
+                    "url": "https://open.spotify.com/track/0LtOwyZoSNZKJWHqjzADpW"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "I Can't Handle Change",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "I Can't Handle Change",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Roar",
+                    "aliases": []
+                }
+            ],
+            "length": 198,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0I1eFRytp4XRhLCjT6tZm7",
+                    "url": "https://open.spotify.com/track/0I1eFRytp4XRhLCjT6tZm7"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Somebody Else",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "I like it when you sleep, for you are so beautiful yet so unaware of it",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The 1975",
+                    "aliases": []
+                }
+            ],
+            "length": 347,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "5hc71nKsUgtwQ3z52KEKQk",
+                    "url": "https://open.spotify.com/track/5hc71nKsUgtwQ3z52KEKQk"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Still Don't Know My Name",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Euphoria (Original Score from the HBO Series)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                }
+            ],
+            "length": 153,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6N22FZs2ZhPBYi3b9XPajV",
+                    "url": "https://open.spotify.com/track/6N22FZs2ZhPBYi3b9XPajV"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "This Side of Paradise",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Color",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Coyote Theory",
+                    "aliases": []
+                }
+            ],
+            "length": 242,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3sgf2a905hjZ81tXYytY6i",
+                    "url": "https://open.spotify.com/track/3sgf2a905hjZ81tXYytY6i"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Heather",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Kid Krow",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Conan Gray",
+                    "aliases": []
+                }
+            ],
+            "length": 198,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "4xqrdfXkTW4T0RauPLv3WA",
+                    "url": "https://open.spotify.com/track/4xqrdfXkTW4T0RauPLv3WA"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Someone To You",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Empires On Fire",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "BANNERS",
+                    "aliases": []
+                }
+            ],
+            "length": 219,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "14BH4qO7pgCmIe6mgLKOK3",
+                    "url": "https://open.spotify.com/track/14BH4qO7pgCmIe6mgLKOK3"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Forever",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Euphoria (Original Score from the HBO Series)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                }
+            ],
+            "length": 202,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6potEImiklXkwD9qFzpu15",
+                    "url": "https://open.spotify.com/track/6potEImiklXkwD9qFzpu15"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Fragile",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Fragile",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Kygo",
+                    "aliases": []
+                },
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                }
+            ],
+            "length": 230,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0L6UCE1Y0KX3MF2AtxlntI",
+                    "url": "https://open.spotify.com/track/0L6UCE1Y0KX3MF2AtxlntI"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "All For Us - from the HBO Original Series Euphoria",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "All For Us (from the HBO Original Series Euphoria)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                },
+                {
+                    "value": "Zendaya",
+                    "aliases": []
+                }
+            ],
+            "length": 192,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "10hMM5nsZQf66ldBlgWBfG",
+                    "url": "https://open.spotify.com/track/10hMM5nsZQf66ldBlgWBfG"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Formula",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Euphoria (Original Score from the HBO Series)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                }
+            ],
+            "length": 91,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6EtKlIQmGPB9SX8UjDJG5s",
+                    "url": "https://open.spotify.com/track/6EtKlIQmGPB9SX8UjDJG5s"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "When I R.I.P.",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Euphoria (Original Score from the HBO Series)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Labrinth",
+                    "aliases": []
+                }
+            ],
+            "length": 174,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2t16D9V5FmmRAJjsSpwvZf",
+                    "url": "https://open.spotify.com/track/2t16D9V5FmmRAJjsSpwvZf"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Young And Beautiful",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Young And Beautiful",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Lana Del Rey",
+                    "aliases": []
+                }
+            ],
+            "length": 236,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2nMeu6UenVvwUktBCpLMK9",
+                    "url": "https://open.spotify.com/track/2nMeu6UenVvwUktBCpLMK9"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Snowman",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Everyday Is Christmas (Deluxe Edition)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Sia",
+                    "aliases": []
+                }
+            ],
+            "length": 165,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7uoFMmxln0GPXQ0AcCBXRq",
+                    "url": "https://open.spotify.com/track/7uoFMmxln0GPXQ0AcCBXRq"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "War of Hearts",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Up in Flames",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Ruelle",
+                    "aliases": []
+                }
+            ],
+            "length": 226,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "4vWeIrIQQrbThS11ogLTmu",
+                    "url": "https://open.spotify.com/track/4vWeIrIQQrbThS11ogLTmu"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Could Have Been Me",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Everybody Wants",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Struts",
+                    "aliases": []
+                }
+            ],
+            "length": 187,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3IyCL4Em1GOpNGDf451Hg1",
+                    "url": "https://open.spotify.com/track/3IyCL4Em1GOpNGDf451Hg1"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Welcome Home",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Touch the Sky (Welcome Home) - EP",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Radical Face",
+                    "aliases": []
+                }
+            ],
+            "length": 287,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1oofwLaSk4kDIWAYT5ZGK7",
+                    "url": "https://open.spotify.com/track/1oofwLaSk4kDIWAYT5ZGK7"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Where's My Love",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "SYML",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "SYML",
+                    "aliases": []
+                }
+            ],
+            "length": 202,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2NeM9rfWo70KQej9GxeaoL",
+                    "url": "https://open.spotify.com/track/2NeM9rfWo70KQej9GxeaoL"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Talking to the Moon",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Doo-Wops & Hooligans",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Bruno Mars",
+                    "aliases": []
+                }
+            ],
+            "length": 217,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "161DnLWsx1i3u1JT05lzqU",
+                    "url": "https://open.spotify.com/track/161DnLWsx1i3u1JT05lzqU"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Everybody Wants To Rule The World - From \u201cThe Hunger Games: Catching Fire\u201d Soundtrack",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "The Hunger Games: Catching Fire (Original Motion Picture Soundtrack)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Lorde",
+                    "aliases": []
+                }
+            ],
+            "length": 155,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6zLq4lYSu2W7LLxJlUWzz8",
+                    "url": "https://open.spotify.com/track/6zLq4lYSu2W7LLxJlUWzz8"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Are You With Me",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Are You With Me",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "nilu",
+                    "aliases": []
+                }
+            ],
+            "length": 249,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2NTww3JSBHpySR2plYyAd6",
+                    "url": "https://open.spotify.com/track/2NTww3JSBHpySR2plYyAd6"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Train Wreck",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Back from the Edge",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "James Arthur",
+                    "aliases": []
+                }
+            ],
+            "length": 208,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "55Am8neGJkdj2ADaM3aw5H",
+                    "url": "https://open.spotify.com/track/55Am8neGJkdj2ADaM3aw5H"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "High Enough",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Every Where Is Some Where",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "K.Flay",
+                    "aliases": []
+                }
+            ],
+            "length": 231,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1qwno7xb5mJe71xtMS6jl2",
+                    "url": "https://open.spotify.com/track/1qwno7xb5mJe71xtMS6jl2"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Runaway",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Running With The Wolves",
+                    "aliases": []
+                },
+                {
+                    "value": "All My Demons Greeting Me as a Friend (Deluxe)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "AURORA",
+                    "aliases": []
+                }
+            ],
+            "length": 249,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3GeJhZVdGhBKk6NQkRq5pj",
+                    "url": "https://open.spotify.com/track/3GeJhZVdGhBKk6NQkRq5pj"
+                },
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "0TCmhnbMpw5zwPsTvlXTJi",
+                    "url": "https://open.spotify.com/track/0TCmhnbMpw5zwPsTvlXTJi"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Another Love",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Long Way Down",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Tom Odell",
+                    "aliases": []
+                }
+            ],
+            "length": 244,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7otCGmgp9h4CsR2LhwB6gt",
+                    "url": "https://open.spotify.com/track/7otCGmgp9h4CsR2LhwB6gt"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Experience",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "In A Time Lapse",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Ludovico Einaudi",
+                    "aliases": []
+                },
+                {
+                    "value": "Daniel Hope",
+                    "aliases": []
+                },
+                {
+                    "value": "I Virtuosi Italiani",
+                    "aliases": []
+                }
+            ],
+            "length": 315,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1BncfTJAWxrsxyT9culBrj",
+                    "url": "https://open.spotify.com/track/1BncfTJAWxrsxyT9culBrj"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Flares",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "No Sound Without Silence",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Script",
+                    "aliases": []
+                }
+            ],
+            "length": 229,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3mTEYjm3kIm4YzJ5zxJZjs",
+                    "url": "https://open.spotify.com/track/3mTEYjm3kIm4YzJ5zxJZjs"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "In This Shirt",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "From the Circus to the Sea",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Irrepressibles",
+                    "aliases": []
+                }
+            ],
+            "length": 334,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "60mItLdFl6xkYc1sAjlZlf",
+                    "url": "https://open.spotify.com/track/60mItLdFl6xkYc1sAjlZlf"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Outro",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Hurry Up, We're Dreaming",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "M83",
+                    "aliases": []
+                }
+            ],
+            "length": 247,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2QVmiA93GVhWNTWQctyY1K",
+                    "url": "https://open.spotify.com/track/2QVmiA93GVhWNTWQctyY1K"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Otherside",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "No Shape",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Perfume Genius",
+                    "aliases": []
+                }
+            ],
+            "length": 160,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2Iqdun0CJawDkc3NBUrbdA",
+                    "url": "https://open.spotify.com/track/2Iqdun0CJawDkc3NBUrbdA"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Don\u2019t Blame Me",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "reputation",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Taylor Swift",
+                    "aliases": []
+                }
+            ],
+            "length": 236,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1R0a2iXumgCiFb7HEZ7gUE",
+                    "url": "https://open.spotify.com/track/1R0a2iXumgCiFb7HEZ7gUE"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "drivers license",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "drivers license",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Olivia Rodrigo",
+                    "aliases": []
+                }
+            ],
+            "length": 242,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7lPN2DXiMsVn7XUKtOW1CS",
+                    "url": "https://open.spotify.com/track/7lPN2DXiMsVn7XUKtOW1CS"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "The Untold",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "The Untold",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Secession Studios",
+                    "aliases": []
+                }
+            ],
+            "length": 191,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2YGckbcAmjxbiZbYVAz5UW",
+                    "url": "https://open.spotify.com/track/2YGckbcAmjxbiZbYVAz5UW"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Atlantis",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Tell Me It's Real (Expanded Edition)",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Seafret",
+                    "aliases": []
+                }
+            ],
+            "length": 229,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1Fid2jjqsHViMX6xNH70hE",
+                    "url": "https://open.spotify.com/track/1Fid2jjqsHViMX6xNH70hE"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Would That I",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Wasteland, Baby!",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Hozier",
+                    "aliases": []
+                }
+            ],
+            "length": 268,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "37zuIvk4KBkAxxLJsxJaHq",
+                    "url": "https://open.spotify.com/track/37zuIvk4KBkAxxLJsxJaHq"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "I Always Knew",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Come Of Age",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Vaccines",
+                    "aliases": []
+                }
+            ],
+            "length": 214,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "6E3NosMXYlGD21K7KqIxQ1",
+                    "url": "https://open.spotify.com/track/6E3NosMXYlGD21K7KqIxQ1"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Space Song",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Depression Cherry",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Beach House",
+                    "aliases": []
+                }
+            ],
+            "length": 320,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7H0ya83CMmgFcOhw0UB6ow",
+                    "url": "https://open.spotify.com/track/7H0ya83CMmgFcOhw0UB6ow"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "The Archer",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Lover",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Taylor Swift",
+                    "aliases": []
+                }
+            ],
+            "length": 211,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3pHkh7d0lzM2AldUtz2x37",
+                    "url": "https://open.spotify.com/track/3pHkh7d0lzM2AldUtz2x37"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "To Build A Home",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Ma Fleur",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "The Cinematic Orchestra",
+                    "aliases": []
+                },
+                {
+                    "value": "Patrick Watson",
+                    "aliases": []
+                }
+            ],
+            "length": 371,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "54KFQB6N4pn926IUUYZGzK",
+                    "url": "https://open.spotify.com/track/54KFQB6N4pn926IUUYZGzK"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "hope ur ok",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "SOUR",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Olivia Rodrigo",
+                    "aliases": []
+                }
+            ],
+            "length": 209,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1zejeOnykpCoyVSit6Bwp3",
+                    "url": "https://open.spotify.com/track/1zejeOnykpCoyVSit6Bwp3"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Pluto Projector",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Pony",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Rex Orange County",
+                    "aliases": []
+                }
+            ],
+            "length": 267,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "4EWBhKf1fOFnyMtUzACXEc",
+                    "url": "https://open.spotify.com/track/4EWBhKf1fOFnyMtUzACXEc"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "I Hear a Symphony",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Flying",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Cody Fry",
+                    "aliases": []
+                }
+            ],
+            "length": 185,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "3iJya7m7trpGv570Ske30n",
+                    "url": "https://open.spotify.com/track/3iJya7m7trpGv570Ske30n"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Fire On Fire",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Love Goes",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Sam Smith",
+                    "aliases": []
+                }
+            ],
+            "length": 246,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7t3Xdbufg7q2onVsR8RBdY",
+                    "url": "https://open.spotify.com/track/7t3Xdbufg7q2onVsR8RBdY"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Love In The Dark",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "25",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "Adele",
+                    "aliases": []
+                }
+            ],
+            "length": 285,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "7B5Npv8NjjTCzk8PLpU66h",
+                    "url": "https://open.spotify.com/track/7B5Npv8NjjTCzk8PLpU66h"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Half Light",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Half Light",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "BANNERS",
+                    "aliases": []
+                }
+            ],
+            "length": 185,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "1tYOB844iD7HxHvPtwDPNu",
+                    "url": "https://open.spotify.com/track/1tYOB844iD7HxHvPtwDPNu"
+                }
+            ]
+        },
+        {
+            "name": {
+                "value": "Castles - Instrumental",
+                "aliases": []
+            },
+            "albums": [
+                {
+                    "value": "Castles",
+                    "aliases": []
+                }
+            ],
+            "artists": [
+                {
+                    "value": "lifestory",
+                    "aliases": []
+                }
+            ],
+            "length": 213,
+            "uris": [
+                {
+                    "service": "spotify",
+                    "type": "track",
+                    "uri": "2zXtlLk5ip6FbQvflBf1uT",
+                    "url": "https://open.spotify.com/track/2zXtlLk5ip6FbQvflBf1uT"
+                }
+            ]
+        }
+    ]
+}
