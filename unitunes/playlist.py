@@ -18,39 +18,38 @@ class PlaylistMetadata(BaseModel):
 class Playlist(BaseModel):
     name: str
     description: str = ""
-    uris: Dict[str, PlaylistURIs] = {}
+    uris: Dict[str, List[PlaylistURIs]] = {}
     tracks: List[Track] = []
 
     def __rich__(self):
         s = f"[b]{self.name}[/b]\n"
         s += f"Description: {self.description}\n"
         if self.uris:
-            s += f"\nURIs: {', '.join(uri.__rich__() for uri in self.uris.values())}"
+            for service_name, uris in self.uris.items():
+                s += f"{service_name}: "
+                for uri in uris:
+                    s += f"{uri.url} "
         if self.tracks:
             joined = "\n".join(track.__rich__() for track in self.tracks)
             s += f"\nTracks:\n{joined}"
 
         return s
 
-    def find_uri(self, service: ServiceType) -> Optional[PlaylistURIs]:
-        for uri in self.uris.values():
-            if uri.service == service:
-                return uri
-        return None
+    def add_uri(self, service_name: str, uri: PlaylistURIs) -> None:
+        if service_name not in self.uris:
+            self.uris[service_name] = []
+        self.uris[service_name].append(uri)
 
-    def get_uri(self, service_name: str) -> Optional[PlaylistURIs]:
-        if service_name in self.uris:
-            return self.uris[service_name]
-        return None
+    def remove_uri(self, service_name: str, uri: PlaylistURIs) -> None:
+        self.uris[service_name].remove(uri)
+        if not self.uris[service_name]:
+            del self.uris[service_name]
 
-    def set_uri(self, service_name: str, uri: PlaylistURIs) -> None:
-        self.uris[service_name] = uri
-
-    def remove_uri(self, service_name: str) -> None:
+    def remove_service(self, service_name: str) -> None:
         del self.uris[service_name]
 
     def contains_uri(self, uri: PlaylistURIs) -> bool:
-        for uri_ in self.uris.values():
-            if uri_.uri == uri.uri:
+        for service_name, uris in self.uris.items():
+            if uri in uris:
                 return True
         return False

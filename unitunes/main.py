@@ -167,7 +167,7 @@ class PlaylistManager:
         self.config.remove_service(name)
 
         for playlist in self.playlists.values():
-            playlist.remove_uri(name)
+            playlist.remove_service(name)
             self.file_manager.save_playlist(playlist)
 
         self.file_manager.save_config(self.config)
@@ -184,7 +184,7 @@ class PlaylistManager:
     ) -> None:
         """Link a playlist URI to a UP. UP must exist."""
         pl = self.playlists[playlist_name]
-        pl.set_uri(service_name, uri)
+        pl.add_uri(service_name, uri)
 
         self.file_manager.save_config(self.config)
         self.file_manager.save_playlist(pl)
