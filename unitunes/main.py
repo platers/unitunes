@@ -194,8 +194,9 @@ class PlaylistManager:
 
     def is_tracking_playlist(self, uri: PlaylistURIs) -> bool:
         for playlist in self.playlists.values():
-            if uri in playlist.uris.values():
-                return True
+            for uris in playlist.uris.values():
+                if uri in uris:
+                    return True
         return False
 
 
