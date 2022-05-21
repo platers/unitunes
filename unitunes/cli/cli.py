@@ -147,12 +147,19 @@ def tracks_to_remove(
 def get_missing_uris(
     service: ServiceType, current: List[Track], new: List[Track]
 ) -> List[TrackURIs]:
+    def matches_any(track: Track, tracks: List[Track]) -> bool:
+        return any(tracks_match_and_on_service(service, track, t) for t in tracks)
+
+    not_matched = [t for t in current if not matches_any(t, new)]
+
     def tracks_to_uris(tracks: List[Track]) -> List[TrackURIs]:
         uris = [track.uris for track in tracks]
         flat_uris = [uri for uri_list in uris for uri in uri_list]
         return flat_uris
 
-    uris_on_service = [uri for uri in tracks_to_uris(current) if uri.service == service]
+    uris_on_service = [
+        uri for uri in tracks_to_uris(not_matched) if uri.service == service
+    ]
     remote = tracks_to_uris(new)
     missing = [uri for uri in uris_on_service if uri not in remote]
     return missing
@@ -321,6 +328,7 @@ def push(
                 pm.save_playlist(pl.name)
 
             for playlist_uri in pl.uris[service.name]:
+                console.print(f"Pushing to {playlist_uri.url}")
                 current_tracks = service.pull_tracks(playlist_uri)
                 added = tracks_to_add(service.type, current_tracks, pl.tracks)
                 removed = tracks_to_remove(service.type, current_tracks, pl.tracks)
