@@ -5,6 +5,8 @@ from typing import (
     Any,
     List,
     NewType,
+    Protocol,
+    runtime_checkable,
 )
 from unitunes.playlist import PlaylistMetadata
 from unitunes.track import Track
@@ -52,28 +54,22 @@ class ServiceWrapper:
             self.cache_path.mkdir()
 
 
-class UserPlaylistPullable(ABC):
+@runtime_checkable
+class UserPlaylistPullable(Protocol):
     @abstractmethod
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         """Returns the users playlists"""
 
-    def get_playlist_metadata(self, playlist_name: str) -> PlaylistMetadata:
-        metas = self.get_playlist_metadatas()
-        for meta in metas:
-            if meta.name == playlist_name:
-                return meta
-        raise ValueError(
-            f"Playlist {playlist_name} not found. Available playlists: {', '.join([meta.name for meta in metas])}"
-        )
 
-
-class PlaylistPullable(ABC):
+@runtime_checkable
+class PlaylistPullable(Protocol):
     @abstractmethod
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
         """Gets tracks from a playlist"""
 
 
-class TrackPullable(ABC):
+@runtime_checkable
+class TrackPullable(Protocol):
     @abstractmethod
     def pull_track(self, uri: TrackURI) -> Track:
         raise NotImplementedError
@@ -82,7 +78,8 @@ class TrackPullable(ABC):
 Query = NewType("Query", Any)
 
 
-class Searchable(ABC):
+@runtime_checkable
+class Searchable(Protocol):
     @abstractmethod
     def search_query(self, query: Query) -> List[Track]:
         """Search for a query in the streaming service. Returns a list of potential matches."""
@@ -93,7 +90,8 @@ class Searchable(ABC):
         Sorted from most precise to least precise."""
 
 
-class Pushable(PlaylistPullable):
+@runtime_checkable
+class Pushable(PlaylistPullable, Protocol):
     @abstractmethod
     def create_playlist(self, title: str, description: str = "") -> PlaylistURIs:
         """Creates a new playlist"""

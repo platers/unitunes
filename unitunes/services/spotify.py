@@ -157,13 +157,7 @@ class SpotifyAPIWrapper(SpotifyWrapper):
             self.sp.current_user_saved_tracks_delete(chunk)
 
 
-class SpotifyService(
-    StreamingService,
-    Searchable,
-    TrackPullable,
-    Pushable,
-    UserPlaylistPullable,
-):
+class SpotifyService(StreamingService):
     wrapper: SpotifyWrapper
 
     def __init__(self, name: str, wrapper: SpotifyWrapper) -> None:

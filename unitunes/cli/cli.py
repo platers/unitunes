@@ -524,6 +524,7 @@ def fetch(
         console.print(f"Cannot fetch user playlists from {service.type}", style="red")
         raise typer.Exit(1)
 
+    assert isinstance(service, UserPlaylistPullable)
     playlists = service.get_playlist_metadatas()
     console.print(f"Found {len(playlists)} playlists")
 

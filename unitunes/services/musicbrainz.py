@@ -54,7 +54,7 @@ class MusicBrainzWrapper(ServiceWrapper):
         return mb.get_release_by_id(*args, **kwargs)
 
 
-class MusicBrainz(StreamingService, Searchable, TrackPullable):
+class MusicBrainz(StreamingService):
     wrapper: MusicBrainzWrapper
 
     def __init__(self, wrapper: MusicBrainzWrapper) -> None:

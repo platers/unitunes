@@ -128,13 +128,7 @@ class YtmAPIWrapper(YtmWrapper):
         return self.ytm.get_library_playlists(*args, **kwargs)
 
 
-class YTM(
-    StreamingService,
-    Searchable,
-    TrackPullable,
-    Pushable,
-    UserPlaylistPullable,
-):
+class YTM(StreamingService):
     wrapper: YtmWrapper
 
     def __init__(self, name: str, wrapper: YtmWrapper) -> None:
