@@ -1,0 +1,60 @@
+from pathlib import Path
+import string
+
+from unitunes.index import Index
+from unitunes.playlist import Playlist
+
+
+class FileManager:
+    dir: Path
+    config_path: Path
+    playlist_folder: Path
+    cache_path: Path
+
+    def __init__(self, dir: Path) -> None:
+        self.dir = dir
+        self.config_path = dir / "config.json"
+        self.playlist_folder = dir / "playlists"
+        self.cache_path = dir / "cache"
+
+    def get_playlist_path(self, name: str) -> Path:
+        def format_filename(s):
+            """Take a string and return a valid filename constructed from the string.
+            Uses a whitelist approach: any characters not present in valid_chars are
+            removed. Also spaces are replaced with underscores.
+            Source: https://gist.github.com/seanh/93666
+            """
+            valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+            filename = "".join(c for c in s if c in valid_chars)
+            filename = filename.replace(" ", "_")
+            return filename
+
+        return self.playlist_folder / f"{format_filename(name)}.json"
+
+    def make_playlist_dir(self) -> None:
+        self.playlist_folder.mkdir(exist_ok=True)
+
+    def save_config(self, config: Index) -> None:
+        with open(self.config_path, "w") as f:
+            f.write(config.json(indent=4))
+
+    def load_config(self) -> Index:
+        if not self.config_path.exists():
+            raise FileNotFoundError(f"Config file not found: {self.config_path}")
+        return Index.parse_file(self.config_path)
+
+    def save_playlist(self, playlist: Playlist) -> None:
+        with open(self.get_playlist_path(playlist.name), "w") as f:
+            f.write(playlist.json(indent=4))
+
+    def load_playlist(self, name: str) -> Playlist:
+        path = self.get_playlist_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Playlist file not found: {path}")
+        return Playlist.parse_file(path)
+
+    def delete_playlist(self, name: str) -> None:
+        path = self.get_playlist_path(name)
+        if not path.exists():
+            raise FileNotFoundError(f"Playlist file not found: {path}")
+        path.unlink()
