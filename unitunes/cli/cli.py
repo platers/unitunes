@@ -7,12 +7,12 @@ from unitunes.cli.utils import (
     print_tracks,
 )
 from unitunes.main import (
-    Config,
     FileManager,
     PlaylistManager,
     get_predicted_tracks,
     get_prediction_track,
 )
+from unitunes.index import Index
 from typing import List, Optional
 from pathlib import Path
 from rich.console import Console
@@ -58,7 +58,7 @@ def init(
     fm = FileManager(directory)
 
     try:
-        fm.save_config(Config())
+        fm.save_config(Index())
     except FileExistsError:
         console.print(
             f"A playlist manager is already initialized in {directory}",

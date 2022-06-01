@@ -2,7 +2,7 @@ import json
 import string
 from typing import Dict, List, Optional
 from pathlib import Path
-from pydantic import BaseModel
+from unitunes.index import Index
 from unitunes.matcher import MatcherStrategy
 from unitunes.playlist import Playlist
 from unitunes.searcher import SearcherStrategy
@@ -22,39 +22,6 @@ from unitunes.services.ytm import YTM, YtmAPIWrapper
 from unitunes.track import Track
 from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURIs, TrackURI
-
-
-class ConfigServiceEntry(BaseModel):
-    name: str
-    service: str
-    config_path: str
-
-
-class Config(BaseModel):
-    services: Dict[str, ConfigServiceEntry] = {}
-    playlists: List[str] = []
-
-    def add_playlist(self, name: str):
-        if name in self.playlists:
-            raise ValueError(f"Playlist {name} already exists")
-        self.playlists.append(name)
-
-    def add_service(self, name: str, service: str, config_path: str):
-        if name in self.services:
-            raise ValueError(f"Service {name} already exists")
-        self.services[name] = ConfigServiceEntry(
-            name=name, service=service, config_path=config_path
-        )
-
-    def remove_service(self, name: str):
-        if name not in self.services:
-            raise ValueError(f"Service {name} does not exist")
-        del self.services[name]
-
-    def remove_playlist(self, name: str):
-        if name not in self.playlists:
-            raise ValueError(f"Playlist {name} does not exist")
-        self.playlists.remove(name)
 
 
 def service_factory(
@@ -106,14 +73,14 @@ class FileManager:
     def make_playlist_dir(self) -> None:
         self.playlist_folder.mkdir(exist_ok=True)
 
-    def save_config(self, config: Config) -> None:
+    def save_config(self, config: Index) -> None:
         with open(self.config_path, "w") as f:
             f.write(config.json(indent=4))
 
-    def load_config(self) -> Config:
+    def load_config(self) -> Index:
         if not self.config_path.exists():
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
-        return Config.parse_file(self.config_path)
+        return Index.parse_file(self.config_path)
 
     def save_playlist(self, playlist: Playlist) -> None:
         with open(self.get_playlist_path(playlist.name), "w") as f:
@@ -133,12 +100,12 @@ class FileManager:
 
 
 class PlaylistManager:
-    config: Config
+    config: Index
     file_manager: FileManager
     playlists: Dict[str, Playlist]
     services: Dict[str, StreamingService]
 
-    def __init__(self, config: Config, file_manager: FileManager) -> None:
+    def __init__(self, config: Index, file_manager: FileManager) -> None:
         self.config = config
         self.file_manager = file_manager
         self.playlists = {}
