@@ -40,7 +40,7 @@ pip install unitunes
 unitunes init
 ```
 
-This creates a `config.json` file in the current directory.
+This creates a `index.json` file in the current directory.
 
 ### Add Services
 

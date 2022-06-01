@@ -58,7 +58,7 @@ def init(
     fm = FileManager(directory)
 
     try:
-        fm.save_config(Index())
+        fm.save_index(Index())
     except FileExistsError:
         console.print(
             f"A playlist manager is already initialized in {directory}",
@@ -85,7 +85,7 @@ def expand_playlists(
     pm: PlaylistManager, playlist_names: Optional[List[str]]
 ) -> List[Playlist]:
     if not playlist_names:
-        playlist_names = pm.config.playlists
+        playlist_names = pm.index.playlists
 
     for playlist_name in playlist_names:
         if playlist_name not in pm.playlists:
@@ -99,7 +99,7 @@ def expand_services(
     pm: PlaylistManager, service_names: Optional[List[str]]
 ) -> List[StreamingService]:
     if not service_names:
-        service_names = list(pm.config.services.keys())
+        service_names = list(pm.index.services.keys())
 
     for service_name in service_names:
         if service_name not in pm.services:
@@ -464,7 +464,7 @@ def add(
     playlist_name: str, service_name: str, url: Optional[str] = typer.Argument(None)
 ):
     """
-    Add a playlist to the config file.
+    Add a playlist to the index file.
 
     If a playlist with the same name already exists, the url will be added to the playlist.
     Otherwise, a new playlist will be created.

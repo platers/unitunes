@@ -16,14 +16,14 @@ console = Console()
 def get_playlist_manager(dir: Path) -> PlaylistManager:
     fm = FileManager(dir)
     try:
-        config = fm.load_config()
+        index = fm.load_index()
     except FileNotFoundError:
         typer.echo(
-            "Config file not found. Please run `unitunes init` to create a config file."
+            "Index file not found. Please run `unitunes init` to create a config file."
         )
         raise typer.Exit()
 
-    return PlaylistManager(config, fm)
+    return PlaylistManager(index, fm)
 
 
 def print_grid(

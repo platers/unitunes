@@ -1,5 +1,4 @@
 import json
-import string
 from typing import Dict, List, Optional
 from pathlib import Path
 from unitunes.file_manager import FileManager
@@ -29,16 +28,16 @@ def service_factory(
     service_type: ServiceType,
     name: str,
     cache_path: Path,
-    config_path: Optional[Path] = None,
+    index_path: Optional[Path] = None,
 ) -> StreamingService:
 
     if service_type == ServiceType.SPOTIFY:
-        assert config_path is not None
-        config = json.load(config_path.open())
-        return SpotifyService(name, SpotifyAPIWrapper(config, cache_path))
+        assert index_path is not None
+        index = json.load(index_path.open())
+        return SpotifyService(name, SpotifyAPIWrapper(index, cache_path))
     elif service_type == ServiceType.YTM:
-        assert config_path is not None
-        return YTM(name, YtmAPIWrapper(config_path, cache_path))
+        assert index_path is not None
+        return YTM(name, YtmAPIWrapper(index_path, cache_path))
     elif service_type == ServiceType.MB:
         return MusicBrainz(MusicBrainzWrapper(cache_path))
     else:
@@ -46,13 +45,13 @@ def service_factory(
 
 
 class PlaylistManager:
-    config: Index
+    index: Index
     file_manager: FileManager
     playlists: Dict[str, Playlist]
     services: Dict[str, StreamingService]
 
-    def __init__(self, config: Index, file_manager: FileManager) -> None:
-        self.config = config
+    def __init__(self, index: Index, file_manager: FileManager) -> None:
+        self.index = index
         self.file_manager = file_manager
         self.playlists = {}
         self.services = {}
@@ -60,7 +59,7 @@ class PlaylistManager:
         self.load_services()
 
         # create playlist objects
-        for name in self.config.playlists:
+        for name in self.index.playlists:
             self.playlists[name] = self.file_manager.load_playlist(name)
 
     def load_services(self) -> None:
@@ -69,48 +68,48 @@ class PlaylistManager:
             "MusicBrainz",
             cache_path=self.file_manager.cache_path,
         )
-        for s in self.config.services.values():
-            service_config_path = Path(s.config_path)
+        for s in self.index.services.values():
+            service_index_path = Path(s.index_path)
             self.services[s.name] = service_factory(
                 ServiceType(s.service),
                 s.name,
-                config_path=service_config_path,
+                index_path=service_index_path,
                 cache_path=self.file_manager.cache_path,
             )
 
     def add_service(
-        self, service: ServiceType, service_config_path: Path, name: str
+        self, service: ServiceType, service_index_path: Path, name: str
     ) -> None:
-        self.config.add_service(name, service.value, service_config_path.as_posix())
+        self.index.add_service(name, service.value, service_index_path.as_posix())
         self.load_services()
-        self.file_manager.save_config(self.config)
+        self.file_manager.save_index(self.index)
 
     def remove_service(self, name: str) -> None:
-        if name not in self.config.services:
+        if name not in self.index.services:
             raise ValueError(f"Service {name} not found")
-        self.config.remove_service(name)
+        self.index.remove_service(name)
 
         for playlist in self.playlists.values():
             playlist.remove_service(name)
             self.file_manager.save_playlist(playlist)
 
-        self.file_manager.save_config(self.config)
+        self.file_manager.save_index(self.index)
 
     def add_playlist(self, name: str) -> None:
         """Initialize a UP. Raise ValueError if the playlist already exists."""
-        self.config.add_playlist(name)
+        self.index.add_playlist(name)
         self.playlists[name] = Playlist(name=name)
-        self.file_manager.save_config(self.config)
+        self.file_manager.save_index(self.index)
         self.file_manager.save_playlist(self.playlists[name])
 
     def remove_playlist(self, name: str) -> None:
-        """Remove a playlist from the config and filesystem."""
-        if name not in self.config.playlists:
+        """Remove a playlist from the index and filesystem."""
+        if name not in self.index.playlists:
             raise ValueError(f"Playlist {name} not found")
         self.file_manager.delete_playlist(name)
         del self.playlists[name]
-        self.config.remove_playlist(name)
-        self.file_manager.save_config(self.config)
+        self.index.remove_playlist(name)
+        self.file_manager.save_index(self.index)
 
     def add_uri_to_playlist(
         self, playlist_name: str, service_name: str, uri: PlaylistURIs
@@ -119,7 +118,7 @@ class PlaylistManager:
         pl = self.playlists[playlist_name]
         pl.add_uri(service_name, uri)
 
-        self.file_manager.save_config(self.config)
+        self.file_manager.save_index(self.index)
         self.file_manager.save_playlist(pl)
 
     def save_playlist(self, playlist_name: str) -> None:
