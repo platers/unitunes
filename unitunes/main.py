@@ -80,7 +80,9 @@ class PlaylistManager:
     def add_service(
         self, service: ServiceType, service_index_path: Path, name: str
     ) -> None:
-        self.index.add_service(name, service.value, service_index_path.as_posix())
+        self.index.add_service(
+            name, service.value, service_index_path.absolute().as_posix()
+        )
         self.load_services()
         self.file_manager.save_index(self.index)
 
