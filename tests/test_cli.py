@@ -19,15 +19,15 @@ test_dir = Path("tests") / "test_lib"
 
 
 @pytest.fixture(scope="module")
-def ytm_index_path(pytestconfig):
-    index_path = pytestconfig.getoption("ytm", skip=True)
-    return Path(index_path).absolute()
+def ytm_config_path(pytestconfig):
+    config_path = pytestconfig.getoption("ytm", skip=True)
+    return Path(config_path).absolute()
 
 
 @pytest.fixture(scope="module")
-def spotify_index_path(pytestconfig):
-    index_path = pytestconfig.getoption("spotify", skip=True)
-    return Path(index_path).absolute()
+def spotify_config_path(pytestconfig):
+    config_path = pytestconfig.getoption("spotify", skip=True)
+    return Path(config_path).absolute()
 
 
 @pytest.fixture
@@ -63,8 +63,8 @@ def invoke_cli(args: List[str]):
     return result
 
 
-def test_add_ytm_service(playlist_manager, ytm_index_path):
-    result = invoke_cli(["service", "add", "ytm", ytm_index_path.as_posix()])
+def test_add_ytm_service(playlist_manager, ytm_config_path):
+    result = invoke_cli(["service", "add", "ytm", ytm_config_path.as_posix()])
     assert result.exit_code == 0
     assert "Added" in result.stdout
     pm = get_playlist_manager(test_dir)
@@ -72,8 +72,8 @@ def test_add_ytm_service(playlist_manager, ytm_index_path):
     assert "ytm" in pm.services
 
 
-def test_add_spotify_service(playlist_manager, spotify_index_path):
-    result = invoke_cli(["service", "add", "spotify", spotify_index_path.as_posix()])
+def test_add_spotify_service(playlist_manager, spotify_config_path):
+    result = invoke_cli(["service", "add", "spotify", spotify_config_path.as_posix()])
     assert result.exit_code == 0
     assert "Added" in result.stdout
     pm = get_playlist_manager(test_dir)
@@ -81,15 +81,15 @@ def test_add_spotify_service(playlist_manager, spotify_index_path):
 
 
 @pytest.fixture
-def pm_with_spotify_service(playlist_manager, spotify_index_path):
-    result = invoke_cli(["service", "add", "spotify", spotify_index_path.as_posix()])
+def pm_with_spotify_service(playlist_manager, spotify_config_path):
+    result = invoke_cli(["service", "add", "spotify", spotify_config_path.as_posix()])
     assert result.exit_code == 0
 
     yield get_playlist_manager(test_dir)
 
 
-def test_add_same_service(pm_with_spotify_service, spotify_index_path):
-    result = invoke_cli(["service", "add", "spotify", spotify_index_path.as_posix()])
+def test_add_same_service(pm_with_spotify_service, spotify_config_path):
+    result = invoke_cli(["service", "add", "spotify", spotify_config_path.as_posix()])
     assert result.exit_code == 1
     assert "already exists" in result.stdout.lower()
 
@@ -140,11 +140,11 @@ def test_remove_service(pm_added_playlist):
 
 
 @pytest.fixture
-def pm_pulled_playlist(pm_added_playlist, spotify_index_path):
+def pm_pulled_playlist(pm_added_playlist, spotify_config_path):
     # Pull a playlist with spotify service first to ensure .cache is created
     # typer.invoke cant take input
 
-    with open(spotify_index_path, "r") as f:
+    with open(spotify_config_path, "r") as f:
         index = json.load(f)
     wrapper = SpotifyAPIWrapper(index, test_dir / "cache")
     service = SpotifyService("temp", wrapper)

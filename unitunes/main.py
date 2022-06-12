@@ -28,16 +28,16 @@ def service_factory(
     service_type: ServiceType,
     name: str,
     cache_path: Path,
-    index_path: Optional[Path] = None,
+    config_path: Optional[Path] = None,
 ) -> StreamingService:
 
     if service_type == ServiceType.SPOTIFY:
-        assert index_path is not None
-        index = json.load(index_path.open())
+        assert config_path is not None
+        index = json.load(config_path.open())
         return SpotifyService(name, SpotifyAPIWrapper(index, cache_path))
     elif service_type == ServiceType.YTM:
-        assert index_path is not None
-        return YTM(name, YtmAPIWrapper(index_path, cache_path))
+        assert config_path is not None
+        return YTM(name, YtmAPIWrapper(config_path, cache_path))
     elif service_type == ServiceType.MB:
         return MusicBrainz(MusicBrainzWrapper(cache_path))
     else:
@@ -69,19 +69,19 @@ class PlaylistManager:
             cache_path=self.file_manager.cache_path,
         )
         for s in self.index.services.values():
-            service_index_path = Path(s.index_path)
+            service_config_path = Path(s.config_path)
             self.services[s.name] = service_factory(
                 ServiceType(s.service),
                 s.name,
-                index_path=service_index_path,
+                config_path=service_config_path,
                 cache_path=self.file_manager.cache_path,
             )
 
     def add_service(
-        self, service: ServiceType, service_index_path: Path, name: str
+        self, service: ServiceType, service_config_path: Path, name: str
     ) -> None:
         self.index.add_service(
-            name, service.value, service_index_path.absolute().as_posix()
+            name, service.value, service_config_path.absolute().as_posix()
         )
         self.load_services()
         self.file_manager.save_index(self.index)

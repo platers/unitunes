@@ -147,19 +147,12 @@ def tracks_to_remove(
 def get_missing_uris(
     service: ServiceType, current: List[Track], new: List[Track]
 ) -> List[TrackURIs]:
-    def matches_any(track: Track, tracks: List[Track]) -> bool:
-        return any(tracks_match_and_on_service(service, track, t) for t in tracks)
-
-    not_matched = [t for t in current if not matches_any(t, new)]
-
     def tracks_to_uris(tracks: List[Track]) -> List[TrackURIs]:
         uris = [track.uris for track in tracks]
         flat_uris = [uri for uri_list in uris for uri in uri_list]
         return flat_uris
 
-    uris_on_service = [
-        uri for uri in tracks_to_uris(not_matched) if uri.service == service
-    ]
+    uris_on_service = [uri for uri in tracks_to_uris(current) if uri.service == service]
     remote = tracks_to_uris(new)
     missing = [uri for uri in uris_on_service if uri not in remote]
     return missing
@@ -260,6 +253,36 @@ def pull(
                 new_tracks.extend(added)
 
                 if not dont_remove:
+
+                    def fix_uris(
+                        current_tracks: List[Track], remote_tracks: List[Track]
+                    ) -> None:
+                        """Finds matching tracks with different uris and updates them"""
+                        matcher = DefaultMatcherStrategy()
+
+                        def fix_track_uri(track: Track) -> None:
+                            matches = [
+                                t for t in remote_tracks if matcher.are_same(t, track)
+                            ]
+                            if not matches:
+                                return
+                            new_uri = matches[0].uris[0]
+                            if new_uri not in track.uris:
+                                # remove old uris on this service
+                                track.uris = [
+                                    uri
+                                    for uri in track.uris
+                                    if uri.service != service.type
+                                ]
+                                track.uris.append(new_uri)
+                                print(
+                                    f"{track.name.value} updated uri to {new_uri.url}"
+                                )
+
+                        for track in current_tracks:
+                            fix_track_uri(track)
+
+                    fix_uris(pl.tracks, remote_tracks)
                     missing = get_missing_uris(service.type, pl.tracks, remote_tracks)
                     if missing:
                         console.print(
