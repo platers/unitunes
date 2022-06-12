@@ -24,6 +24,7 @@ from unitunes.searcher import DefaultSearcherStrategy
 from unitunes.services.services import (
     PlaylistPullable,
     Pushable,
+    Searchable,
     StreamingService,
     UserPlaylistPullable,
 )
@@ -282,15 +283,6 @@ def pull(
                         for track in current_tracks:
                             fix_track_uri(track)
 
-                    def remove_dead_uris(
-                        tracks: List[Track], service: ServiceType
-                    ) -> None:
-                        """Removes dead uris from tracks"""
-                        for track in tracks:
-                            track.uris = [
-                                uri for uri in track.uris if uri.service != service
-                            ]
-
                     fix_uris(pl.tracks, remote_tracks)
                     missing = get_missing_uris(service.type, pl.tracks, remote_tracks)
                     if missing:
@@ -390,8 +382,16 @@ def push(
 
 @app.command()
 def search(
-    service: ServiceType,
-    playlist_name: str,
+    playlist_names: Optional[List[str]] = typer.Argument(
+        None,
+        help="Playlists to push to services. If not specified, all playlists are pushed.",
+    ),
+    service_names: Optional[List[str]] = typer.Option(
+        None,
+        "--service",
+        "-s",
+        help="Services to push to. If not specified, all services are used.",
+    ),
     preview: bool = typer.Option(
         False,
         "--preview",
@@ -420,75 +420,87 @@ def search(
 
     If the preview flag is set, URI's will not be added.
     """
-    typer.echo(f"Searching {service.value} for {playlist_name}")
-
     pm = get_playlist_manager(Path.cwd())
-    pl = pm.playlists[playlist_name]
-    original_tracks = [track for track in pl.tracks if not track.find_uri(service)]
-    streaming_service = [s for s in pm.services.values() if s.type == service][0]
-    matcher = DefaultMatcherStrategy()
-    searcher = DefaultSearcherStrategy(matcher)
-
-    predicted_tracks = [
-        get_prediction_track(streaming_service, track, matcher, searcher, threshold=0.7)
-        for track in tqdm(original_tracks)
+    playlists = expand_playlists(pm, playlist_names)
+    services = [
+        service
+        for service in expand_services(pm, service_names)
+        if isinstance(service, Searchable)
     ]
-    num_not_found = len([t for t in predicted_tracks if t is None])
-    console.print(f"{len(predicted_tracks) - num_not_found} tracks found")
-    console.print(f"{num_not_found} tracks not found")
 
-    for (original, predicted) in zip(original_tracks, predicted_tracks):
-        if predicted is None:
-            console.print(f"{original.name.value} ->", style="red")
-            continue
-        print(
-            f"{original.name.value} -> {predicted.name.value}"
-        )  # no highlight for clarity
-        original.merge(predicted)
+    for pl in playlists:
+        for service in services:
 
-    if not preview:
-        pm.save_playlist(playlist_name)
+            typer.echo(f"Searching {service.name} for {pl.name}")
 
-    if debug:
-        all_predicted_tracks = [
-            get_predicted_tracks(streaming_service, track, searcher)
-            for track in original_tracks
-        ]
+            original_tracks = [
+                track for track in pl.tracks if not track.find_uri(service.type)
+            ]
+            matcher = DefaultMatcherStrategy()
+            searcher = DefaultSearcherStrategy(matcher)
 
-        table = Table(
-            title=f"Uncertain {service.value} search results for {playlist_name}"
-        )
-        table.add_column("Original Track")
-        table.add_column("Predicted Track")
-        table.add_column("Confidence")
-        table.show_lines = True
+            predicted_tracks = [
+                get_prediction_track(service, track, matcher, searcher, threshold=0.7)
+                for track in tqdm(original_tracks)
+            ]
+            num_not_found = len([t for t in predicted_tracks if t is None])
+            console.print(f"{len(predicted_tracks) - num_not_found} tracks found")
+            console.print(f"{num_not_found} tracks not found")
 
-        for i, (original, predicted) in enumerate(
-            zip(original_tracks, predicted_tracks)
-        ):
-            if predicted is None:
-                if showall or onlyfailed:
-                    table.add_row(original, "", "")
-                    for track in all_predicted_tracks[i]:
-                        table.add_row(
-                            "", track, f"{matcher.similarity(original, track):.2f}"
-                        )
-                continue
-            elif onlyfailed:
-                continue
+            for (original, predicted) in zip(original_tracks, predicted_tracks):
+                if predicted is None:
+                    console.print(f"{original.name.value} ->", style="red")
+                    continue
+                print(
+                    f"{original.name.value} -> {predicted.name.value}"
+                )  # no highlight for clarity
+                original.merge(predicted)
 
-            similarity = matcher.similarity(original, predicted)
-            if not showall and similarity >= 0.7:
-                continue
+            if not preview:
+                pm.save_playlist(pl.name)
 
-            table.add_row(original, predicted, f"{similarity:.2f}")
             if debug:
-                for track in all_predicted_tracks[i][1:]:
-                    table.add_row(
-                        "", track, f"{matcher.similarity(original, track):.2f}"
-                    )
+                all_predicted_tracks = [
+                    get_predicted_tracks(service, track, searcher)
+                    for track in original_tracks
+                ]
 
-        console.print(table)
+                table = Table(
+                    title=f"Uncertain {service.name} search results for {pl.name}"
+                )
+                table.add_column("Original Track")
+                table.add_column("Predicted Track")
+                table.add_column("Confidence")
+                table.show_lines = True
+
+                for i, (original, predicted) in enumerate(
+                    zip(original_tracks, predicted_tracks)
+                ):
+                    if predicted is None:
+                        if showall or onlyfailed:
+                            table.add_row(original, "", "")
+                            for track in all_predicted_tracks[i]:
+                                table.add_row(
+                                    "",
+                                    track,
+                                    f"{matcher.similarity(original, track):.2f}",
+                                )
+                        continue
+                    elif onlyfailed:
+                        continue
+
+                    similarity = matcher.similarity(original, predicted)
+                    if not showall and similarity >= 0.7:
+                        continue
+
+                    table.add_row(original, predicted, f"{similarity:.2f}")
+                    if debug:
+                        for track in all_predicted_tracks[i][1:]:
+                            table.add_row(
+                                "", track, f"{matcher.similarity(original, track):.2f}"
+                            )
+
+                console.print(table)
 
 
 @app.command()
