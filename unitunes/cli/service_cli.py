@@ -45,7 +45,7 @@ def list(plain: bool = False) -> None:
     """List all services."""
 
     pm = get_playlist_manager(Path.cwd())
-    grid = [[s.name, s.service, s.config_path] for s in pm.config.services.values()]
+    grid = [[s.name, s.service, s.config_path] for s in pm.index.services.values()]
     print_grid(
         "Services", headers=["Name", "Service", "Config Path"], rows=grid, plain=plain
     )
@@ -58,7 +58,7 @@ def remove(
     """Remove a service."""
 
     pm = get_playlist_manager(Path.cwd())
-    if service_name not in pm.config.services:
+    if service_name not in pm.index.services:
         console.print(f"Service with name {service_name} does not exist")
         raise typer.Exit(1)
 

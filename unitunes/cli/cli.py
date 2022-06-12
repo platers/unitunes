@@ -282,6 +282,15 @@ def pull(
                         for track in current_tracks:
                             fix_track_uri(track)
 
+                    def remove_dead_uris(
+                        tracks: List[Track], service: ServiceType
+                    ) -> None:
+                        """Removes dead uris from tracks"""
+                        for track in tracks:
+                            track.uris = [
+                                uri for uri in track.uris if uri.service != service
+                            ]
+
                     fix_uris(pl.tracks, remote_tracks)
                     missing = get_missing_uris(service.type, pl.tracks, remote_tracks)
                     if missing:
