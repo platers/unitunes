@@ -46,6 +46,7 @@ class Track(BaseModel):
     artists: List[AliasedString] = []
     length: Optional[int] = None
     uris: List[TrackURIs] = []
+    bad_uris: List[TrackURIs] = []
 
     def __rich__(self):
         s = f"[b]{self.name.__rich__()}[/b]"

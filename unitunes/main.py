@@ -153,6 +153,7 @@ def get_prediction_track(
     threshold: float = 0.8,
 ) -> Optional[Track]:
     matches = get_predicted_tracks(target_service, track, searcher)
+    matches = [m for m in matches if m not in track.bad_uris]
     if len(matches) == 0:
         return None
     best_match = matches[0]

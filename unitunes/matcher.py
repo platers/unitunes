@@ -22,6 +22,7 @@ def normalized_string_similarity(s1: str, s2: str) -> float:
         "live",
         "version",
         "edit",
+        "nightcore",
     ]
 
     for term in special_terms:

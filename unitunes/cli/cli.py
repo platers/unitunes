@@ -207,14 +207,17 @@ def pull(
             for t in matches:
                 console.print(f"Track {t.name.value} not found in playlist")
                 prompt: str = typer.prompt(
-                    f"Remove {missing_uri.url} from track (u), remove track from playlist (r), or skip (s)?",
-                    default="s",
+                    f"Mark {missing_uri.url} as bad (b), remove track from playlist (r), or skip (s)?",
+                    default="b",
                 )
 
-                if prompt.startswith("u"):
+                if prompt.startswith("b"):
                     # remove uri
                     t.uris.remove(missing_uri)
-                    console.print(f"Removed {missing_uri.url} from {t.name.value}")
+                    t.bad_uris.append(missing_uri)
+                    console.print(
+                        f"Removed {missing_uri.url} from {t.name.value} and marked it as bad"
+                    )
                 elif prompt.startswith("r"):
                     # remove track
                     current_tracks.remove(t)
