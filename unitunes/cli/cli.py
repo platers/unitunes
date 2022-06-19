@@ -372,7 +372,7 @@ def push(
                 if not added and not removed:
                     continue
 
-                if not typer.confirm(f"Push to {playlist_uri.url}?", default=False):
+                if not typer.confirm(f"Push to {playlist_uri.url}?", default=True):
                     continue
 
                 if added:
