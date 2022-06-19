@@ -75,17 +75,14 @@ class TrackPullable(Protocol):
         raise NotImplementedError
 
 
-Query = NewType("Query", Any)
-
-
 @runtime_checkable
 class Searchable(Protocol):
     @abstractmethod
-    def search_query(self, query: Query) -> List[Track]:
+    def search_query(self, query: Any) -> List[Track]:
         """Search for a query in the streaming service. Returns a list of potential matches."""
 
     @abstractmethod
-    def query_generator(self, track: Track) -> List[Query]:
+    def query_generator(self, track: Track) -> List[Any]:
         """Returns a list of queries that could be used to search for a track.
         Sorted from most precise to least precise."""
 

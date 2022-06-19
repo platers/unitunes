@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 import musicbrainzngs as mb
 from ratelimit import sleep_and_retry, limits
 
 
 import requests
 from unitunes.services.services import (
-    Query,
     Searchable,
     ServiceWrapper,
     StreamingService,
@@ -125,7 +124,7 @@ class MusicBrainz(StreamingService):
         track = self.parse_track(results)
         return track
 
-    def search_query(self, query: Query) -> List[Track]:
+    def search_query(self, query: Any) -> List[Track]:
         # remove empty fields
         fields = {k: v for k, v in query.items() if v}
 
@@ -136,7 +135,7 @@ class MusicBrainz(StreamingService):
 
         return list(map(self.parse_track, results["recording-list"]))
 
-    def query_generator(self, track: Track) -> List[Query]:
+    def query_generator(self, track: Track) -> List[Any]:
         def escape_special_chars(s: str) -> str:
             # + - && || ! ( ) { } [ ] ^ " ~ * ? : \
             special_chars = [
