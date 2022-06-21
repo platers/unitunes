@@ -64,3 +64,19 @@ def test_ytm_can_pull_track(ytm_service):
     )
     assert track.name.value == "Fireflies"
     assert track.artists[0].value == "Owl City"
+
+
+def test_invalid_uri(ytm_service: YTM):
+    assert ytm_service.is_uri_alive(
+        YtmTrackURI.from_url(
+            "https://music.youtube.com/watch?v=KWLGyeg74es"
+        )  # may be flaky, check if url is valid
+    )
+
+    assert not ytm_service.is_uri_alive(
+        YtmTrackURI.from_url("https://music.youtube.com/watch?v=WvvIjTtBYWM")
+    )
+
+    assert ytm_service.is_uri_alive(
+        YtmTrackURI.from_url("https://music.youtube.com/watch?v=AKXNtLwP294")
+    )

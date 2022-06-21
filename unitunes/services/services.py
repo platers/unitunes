@@ -12,7 +12,7 @@ from unitunes.playlist import PlaylistMetadata
 from unitunes.track import Track
 
 from unitunes.types import ServiceType
-from unitunes.uri import PlaylistURI, PlaylistURIs, TrackURI
+from unitunes.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
 
 
 def cache(method):
@@ -100,6 +100,13 @@ class Pushable(PlaylistPullable, Protocol):
     @abstractmethod
     def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
         """Removes tracks from a playlist"""
+
+
+@runtime_checkable
+class Checkable(Protocol):
+    @abstractmethod
+    def is_uri_alive(self, uri: TrackURIs) -> bool:
+        """Checks if a uri exists in the service."""
 
 
 class StreamingService(ABC):

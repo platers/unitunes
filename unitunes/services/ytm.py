@@ -25,6 +25,7 @@ from unitunes.types import ServiceType
 from unitunes.uri import (
     PlaylistURI,
     PlaylistURIs,
+    TrackURIs,
     YtmPlaylistURI,
     YtmTrackURI,
 )
@@ -241,3 +242,7 @@ class YTM(StreamingService):
             track_ids.append(uri.uri)
 
         self.wrapper.remove_tracks(playlist_uri.uri, track_ids)
+
+    def is_uri_alive(self, uri: TrackURIs) -> bool:
+        raw = self.wrapper.get_song(uri.uri)
+        return "playabilityStatus" in raw and raw["playabilityStatus"]["status"] == "OK"
