@@ -146,7 +146,6 @@ def pull_playlist(
         for playlist_uri in pl.uris[service.name]:
             assert isinstance(service, PlaylistPullable)
             remote_tracks = service.pull_tracks(playlist_uri)
-            print(f"Pulled {len(remote_tracks)} tracks from {service.name}")
 
             new_tracks.extend(get_added(service, playlist_uri, pl, remote_tracks))
 
