@@ -121,3 +121,10 @@ def test_pull_liked_tracks(spotify_api_service):
         SpotifyPlaylistURI.from_url("spotify:liked_songs")
     )
     assert len(tracks) > 5
+
+
+def test_spotify_can_search(spotify_service: SpotifyService):
+    results = spotify_service.search_query(
+        'track:"value=\'OBENTO MAGNUM\' aliases=[]" artist:"DOKONJOFINGER(CV:伊東健人、小松昌平、小野友樹、白井悠介)" album:"TVアニメ「SHOW BY ROCK!!STARS!!」挿入歌ミニアルバム Vol.1"'
+    )  # this is a tricky URL due to the album. Spotipy returns 404, make sure we handle gracefully.
+    assert results is not None

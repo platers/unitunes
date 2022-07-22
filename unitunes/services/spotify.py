@@ -106,7 +106,11 @@ class SpotifyAPIWrapper(SpotifyWrapper):
 
     @cache
     def search(self, *args, use_cache=True, **kwargs):
-        return self.sp.search(*args, **kwargs)
+        try:
+            return self.sp.search(*args, **kwargs)
+        except Exception as e:
+            print(e)
+            return {"tracks": {"items": []}}
 
     def create_playlist(self, title: str, description: str = "") -> str:
         id = self.sp.user_playlist_create(self.sp.me()["id"], title, public=False)["id"]
