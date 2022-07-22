@@ -16,6 +16,22 @@ from unitunes.types import ServiceType
 console = Console()
 
 
+def toggleable_confirm(prompt: str, noninteractive: bool, default: bool) -> bool:
+    console.print(prompt, "YES" if default else "NO")
+    if noninteractive:
+        return default
+
+    return typer.confirm(prompt, default=default)
+
+
+def toggleable_prompt(prompt: str, noninteractive: bool, default: str) -> str:
+    console.print(prompt, default)
+    if noninteractive:
+        return default
+
+    return typer.prompt(prompt, default=default)
+
+
 def get_playlist_manager(dir: Path) -> PlaylistManager:
     fm = FileManager(dir)
     try:

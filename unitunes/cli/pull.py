@@ -10,6 +10,7 @@ from unitunes.uri import TrackURIs
 
 from unitunes.cli.utils import (
     print_tracks,
+    toggleable_prompt,
     tracks_to_add,
 )
 from unitunes.matcher import DefaultMatcherStrategy, MatcherStrategy
@@ -62,13 +63,16 @@ def merge_new_tracks(
             tracks.append(track)
 
 
-def remove_tracks(current_tracks: List[Track], missing: List[TrackURIs]) -> None:
+def remove_tracks(
+    current_tracks: List[Track], missing: List[TrackURIs], noninteractive: bool
+) -> None:
     for missing_uri in missing:
         matches = [t for t in current_tracks if missing_uri in t.uris]
         for t in matches:
             console.print(f"Track {t.name.value} not found in playlist")
-            prompt: str = typer.prompt(
+            prompt: str = toggleable_prompt(
                 f"Mark {missing_uri.url} as bad (b), remove track from playlist (r), or skip (s)?",
+                noninteractive,
                 default="b",
             )
 
@@ -94,13 +98,13 @@ def get_added(
     remote_tracks: List[Track],
 ) -> List[Track]:
     added = tracks_to_add(service.type, pl.tracks, remote_tracks)
-    print(f"Added {len(added)} tracks")
 
     if added:
         console.print(
             f"{playlist_uri.url} added {len(added)} tracks from {service.name}"
         )
         print_tracks(added)
+
     return added
 
 
@@ -134,7 +138,10 @@ def remove_uris(current_tracks: List[Track], uris: List[TrackURIs]) -> None:
 
 
 def pull_playlist(
-    pl: Playlist, services: List[StreamingService], verbose: bool = False
+    pl: Playlist,
+    services: List[StreamingService],
+    verbose: bool = False,
+    noninteractive: bool = False,
 ) -> None:
     new_tracks: List[Track] = []
     missing_uris: List[TrackURIs] = []
@@ -159,10 +166,11 @@ def pull_playlist(
 
     if verbose:
         print_tracks(new_tracks)
+    console.print(f"{len(new_tracks)} new tracks")
     console.print(f"{len(missing_uris)} missing tracks")
     if verbose:
         for playlist_uri in missing_uris:
             console.print(f"{playlist_uri.url}")
 
     merge_new_tracks(pl.tracks, new_tracks, DefaultMatcherStrategy())
-    remove_tracks(pl.tracks, missing_uris)
+    remove_tracks(pl.tracks, missing_uris, noninteractive=noninteractive)

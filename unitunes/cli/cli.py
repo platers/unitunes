@@ -8,6 +8,7 @@ from unitunes.cli.utils import (
     print_grid,
     print_playlist,
     print_tracks,
+    toggleable_confirm,
     tracks_to_add,
     tracks_to_remove,
 )
@@ -105,6 +106,12 @@ def pull(
         "--verbose",
         "-v",
     ),
+    noninteractive: bool = typer.Option(
+        False,
+        "--no-input",
+        "-i",
+        help="If flag set, assumes default values for all prompts. Accepts pushes to existing playlists, does not create new ones.",
+    ),
 ):
     """
     Pull playlist tracks from services.
@@ -124,8 +131,9 @@ def pull(
 
     for pl in playlists:
         console.print(f"Pulling {pl.name}...")
-        pull_playlist(pl, services, verbose)  # type: ignore
+        pull_playlist(pl, services, verbose=verbose, noninteractive=noninteractive)  # type: ignore
         pm.save_playlist(pl.name)
+        console.print()
 
 
 @app.command()
@@ -139,6 +147,12 @@ def push(
         "--service",
         "-s",
         help="Services to push to. If not specified, all services are used.",
+    ),
+    noninteractive: bool = typer.Option(
+        False,
+        "--no-input",
+        "-i",
+        help="If flag set, assumes default values for all prompts. Accepts pushes to existing playlists, does not create new ones.",
     ),
 ):
     """
@@ -166,7 +180,9 @@ def push(
 
             if not service.name in pl.uris:
                 console.print(f"{pl.name} does not have a uri for {service.type}")
-                create_new = typer.confirm("Create new playlist?", default=False)
+                create_new = toggleable_confirm(
+                    "Create new playlist?", noninteractive, False
+                )
                 if not create_new:
                     continue
                 playlist_uri = service.create_playlist(pl.name)
@@ -192,7 +208,11 @@ def push(
                 if not added and not removed:
                     continue
 
-                if not typer.confirm(f"Push to {playlist_uri.url}?", default=True):
+                if not toggleable_confirm(
+                    f"Push to {playlist_uri.url}?",
+                    noninteractive,
+                    True,
+                ):
                     continue
 
                 if added:
@@ -200,7 +220,8 @@ def push(
                 if removed:
                     service.remove_tracks(playlist_uri, removed)
 
-                console.print(f"Pushed {pl.name} to {playlist_uri.url}")
+                console.print(f"Pushed {pl.name} to {playlist_uri.url}", end="\n\n")
+        console.print()
 
 
 @app.command()
@@ -373,7 +394,9 @@ def list_cmd(plain: bool = False) -> None:
 @app.command()
 def fetch(
     service_name: str = typer.Argument(None, help="Service to fetch from."),
-    force: bool = typer.Option(False, "--force", "-f", help="Auto accept prompts."),
+    noninteractive: bool = typer.Option(
+        False, "--no-input", "-i", help="Auto accept prompts."
+    ),
 ) -> None:
     """
     Quickly add playlists from a service.
@@ -400,15 +423,15 @@ def fetch(
             console.print(f"Already tracking {pl.name}")
             continue
 
-        track_pl = force or typer.confirm(
-            f"Add {pl.name} ({pl.uri.url})?", default=True
+        track_pl = toggleable_confirm(
+            f"Add {pl.name} ({pl.uri.url})?", noninteractive, True
         )
         if not track_pl:
             continue
 
         up_name = (
             pl.name
-            if force
+            if noninteractive
             else typer.prompt(f"UP name for {pl.name}", default=pl.name)
         )
         if up_name in pm.playlists:
