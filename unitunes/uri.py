@@ -258,12 +258,12 @@ class BeatsaberPlaylistURI(PlaylistURI):
         return BeatsaberPlaylistURI.from_uri(BeatsaberPlaylistURI.url_to_uri(url))
 
 
-TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
-PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
+TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrackURI]
+PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI, BeatsaberPlaylistURI]
 AlbumURIs = MB_RELEASE_URI
 
-playlist_uri_types = [SpotifyPlaylistURI, YtmPlaylistURI]
-track_uri_types = [SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
+playlist_uri_types = [SpotifyPlaylistURI, YtmPlaylistURI, BeatsaberPlaylistURI]
+track_uri_types = [SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrackURI]
 album_uri_types = [MB_RELEASE_URI]
 all_uri_types = [..., *playlist_uri_types, *track_uri_types, *album_uri_types]
 

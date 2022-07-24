@@ -1,3 +1,5 @@
+from distutils.command.config import config
+import json
 from pathlib import Path
 from typing import Any, List
 
@@ -75,8 +77,59 @@ def test_search_wrapper(beatsaver_api_wrapper: BeatsaverAPIWrapper):
 
 
 @pytest.fixture
-def Beatsaber(beatsaver_api_wrapper):
-    return BeatsaberService("beatsaber", beatsaver_api_wrapper)
+def empty_dir():
+    dir = Path("tests") / "test_bplists"
+    dir.mkdir(exist_ok=True)
+    assert dir.exists()
+
+    yield dir
+
+    dir.rmdir()
+
+
+@pytest.fixture
+def populated_dir(empty_dir: Path):
+    raw = {
+        "playlistTitle": "Bass House Music Pack",
+        "playlistAuthor": "alphabeat",
+        "playlistDescription": "A description",
+        "image": "truncated47318904732189047201",
+        "customData": {
+            "syncURL": "https://api.beatsaver.com/playlists/id/7015/download"
+        },
+        "songs": [
+            {
+                "key": "27bfe",
+                "hash": "24800f88b15041713940163bebaf344df0775471",
+                "songName": "[Alphabeat - Bass House Pack] Cheyenne Giles - Jump Around",
+            },
+            {
+                "key": "27ca1",
+                "hash": "c07dfcec4114f36cd686273e8cd99f94651009d8",
+                "songName": "[Alphabeat - Bass House Pack] Rootkit - Levitate",
+            },
+        ],
+    }
+    file = empty_dir / "bass_house_music_pack.bplist"
+    file.write_text(json.dumps(raw, indent=4))
+
+    yield empty_dir
+
+    file.unlink()
+
+
+@pytest.fixture
+def Beatsaber(beatsaver_api_wrapper, populated_dir: Path):
+    config = {
+        "dir": populated_dir.absolute().__str__(),
+        "search_config": {
+            "minNps": 0.0,
+            "maxNps": 1000,
+            "minRating": 0,
+            "sortOrder": "Relevance",
+        },
+    }
+    return BeatsaberService("beatsaber", beatsaver_api_wrapper, config)
 
 
 def test_pull_track(Beatsaber: BeatsaberService):
@@ -94,3 +147,11 @@ def test_search(Beatsaber: BeatsaberService):
     assert len(results) > 0
     assert results[0].artists[0].value == "MAN WITH A MISSION"
     assert "My Hero" in results[0].name.value
+
+
+def test_get_playlist_metadatas(Beatsaber: BeatsaberService):
+    metas = Beatsaber.get_playlist_metadatas()
+    assert len(metas) == 1
+    assert metas[0].name == "Bass House Music Pack"
+    assert metas[0].description == "A description"
+    assert metas[0].uri.uri == metas[0].name
