@@ -2907,5 +2907,225 @@
         "createdAt": "2020-05-24T11:18:57.465Z",
         "updatedAt": "2020-05-24T11:18:57.465Z",
         "lastPublishedAt": "2020-05-24T11:18:57.465Z"
+    },
+    "('27bfe',)_{}": {
+        "id": "27bfe",
+        "name": "[Alphabeat - Bass House Pack] Cheyenne Giles - Jump Around",
+        "description": "This map is part of Alphabeat's newest pack: **Bass House**!\nWe're happy to present the latest addition to our assortment of packs, featuring 9 Bass House tracks by a large variety of artists.\nWe hope you enjoy these multi-difficulty, hand-lit maps, and can't wait to bring you more packs in the future!\n\nCheck out my collaborator for this pack: @nitronik.exe\n\nYou can get the pack here: https://beatsaver.com/playlists/7015\nPreview: https://youtu.be/_hq_fHCUIHk\n\nSpecial thanks to @nitronik.exe for making the Expert difficulty I was too lazy to make, and a big thanks to @Dee-Dee and @SlimyBlob for testing!",
+        "uploader": {
+            "id": 57657,
+            "name": "Pixelguy",
+            "hash": "5cff0b7698cc5a672c8541a8",
+            "avatar": "https://cdn.beatsaver.com/avatar/434386941547511818.png",
+            "type": "DISCORD",
+            "curator": true,
+            "verifiedMapper": true
+        },
+        "metadata": {
+            "bpm": 126.0,
+            "duration": 208,
+            "songName": "Jump Around",
+            "songSubName": "",
+            "songAuthorName": "Cheyenne Giles",
+            "levelAuthorName": "Pixelguy & nitronik.exe"
+        },
+        "stats": {
+            "plays": 0,
+            "downloads": 0,
+            "upvotes": 53,
+            "downvotes": 1,
+            "score": 0.8374
+        },
+        "uploaded": "2022-07-17T18:00:00.638025Z",
+        "automapper": false,
+        "ranked": false,
+        "qualified": false,
+        "versions": [
+            {
+                "hash": "24800f88b15041713940163bebaf344df0775471",
+                "state": "Published",
+                "createdAt": "2022-07-13T16:05:29.074510Z",
+                "sageScore": 4,
+                "diffs": [
+                    {
+                        "njs": 16.0,
+                        "offset": -0.5,
+                        "notes": 580,
+                        "bombs": 0,
+                        "obstacles": 42,
+                        "nps": 2.935,
+                        "length": 415.0,
+                        "characteristic": "Standard",
+                        "difficulty": "Expert",
+                        "events": 7398,
+                        "chroma": true,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 197.619,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 0,
+                            "resets": 0
+                        },
+                        "maxScore": 526355
+                    },
+                    {
+                        "njs": 19.0,
+                        "offset": 0.2,
+                        "notes": 842,
+                        "bombs": 0,
+                        "obstacles": 46,
+                        "nps": 4.276,
+                        "length": 413.5,
+                        "characteristic": "Standard",
+                        "difficulty": "ExpertPlus",
+                        "events": 7398,
+                        "chroma": true,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 196.905,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 0,
+                            "resets": 0
+                        },
+                        "maxScore": 767395
+                    }
+                ],
+                "downloadURL": "https://r2cdn.beatsaver.com/24800f88b15041713940163bebaf344df0775471.zip",
+                "coverURL": "https://na.cdn.beatsaver.com/24800f88b15041713940163bebaf344df0775471.jpg",
+                "previewURL": "https://na.cdn.beatsaver.com/24800f88b15041713940163bebaf344df0775471.mp3"
+            }
+        ],
+        "curator": {
+            "id": 32269,
+            "name": "maybeemae",
+            "hash": "5e1123516d774b0006a953ec",
+            "avatar": "https://cdn.beatsaver.com/avatar/32269.jpg",
+            "type": "SIMPLE",
+            "curator": true
+        },
+        "curatedAt": "2022-07-17T20:39:07.446084Z",
+        "createdAt": "2022-07-13T16:05:29.074510Z",
+        "updatedAt": "2022-07-17T20:39:07.446084Z",
+        "lastPublishedAt": "2022-07-17T18:00:00.638025Z",
+        "tags": [
+            "house",
+            "electronic",
+            "balanced",
+            "dance-style"
+        ]
+    },
+    "('27ca1',)_{}": {
+        "id": "27ca1",
+        "name": "[Alphabeat - Bass House Pack] Rootkit - Levitate",
+        "description": "This map is part of Alphabeat's newest pack: **Bass House**!\nWe're happy to present the latest addition to our assortment of packs, featuring 9 Bass House tracks by a large variety of artists.\nWe hope you enjoy these multi-difficulty, hand-lit maps, and can't wait to bring you more packs in the future!\n\nPreview Video:\nhttps://youtu.be/MHgGNkaFTjE\n\nCheck out my collaborator for this pack:\n- @Pixelguy\n\nYou can get the pack here: https://beatsaver.com/playlists/7015\n\n\nTwitter: https://twitter.com/nitronik_exe\nDiscord: nitronik.exe#7974",
+        "uploader": {
+            "id": 4284201,
+            "name": "nitronik.exe",
+            "hash": "5cff0b7798cc5a672c855d84",
+            "avatar": "https://cdn.beatsaver.com/avatar/428230049704181760.png",
+            "type": "DISCORD",
+            "curator": true,
+            "verifiedMapper": true
+        },
+        "metadata": {
+            "bpm": 126.0,
+            "duration": 210,
+            "songName": "Levitate",
+            "songSubName": "(feat. Tylor Maurer)",
+            "songAuthorName": "Rootkit",
+            "levelAuthorName": "nitronik.exe"
+        },
+        "stats": {
+            "plays": 0,
+            "downloads": 0,
+            "upvotes": 36,
+            "downvotes": 7,
+            "score": 0.7293
+        },
+        "uploaded": "2022-07-17T18:00:00.638025Z",
+        "automapper": false,
+        "ranked": false,
+        "qualified": false,
+        "versions": [
+            {
+                "hash": "c07dfcec4114f36cd686273e8cd99f94651009d8",
+                "state": "Published",
+                "createdAt": "2022-07-14T20:09:29.273793Z",
+                "sageScore": 4,
+                "diffs": [
+                    {
+                        "njs": 16.0,
+                        "offset": -0.5,
+                        "notes": 809,
+                        "bombs": 0,
+                        "obstacles": 0,
+                        "nps": 3.906,
+                        "length": 435.0,
+                        "characteristic": "Standard",
+                        "difficulty": "Expert",
+                        "events": 4441,
+                        "chroma": true,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 207.143,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 0,
+                            "resets": 0
+                        },
+                        "maxScore": 737035
+                    },
+                    {
+                        "njs": 20.0,
+                        "offset": 0.0,
+                        "notes": 998,
+                        "bombs": 0,
+                        "obstacles": 6,
+                        "nps": 4.818,
+                        "length": 435.0,
+                        "characteristic": "Standard",
+                        "difficulty": "ExpertPlus",
+                        "events": 4441,
+                        "chroma": true,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 207.143,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 0,
+                            "resets": 0
+                        },
+                        "maxScore": 910915
+                    }
+                ],
+                "downloadURL": "https://r2cdn.beatsaver.com/c07dfcec4114f36cd686273e8cd99f94651009d8.zip",
+                "coverURL": "https://na.cdn.beatsaver.com/c07dfcec4114f36cd686273e8cd99f94651009d8.jpg",
+                "previewURL": "https://na.cdn.beatsaver.com/c07dfcec4114f36cd686273e8cd99f94651009d8.mp3"
+            }
+        ],
+        "curator": {
+            "id": 58338,
+            "name": "Joetastic",
+            "hash": "5cff0b7498cc5a672c85050e",
+            "avatar": "https://cdn.beatsaver.com/avatar/227767566402191360.png",
+            "type": "DISCORD",
+            "curator": true,
+            "verifiedMapper": true
+        },
+        "curatedAt": "2022-07-17T19:25:27.081291Z",
+        "createdAt": "2022-07-14T20:05:08.938052Z",
+        "updatedAt": "2022-07-17T19:25:27.081291Z",
+        "lastPublishedAt": "2022-07-17T18:00:00.638025Z",
+        "tags": [
+            "house",
+            "electronic",
+            "balanced"
+        ]
     }
 }

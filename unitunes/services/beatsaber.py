@@ -106,14 +106,21 @@ class BeatsaberService(StreamingService):
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         # find .bplist files in the beatsaber directory
         playlists = []
-        for file in self.dir.glob("*.bplist"):
-            bp = BPList.parse_file(file)
-            playlists.append(
-                PlaylistMetadata(
-                    name=bp.playlistTitle,
-                    description=bp.playlistDescription,
-                    uri=BeatsaberPlaylistURI.from_uri(bp.playlistTitle),
+        for file in self.dir.iterdir():
+            if file.suffix == ".bplist":
+                bp = BPList.parse_file(file)
+                playlists.append(
+                    PlaylistMetadata(
+                        name=bp.playlistTitle,
+                        description=bp.playlistDescription,
+                        uri=BeatsaberPlaylistURI.from_uri(file.stem),
+                    )
                 )
-            )
 
         return playlists
+
+    def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
+        bp = BPList.parse_file(self.dir / (uri.uri + ".bplist"))
+        return [
+            self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
+        ]

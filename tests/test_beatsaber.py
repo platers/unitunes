@@ -11,7 +11,7 @@ from unitunes.services.beatsaber import BeatsaberService, BeatsaverAPIWrapper
 
 from tests.conftest import cache_path
 from unitunes.track import AliasedString, Track
-from unitunes.uri import BeatsaberTrackURI
+from unitunes.uri import BeatsaberPlaylistURI, BeatsaberTrackURI
 
 
 @pytest.fixture
@@ -154,4 +154,13 @@ def test_get_playlist_metadatas(Beatsaber: BeatsaberService):
     assert len(metas) == 1
     assert metas[0].name == "Bass House Music Pack"
     assert metas[0].description == "A description"
-    assert metas[0].uri.uri == metas[0].name
+    assert metas[0].uri.uri == "bass_house_music_pack"
+
+
+def test_pull_tracks(Beatsaber: BeatsaberService):
+    tracks = Beatsaber.pull_tracks(
+        BeatsaberPlaylistURI.from_uri("bass_house_music_pack")
+    )
+    assert len(tracks) == 2
+    assert tracks[0].name.value == "Jump Around"
+    assert tracks[1].name.value == "Levitate"
