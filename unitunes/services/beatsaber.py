@@ -124,3 +124,50 @@ class BeatsaberService(StreamingService):
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
+
+    def write_bplist(self, playlist_uri: PlaylistURI, bp: BPList) -> None:
+        with (self.dir / (playlist_uri.uri + ".bplist")).open("w") as f:
+            f.write(bp.json(indent=4))
+
+    def read_playlist(self, playlist_uri: PlaylistURI) -> BPList:
+        return BPList.parse_file(self.dir / (playlist_uri.uri + ".bplist"))
+
+    def create_playlist(
+        self, title: str, description: str = ""
+    ) -> BeatsaberPlaylistURI:
+        bp = BPList(
+            playlistTitle=title,
+            playlistAuthor="",
+            playlistDescription=description,
+            image="",
+            songs=[],
+        )
+        self.write_bplist(BeatsaberPlaylistURI.from_uri(title), bp)
+
+        return BeatsaberPlaylistURI.from_uri(title)
+
+    def get_song(self, track: Track) -> BPListSong:
+        uri = track.find_uri(ServiceType.BEATSABER)
+        assert uri is not None
+        results = self.wrapper.map(uri.uri)
+        return BPListSong(
+            key=results["id"],
+            hash=results["versions"][0]["hash"],
+            songName=results["name"],
+        )
+
+    def add_tracks(
+        self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
+    ) -> None:
+        bp = self.read_playlist(playlist_uri)
+        new_songs = [self.get_song(track) for track in tracks]
+        bp.songs.extend(new_songs)
+        self.write_bplist(playlist_uri, bp)
+
+    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+        bp = self.read_playlist(playlist_uri)
+        removed_songs = [self.get_song(track) for track in tracks]
+        bp.songs = [
+            song for song in bp.songs if song.key not in [s.key for s in removed_songs]
+        ]
+        self.write_bplist(playlist_uri, bp)

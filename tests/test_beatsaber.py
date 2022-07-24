@@ -164,3 +164,17 @@ def test_pull_tracks(Beatsaber: BeatsaberService):
     assert len(tracks) == 2
     assert tracks[0].name.value == "Jump Around"
     assert tracks[1].name.value == "Levitate"
+
+
+def test_add_remove_tracks(Beatsaber: BeatsaberService):
+    playlist = BeatsaberPlaylistURI.from_uri("bass_house_music_pack")
+    track = Track(
+        name=AliasedString("My Hero"),
+        artists=[AliasedString("MAN WITH A MISSION")],
+        uris=[BeatsaberTrackURI.from_uri("27b65")],
+    )
+    Beatsaber.add_tracks(playlist, [track])
+    assert len(Beatsaber.pull_tracks(playlist)) == 3
+
+    Beatsaber.remove_tracks(playlist, [track])
+    assert len(Beatsaber.pull_tracks(playlist)) == 2
