@@ -67,6 +67,12 @@ def test_search_wrapper(beatsaver_api_wrapper: BeatsaverAPIWrapper):
     assert len(results) > 1
     assert first["name"] == "My Hero - MAN WITH A MISSION ( Inuyashiki OP )"
 
+    results = beatsaver_api_wrapper.search(
+        "my hero MAN WITH A MISSION", 0, search_config={"minNps": 10}
+    )
+    # print(results)
+    assert len(results) == 0
+
 
 @pytest.fixture
 def Beatsaber(beatsaver_api_wrapper):

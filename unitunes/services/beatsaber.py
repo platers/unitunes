@@ -23,37 +23,33 @@ from unitunes.uri import (
 )
 
 
-class BeatsaberWrapper(ServiceWrapper, ABC):
-    @cache
-    @abstractmethod
-    def map(self, id: str, use_cache=True) -> Any:
-        pass
+class BeatsaverAPIWrapper(ServiceWrapper):
+    search_config = {}
 
-    @cache
-    @abstractmethod
-    def search(self, query: str, page: int, use_cache=True, **kwargs) -> Any:
-        pass
-
-
-class BeatsaverAPIWrapper(BeatsaberWrapper):
     def __init__(self, config, cache_root) -> None:
         super().__init__("beatsaver", cache_root=cache_root)
+        if config is not None and "search_config" in config:
+            self.search_config = config["search_config"]
 
     @cache
     def map(self, id: str, use_cache=True) -> Any:
         return requests.get(f"https://api.beatsaver.com/maps/id/{id}").json()
 
     @cache
-    def search(self, query: str, page: int, use_cache=True, **kwargs) -> Any:
+    def search(
+        self, query: str, page: int, search_config={}, use_cache=True, **kwargs
+    ) -> Any:
+        params = search_config.copy()
+        params["q"] = query
         return requests.get(
             f"https://api.beatsaver.com/search/text/{page}",
-            params={"q": query, "sortOrder": "Relevance"},
+            params=params,
         ).json()["docs"]
 
 
 class BeatsaberService(StreamingService):
     # Tracks are online at beatsaver.com, playlists are local .bplist files
-    wrapper: BeatsaberWrapper
+    wrapper: BeatsaverAPIWrapper
 
     def __init__(self, name: str, wrapper: BeatsaverAPIWrapper) -> None:
         super().__init__(name, ServiceType.BEATSABER)
@@ -69,7 +65,11 @@ class BeatsaberService(StreamingService):
         return track
 
     def search_query(self, query: str) -> List[Track]:
-        results = self.wrapper.search(query, 0)
+        results = self.wrapper.search(
+            query,
+            0,
+            search_config=self.wrapper.search_config,
+        )
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
         ]
