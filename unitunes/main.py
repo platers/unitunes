@@ -45,8 +45,9 @@ def service_factory(
     elif service_type == ServiceType.MB:
         return MusicBrainz(MusicBrainzWrapper(cache_path))
     elif service_type == ServiceType.BEATSABER:
-        config = {} if config_path is None else json.load(config_path.open())
-        return BeatsaberService(name, BeatsaverAPIWrapper(config, cache_path))
+        assert config_path is not None
+        config = json.load(config_path.open())
+        return BeatsaberService(name, BeatsaverAPIWrapper(cache_path), config)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 

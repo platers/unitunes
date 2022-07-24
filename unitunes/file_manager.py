@@ -5,6 +5,18 @@ from unitunes.index import Index
 from unitunes.playlist import Playlist
 
 
+def format_filename(s):
+    """Take a string and return a valid filename constructed from the string.
+    Uses a whitelist approach: any characters not present in valid_chars are
+    removed. Also spaces are replaced with underscores.
+    Source: https://gist.github.com/seanh/93666
+    """
+    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    filename = "".join(c for c in s if c in valid_chars)
+    filename = filename.replace(" ", "_")
+    return filename
+
+
 class FileManager:
     dir: Path
     config_path: Path
@@ -18,16 +30,6 @@ class FileManager:
         self.cache_path = dir / "cache"
 
     def get_playlist_path(self, name: str) -> Path:
-        def format_filename(s):
-            """Take a string and return a valid filename constructed from the string.
-            Uses a whitelist approach: any characters not present in valid_chars are
-            removed. Also spaces are replaced with underscores.
-            Source: https://gist.github.com/seanh/93666
-            """
-            valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
-            filename = "".join(c for c in s if c in valid_chars)
-            filename = filename.replace(" ", "_")
-            return filename
 
         return self.playlist_folder / f"{format_filename(name)}.json"
 

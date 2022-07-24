@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, List
 
 from pydantic import BaseModel
+from unitunes.file_manager import format_filename
 from unitunes.playlist import Playlist, PlaylistMetadata
 import requests
 
@@ -28,7 +29,7 @@ from unitunes.uri import (
 
 
 class BeatsaverAPIWrapper(ServiceWrapper):
-    def __init__(self, config, cache_root) -> None:
+    def __init__(self, cache_root) -> None:
         super().__init__("beatsaver", cache_root=cache_root)
 
     @cache
@@ -84,6 +85,7 @@ class BeatsaberService(StreamingService):
             name=AliasedString(res["metadata"]["songName"]),
             artists=[AliasedString(res["metadata"]["songAuthorName"])],
             length=res["metadata"]["duration"],
+            uris=[uri],
         )
         return track
 
@@ -120,17 +122,17 @@ class BeatsaberService(StreamingService):
         return playlists
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        bp = BPList.parse_file(self.dir / (uri.uri + ".bplist"))
+        bp = BPList.parse_file(self.dir / (uri.uri))
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
     def write_bplist(self, playlist_uri: PlaylistURI, bp: BPList) -> None:
-        with (self.dir / (playlist_uri.uri + ".bplist")).open("w") as f:
+        with (self.dir / (playlist_uri.uri)).open("w") as f:
             f.write(bp.json(indent=4))
 
     def read_playlist(self, playlist_uri: PlaylistURI) -> BPList:
-        return BPList.parse_file(self.dir / (playlist_uri.uri + ".bplist"))
+        return BPList.parse_file(self.dir / (playlist_uri.uri))
 
     def create_playlist(
         self, title: str, description: str = ""
@@ -142,9 +144,10 @@ class BeatsaberService(StreamingService):
             image="",
             songs=[],
         )
-        self.write_bplist(BeatsaberPlaylistURI.from_uri(title), bp)
+        uri = BeatsaberPlaylistURI.from_uri(format_filename(title) + ".bplist")
+        self.write_bplist(uri, bp)
 
-        return BeatsaberPlaylistURI.from_uri(title)
+        return uri
 
     def get_song(self, track: Track) -> BPListSong:
         uri = track.find_uri(ServiceType.BEATSABER)

@@ -243,15 +243,15 @@ class BeatsaberPlaylistURI(PlaylistURI):
 
     @staticmethod
     def uri_to_url(uri: str) -> str:
-        return f"beatsaber_playlist:{uri}"
+        return uri
 
     @staticmethod
     def url_to_uri(url: str) -> str:
-        return url.split(":")[-1]
+        return url
 
     @staticmethod
     def valid_url(url: str) -> bool:
-        return url.startswith("beatsaber_playlist:")
+        return url.endswith(".bplist")
 
     @staticmethod
     def from_url(url: str) -> "BeatsaberPlaylistURI":

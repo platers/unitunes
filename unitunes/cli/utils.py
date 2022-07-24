@@ -17,8 +17,8 @@ console = Console()
 
 
 def toggleable_confirm(prompt: str, noninteractive: bool, default: bool) -> bool:
-    console.print(prompt, "YES" if default else "NO")
     if noninteractive:
+        console.print(prompt, "YES" if default else "NO")
         return default
 
     return typer.confirm(prompt, default=default)

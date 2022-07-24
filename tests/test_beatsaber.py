@@ -16,7 +16,7 @@ from unitunes.uri import BeatsaberPlaylistURI, BeatsaberTrackURI
 
 @pytest.fixture
 def beatsaver_api_wrapper() -> BeatsaverAPIWrapper:
-    return BeatsaverAPIWrapper(None, cache_path)
+    return BeatsaverAPIWrapper(cache_path)
 
 
 def test_get_map(beatsaver_api_wrapper: BeatsaverAPIWrapper):
