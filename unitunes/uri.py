@@ -210,6 +210,54 @@ class MB_RELEASE_URI(AlbumURI):
         return MB_RELEASE_URI.from_uri(MB_RELEASE_URI.url_to_uri(url))
 
 
+class BeatsaberTrackURI(TrackURI):
+    service: Literal[ServiceType.BEATSABER] = ServiceType.BEATSABER
+
+    @classmethod
+    def from_uri(cls, uri: str) -> "BeatsaberTrackURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://beatsaver.com/maps/{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://beatsaber.com/maps/")
+
+    @staticmethod
+    def from_url(url: str) -> "BeatsaberTrackURI":
+        return BeatsaberTrackURI.from_uri(BeatsaberTrackURI.url_to_uri(url))
+
+
+class BeatsaberPlaylistURI(PlaylistURI):
+    service: Literal[ServiceType.BEATSABER] = ServiceType.BEATSABER
+
+    @classmethod
+    def from_uri(cls, uri: str) -> "BeatsaberPlaylistURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"beatsaber_playlist:{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split(":")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("beatsaber_playlist:")
+
+    @staticmethod
+    def from_url(url: str) -> "BeatsaberPlaylistURI":
+        return BeatsaberPlaylistURI.from_uri(BeatsaberPlaylistURI.url_to_uri(url))
+
+
 TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI]
 PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI]
 AlbumURIs = MB_RELEASE_URI

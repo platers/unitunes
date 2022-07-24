@@ -3,9 +3,10 @@ from typing import Any, List
 
 import pytest
 from unitunes.services.services import cache
-from unitunes.services.beatsaber import BeatsaverAPIWrapper
+from unitunes.services.beatsaber import BeatsaberService, BeatsaverAPIWrapper
 
 from tests.conftest import cache_path
+from unitunes.uri import BeatsaberTrackURI
 
 
 @pytest.fixture
@@ -62,3 +63,14 @@ def test_search(beatsaver_api_wrapper: BeatsaverAPIWrapper):
     first = results[0]
     assert len(results) > 1
     assert first["name"] == "My Hero - MAN WITH A MISSION ( Inuyashiki OP )"
+
+
+@pytest.fixture
+def Beatsaber(beatsaver_api_wrapper):
+    return BeatsaberService("beatsaber", beatsaver_api_wrapper)
+
+
+def test_pull_track(Beatsaber: BeatsaberService):
+    track = Beatsaber.pull_track(BeatsaberTrackURI.from_uri("27b65"))
+    assert track.name.value == "My Hero (TV Size)"
+    assert track.artists[0].value == "MAN WITH A MISSION"

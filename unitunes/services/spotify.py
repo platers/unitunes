@@ -1,24 +1,18 @@
 from abc import ABC, abstractmethod
 from typing import Any, List
-from unicodedata import name
 import spotipy
 from spotipy import SpotifyOAuth
-from unitunes.playlist import Playlist, PlaylistMetadata
+from unitunes.playlist import PlaylistMetadata
 
 from unitunes.services.services import (
-    Pushable,
-    Searchable,
     ServiceWrapper,
     StreamingService,
-    TrackPullable,
-    UserPlaylistPullable,
     cache,
 )
 from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
     URI,
-    PlaylistURI,
     PlaylistURIs,
     SpotifyPlaylistURI,
     SpotifyTrackURI,

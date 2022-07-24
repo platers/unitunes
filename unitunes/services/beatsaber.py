@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, List
-import spotipy
 from unitunes.playlist import Playlist, PlaylistMetadata
 import requests
 
@@ -17,8 +16,10 @@ from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
     URI,
+    BeatsaberTrackURI,
     PlaylistURI,
     PlaylistURIs,
+    TrackURI,
 )
 
 
@@ -48,3 +49,20 @@ class BeatsaverAPIWrapper(BeatsaberWrapper):
             f"https://api.beatsaver.com/search/text/{page}",
             params={"q": query, "sortOrder": "Relevance"},
         ).json()["docs"]
+
+
+class BeatsaberService(StreamingService):
+    wrapper: BeatsaberWrapper
+
+    def __init__(self, name: str, wrapper: BeatsaverAPIWrapper) -> None:
+        super().__init__(name, ServiceType.BEATSABER)
+        self.wrapper = wrapper
+
+    def pull_track(self, uri: BeatsaberTrackURI) -> Track:
+        res = self.wrapper.map(uri.uri)
+        track = Track(
+            name=AliasedString(res["metadata"]["songName"]),
+            artists=[AliasedString(res["metadata"]["songAuthorName"])],
+            length=res["metadata"]["duration"],
+        )
+        return track
