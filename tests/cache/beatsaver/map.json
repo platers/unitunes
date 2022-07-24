@@ -1,0 +1,125 @@
+{
+    "('27b65',)_{}": {
+        "id": "27b65",
+        "name": "My Hero (TV Size) [Inuyashiki Opening] - MAN WITH A MISSION",
+        "description": "Thanks to https://twitter.com/kitsunesoba1 for the special request!\n\nGameplay preview:\nhttps://youtu.be/uLcGgJEOGuQ\n\nMy Hero is the opening theme song of the Inuyashiki anime series, performed by the Japanese rock band Man with a Mission.\n\nKeep up to date on my maps: https://twitter.com/Joetastic_\nMy mapper's profile: https://bsaber.com/members/joetastic/\nContact me on discord: @Joetastic#2501\n\nEDIT:  Fixed a small inconsistency on E+",
+        "uploader": {
+            "id": 58338,
+            "name": "Joetastic",
+            "hash": "5cff0b7498cc5a672c85050e",
+            "avatar": "https://cdn.beatsaver.com/avatar/227767566402191360.png",
+            "type": "DISCORD",
+            "curator": true,
+            "verifiedMapper": true
+        },
+        "metadata": {
+            "bpm": 180.0,
+            "duration": 92,
+            "songName": "My Hero (TV Size)",
+            "songSubName": "",
+            "songAuthorName": "MAN WITH A MISSION",
+            "levelAuthorName": "Joetastic"
+        },
+        "stats": {
+            "plays": 0,
+            "downloads": 0,
+            "upvotes": 32,
+            "downvotes": 1,
+            "score": 0.8072
+        },
+        "uploaded": "2022-07-12T18:40:15.270804Z",
+        "automapper": false,
+        "ranked": false,
+        "qualified": false,
+        "versions": [
+            {
+                "hash": "0f1ccd14075ce937bc152cb88069d496301bc215",
+                "state": "Published",
+                "createdAt": "2022-07-12T19:13:49.403285Z",
+                "sageScore": 3,
+                "diffs": [
+                    {
+                        "njs": 14.0,
+                        "offset": 0.2,
+                        "notes": 303,
+                        "bombs": 48,
+                        "obstacles": 28,
+                        "nps": 3.45,
+                        "length": 263.5,
+                        "characteristic": "Standard",
+                        "difficulty": "Hard",
+                        "events": 2482,
+                        "chroma": false,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 87.833,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 0,
+                            "resets": 0
+                        },
+                        "maxScore": 271515
+                    },
+                    {
+                        "njs": 17.0,
+                        "offset": -0.1,
+                        "notes": 428,
+                        "bombs": 48,
+                        "obstacles": 38,
+                        "nps": 4.873,
+                        "length": 263.5,
+                        "characteristic": "Standard",
+                        "difficulty": "Expert",
+                        "events": 2482,
+                        "chroma": false,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 87.833,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 1,
+                            "resets": 0
+                        },
+                        "maxScore": 386515
+                    },
+                    {
+                        "njs": 20.0,
+                        "offset": -0.3,
+                        "notes": 518,
+                        "bombs": 48,
+                        "obstacles": 27,
+                        "nps": 5.898,
+                        "length": 263.5,
+                        "characteristic": "Standard",
+                        "difficulty": "ExpertPlus",
+                        "events": 2867,
+                        "chroma": false,
+                        "me": false,
+                        "ne": false,
+                        "cinema": false,
+                        "seconds": 87.833,
+                        "paritySummary": {
+                            "errors": 0,
+                            "warns": 5,
+                            "resets": 0
+                        },
+                        "maxScore": 469315
+                    }
+                ],
+                "downloadURL": "https://r2cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.zip",
+                "coverURL": "https://na.cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.jpg",
+                "previewURL": "https://na.cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.mp3"
+            }
+        ],
+        "createdAt": "2022-07-12T18:40:04.134607Z",
+        "updatedAt": "2022-07-12T19:14:09.477843Z",
+        "lastPublishedAt": "2022-07-12T19:14:09.477843Z",
+        "tags": [
+            "j-rock",
+            "anime",
+            "balanced"
+        ]
+    }
+}

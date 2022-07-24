@@ -1,0 +1,1092 @@
+{
+    "('my hero MAN WITH A MISSION', 0)_{}": [
+        {
+            "id": "3687",
+            "name": "My Hero - MAN WITH A MISSION ( Inuyashiki OP )",
+            "description": "Inuyashiki Opening Song TV Size! \r\n\r\nOnly Ex for now. Rocks hard tho.\r\nCustom Lightmapping",
+            "uploader": {
+                "id": 4285645,
+                "name": "drmarc",
+                "hash": "5cff0b7398cc5a672c84ed14",
+                "avatar": "https://cdn.beatsaver.com/avatar/86157568925270016.png",
+                "type": "DISCORD",
+                "curator": false
+            },
+            "metadata": {
+                "bpm": 180.0,
+                "duration": 93,
+                "songName": "My Hero / Inuyashiki OP",
+                "songSubName": "MAN WITH A MISSION",
+                "songAuthorName": "Dr_Marc",
+                "levelAuthorName": "drmarc"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 144,
+                "downvotes": 17,
+                "score": 0.8091
+            },
+            "uploaded": "2019-02-15T21:51:02Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "9773076fd6dc5eee717af0f3461f14065502f516",
+                    "key": "3687",
+                    "state": "Published",
+                    "createdAt": "2019-02-15T21:51:02Z",
+                    "sageScore": 5,
+                    "diffs": [
+                        {
+                            "njs": 17.5,
+                            "offset": 1.0,
+                            "notes": 511,
+                            "bombs": 0,
+                            "obstacles": 15,
+                            "nps": 5.818,
+                            "length": 263.5,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 996,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 87.833,
+                            "paritySummary": {
+                                "errors": 26,
+                                "warns": 34,
+                                "resets": 0
+                            },
+                            "maxScore": 462875
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/9773076fd6dc5eee717af0f3461f14065502f516.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/9773076fd6dc5eee717af0f3461f14065502f516.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/9773076fd6dc5eee717af0f3461f14065502f516.mp3"
+                }
+            ],
+            "createdAt": "2019-02-15T21:51:02Z",
+            "updatedAt": "2019-02-15T21:51:02Z",
+            "lastPublishedAt": "2019-02-15T21:51:02Z",
+            "tags": [
+                "rock",
+                "alternative",
+                "j-rock"
+            ]
+        },
+        {
+            "id": "1bacd",
+            "name": "Get off of my way | by Man with a mission",
+            "description": "https://youtu.be/0lh1jDNxi0o ",
+            "uploader": {
+                "id": 4285412,
+                "name": "thelitlewiseowl",
+                "hash": "5cff0b7698cc5a672c854bca",
+                "avatar": "https://cdn.beatsaver.com/avatar/200231809387069440.png",
+                "type": "DISCORD",
+                "curator": false,
+                "verifiedMapper": true
+            },
+            "metadata": {
+                "bpm": 135.0,
+                "duration": 221,
+                "songName": "Get off of my way ",
+                "songSubName": "",
+                "songAuthorName": "Man with a mission",
+                "levelAuthorName": "thelitlewiseowl"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 20,
+                "downvotes": 3,
+                "score": 0.7276
+            },
+            "uploaded": "2021-08-28T15:12:07.596054Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "bc563f15cff420c3502882221e2141eed821a605",
+                    "state": "Published",
+                    "createdAt": "2021-08-27T20:06:32.481219Z",
+                    "sageScore": 5,
+                    "diffs": [
+                        {
+                            "njs": 19.0,
+                            "offset": -0.69,
+                            "notes": 1322,
+                            "bombs": 7,
+                            "obstacles": 3,
+                            "nps": 6.21,
+                            "length": 479.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 5052,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 212.889,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 1
+                            },
+                            "maxScore": 1208995
+                        },
+                        {
+                            "njs": 21.0,
+                            "offset": 0.135,
+                            "notes": 1326,
+                            "bombs": 7,
+                            "obstacles": 3,
+                            "nps": 6.229,
+                            "length": 479.0,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 5052,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 212.889,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 6,
+                                "resets": 1
+                            },
+                            "maxScore": 1212675
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/bc563f15cff420c3502882221e2141eed821a605.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/bc563f15cff420c3502882221e2141eed821a605.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/bc563f15cff420c3502882221e2141eed821a605.mp3"
+                }
+            ],
+            "createdAt": "2021-08-27T20:06:32.481219Z",
+            "updatedAt": "2021-09-01T17:40:26.247739Z",
+            "lastPublishedAt": "2021-08-28T15:12:07.596054Z"
+        },
+        {
+            "id": "1956",
+            "name": "Database feat. TAKUMA (10-FEET) - MAN WITH A MISSION",
+            "description": "DA-TA-BASE! DA-TA-BASE! Log Horizon's Opening\r\nThanks to Saut for the massive hand with timing and Kolezan for the audio edit\r\nFull combo expert play-through video: https://streamable.com/elr4s",
+            "uploader": {
+                "id": 11373,
+                "name": "redmagi",
+                "hash": "5cff0b7298cc5a672c84e9d2",
+                "avatar": "https://www.gravatar.com/avatar/5cff0b7298cc5a672c84e9d2?d=retro",
+                "type": "SIMPLE",
+                "curator": false,
+                "verifiedMapper": true
+            },
+            "metadata": {
+                "bpm": 177.0,
+                "duration": 144,
+                "songName": "Database feat. TAKUMA(10-FEET)",
+                "songSubName": "MAN WITH A MISSION",
+                "songAuthorName": "Redmagi",
+                "levelAuthorName": "redmagi"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 1248,
+                "downvotes": 58,
+                "score": 0.9031
+            },
+            "uploaded": "2018-10-08T17:22:57Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "c0832e4d89b736e07e00f06e547048c513018d74",
+                    "key": "1956",
+                    "state": "Published",
+                    "createdAt": "2018-10-08T17:22:57Z",
+                    "diffs": [
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 373,
+                            "bombs": 0,
+                            "obstacles": 2,
+                            "nps": 2.726,
+                            "length": 401.389,
+                            "characteristic": "Standard",
+                            "difficulty": "Easy",
+                            "events": 735,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 136.064,
+                            "paritySummary": {
+                                "errors": 57,
+                                "warns": 46,
+                                "resets": 0
+                            },
+                            "maxScore": 335915
+                        },
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 439,
+                            "bombs": 6,
+                            "obstacles": 3,
+                            "nps": 3.209,
+                            "length": 401.271,
+                            "characteristic": "Standard",
+                            "difficulty": "Normal",
+                            "events": 735,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 136.024,
+                            "paritySummary": {
+                                "errors": 44,
+                                "warns": 51,
+                                "resets": 3
+                            },
+                            "maxScore": 396635
+                        },
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 488,
+                            "bombs": 6,
+                            "obstacles": 3,
+                            "nps": 3.567,
+                            "length": 401.271,
+                            "characteristic": "Standard",
+                            "difficulty": "Hard",
+                            "events": 735,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 136.024,
+                            "paritySummary": {
+                                "errors": 42,
+                                "warns": 46,
+                                "resets": 1
+                            },
+                            "maxScore": 441715
+                        },
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 566,
+                            "bombs": 24,
+                            "obstacles": 3,
+                            "nps": 4.138,
+                            "length": 401.271,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 735,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 136.024,
+                            "paritySummary": {
+                                "errors": 41,
+                                "warns": 73,
+                                "resets": 7
+                            },
+                            "maxScore": 513475
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/c0832e4d89b736e07e00f06e547048c513018d74.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/c0832e4d89b736e07e00f06e547048c513018d74.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/c0832e4d89b736e07e00f06e547048c513018d74.mp3"
+                }
+            ],
+            "createdAt": "2018-10-08T17:22:57Z",
+            "updatedAt": "2018-10-08T17:22:57Z",
+            "lastPublishedAt": "2018-10-08T17:22:57Z"
+        },
+        {
+            "id": "25734",
+            "name": "Database [Log Horizon Opening] - Man with a Mission ft. Takuma",
+            "description": "---------Map uses the new 1.20 Note mechanics (eg: arc and chains) and won't work on any versions of Beat Saber below 1.20---------\n\nGameplay preview:\nhttps://youtu.be/qlczvcdrb_I\n\nThanks to \uff33\uff49\uff52\uff3f\uff33\uff4c\uff41\uff59\uff45\uff52#3753 for the special request!\n\nDatabase is the opening theme song for the first two seasons of the Log Horizon anime. It is performed by Man with a Mission, featuring TAKUMA from the band 10-Feet.\n\nKeep up to date on my maps: https://twitter.com/Joetastic_\nMy mapper's profile: https://bsaber.com/members/joetastic/\nContact me on discord: @Joetastic#2501",
+            "uploader": {
+                "id": 58338,
+                "name": "Joetastic",
+                "hash": "5cff0b7498cc5a672c85050e",
+                "avatar": "https://cdn.beatsaver.com/avatar/227767566402191360.png",
+                "type": "DISCORD",
+                "curator": true,
+                "verifiedMapper": true
+            },
+            "metadata": {
+                "bpm": 177.0,
+                "duration": 237,
+                "songName": "Database",
+                "songSubName": "ft. Takuma",
+                "songAuthorName": "Man with a Mission",
+                "levelAuthorName": "Joetastic"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 125,
+                "downvotes": 5,
+                "score": 0.8552
+            },
+            "uploaded": "2022-05-10T09:06:11.483073Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "67c6517ec10190acaa06d799e80e0dea1a7ad77f",
+                    "state": "Published",
+                    "createdAt": "2022-05-19T18:22:27.983222Z",
+                    "sageScore": 3,
+                    "diffs": [
+                        {
+                            "njs": 16.0,
+                            "offset": 0.1,
+                            "notes": 1174,
+                            "bombs": 104,
+                            "obstacles": 63,
+                            "nps": 5.259,
+                            "length": 658.5,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 12950,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 223.22,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 0
+                            },
+                            "maxScore": 1087135
+                        },
+                        {
+                            "njs": 20.0,
+                            "offset": -0.35,
+                            "notes": 1592,
+                            "bombs": 104,
+                            "obstacles": 64,
+                            "nps": 7.132,
+                            "length": 658.5,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 12950,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 223.22,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 0
+                            },
+                            "maxScore": 1497875
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/67c6517ec10190acaa06d799e80e0dea1a7ad77f.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/67c6517ec10190acaa06d799e80e0dea1a7ad77f.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/67c6517ec10190acaa06d799e80e0dea1a7ad77f.mp3"
+                }
+            ],
+            "curator": {
+                "id": 4280701,
+                "name": "rategyro",
+                "hash": "605e50f0cd73ba00060a45e3",
+                "avatar": "https://cdn.beatsaver.com/avatar/138351191028400128.png",
+                "type": "DISCORD",
+                "curator": true
+            },
+            "curatedAt": "2022-07-04T06:03:56.759402Z",
+            "createdAt": "2022-05-10T09:05:39.407357Z",
+            "updatedAt": "2022-07-04T06:03:56.759402Z",
+            "lastPublishedAt": "2022-05-19T18:22:31.368742Z",
+            "tags": [
+                "balanced",
+                "anime",
+                "j-rock"
+            ]
+        },
+        {
+            "id": "18976",
+            "name": "MAN WITH A MISSION - Database ft. TAKUMA",
+            "description": "Counteraction rising, Yeh we are ready for the, punch, line!\nThere's no use with all your gimmicks, so CHECK THIS OUT\n\nI really like this song, so it's been a treat to map it although I have struggled.\nCool bomb stuff and lots of movement, Expert+ is big swings and very stamina\ndraining. It is quite a decent map set so give it a shot!\n\nEnjoy!\n\nSpecial thanks goes to the following:\nGeneral Feedback and Testing:\n- Ghilo, for playtesting the map!\n- Rocker, for feedback and playtesting the map!\n\nUpdate #1:\nThis map has been updated as of: 19/02/2022\nExpert+ has been heavily fixed and partially remapped,\nExpert has been partially remapped\nHard is gone, The old Normal dif is the new Hard dif\nMade a 2.6sps true normal difficulty.\nYou will need to redownload the map to see these changes!",
+            "uploader": {
+                "id": 4254180,
+                "name": "joshabi",
+                "hash": "5cff0b7398cc5a672c84ee93",
+                "avatar": "https://cdn.beatsaver.com/avatar/169894107517419520.png",
+                "type": "DISCORD",
+                "curator": true,
+                "verifiedMapper": true
+            },
+            "metadata": {
+                "bpm": 177.0,
+                "duration": 237,
+                "songName": "Database",
+                "songSubName": "ft. TAKUMA",
+                "songAuthorName": "MAN WITH A MISSION",
+                "levelAuthorName": "Joshabi"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 455,
+                "downvotes": 56,
+                "score": 0.8307
+            },
+            "uploaded": "2021-05-31T20:42:46.972Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "125e40e1acc4a3b6ac4c8b857bd1004f0b33bf52",
+                    "state": "Published",
+                    "createdAt": "2022-02-19T22:50:28.043734Z",
+                    "sageScore": 3,
+                    "diffs": [
+                        {
+                            "njs": 13.0,
+                            "offset": -1.35,
+                            "notes": 583,
+                            "bombs": 78,
+                            "obstacles": 285,
+                            "nps": 2.626,
+                            "length": 655.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Normal",
+                            "events": 8239,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 222.034,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 7
+                            },
+                            "maxScore": 529115
+                        },
+                        {
+                            "njs": 14.0,
+                            "offset": 0.345,
+                            "notes": 1003,
+                            "bombs": 86,
+                            "obstacles": 216,
+                            "nps": 4.517,
+                            "length": 655.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Hard",
+                            "events": 8239,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 222.034,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 8
+                            },
+                            "maxScore": 915515
+                        },
+                        {
+                            "njs": 17.0,
+                            "offset": -0.1,
+                            "notes": 1393,
+                            "bombs": 94,
+                            "obstacles": 197,
+                            "nps": 6.274,
+                            "length": 655.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 8239,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 222.034,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 9
+                            },
+                            "maxScore": 1274315
+                        },
+                        {
+                            "njs": 20.0,
+                            "offset": -0.425,
+                            "notes": 1782,
+                            "bombs": 186,
+                            "obstacles": 167,
+                            "nps": 8.026,
+                            "length": 655.0,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 8239,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 222.034,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 18
+                            },
+                            "maxScore": 1632195
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/125e40e1acc4a3b6ac4c8b857bd1004f0b33bf52.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/125e40e1acc4a3b6ac4c8b857bd1004f0b33bf52.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/125e40e1acc4a3b6ac4c8b857bd1004f0b33bf52.mp3"
+                }
+            ],
+            "curator": {
+                "id": 58338,
+                "name": "Joetastic",
+                "hash": "5cff0b7498cc5a672c85050e",
+                "avatar": "https://cdn.beatsaver.com/avatar/227767566402191360.png",
+                "type": "DISCORD",
+                "curator": true,
+                "verifiedMapper": true
+            },
+            "curatedAt": "2021-05-31T20:42:46.972Z",
+            "createdAt": "2021-05-31T20:42:46.972Z",
+            "updatedAt": "2022-02-19T22:50:36.308663Z",
+            "lastPublishedAt": "2022-02-19T22:50:36.308663Z",
+            "tags": [
+                "anime",
+                "j-rock",
+                "balanced"
+            ]
+        },
+        {
+            "id": "27b65",
+            "name": "My Hero (TV Size) [Inuyashiki Opening] - MAN WITH A MISSION",
+            "description": "Thanks to https://twitter.com/kitsunesoba1 for the special request!\n\nGameplay preview:\nhttps://youtu.be/uLcGgJEOGuQ\n\nMy Hero is the opening theme song of the Inuyashiki anime series, performed by the Japanese rock band Man with a Mission.\n\nKeep up to date on my maps: https://twitter.com/Joetastic_\nMy mapper's profile: https://bsaber.com/members/joetastic/\nContact me on discord: @Joetastic#2501\n\nEDIT:  Fixed a small inconsistency on E+",
+            "uploader": {
+                "id": 58338,
+                "name": "Joetastic",
+                "hash": "5cff0b7498cc5a672c85050e",
+                "avatar": "https://cdn.beatsaver.com/avatar/227767566402191360.png",
+                "type": "DISCORD",
+                "curator": true,
+                "verifiedMapper": true
+            },
+            "metadata": {
+                "bpm": 180.0,
+                "duration": 92,
+                "songName": "My Hero (TV Size)",
+                "songSubName": "",
+                "songAuthorName": "MAN WITH A MISSION",
+                "levelAuthorName": "Joetastic"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 32,
+                "downvotes": 1,
+                "score": 0.8072
+            },
+            "uploaded": "2022-07-12T18:40:15.270804Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "0f1ccd14075ce937bc152cb88069d496301bc215",
+                    "state": "Published",
+                    "createdAt": "2022-07-12T19:13:49.403285Z",
+                    "sageScore": 3,
+                    "diffs": [
+                        {
+                            "njs": 14.0,
+                            "offset": 0.2,
+                            "notes": 303,
+                            "bombs": 48,
+                            "obstacles": 28,
+                            "nps": 3.45,
+                            "length": 263.5,
+                            "characteristic": "Standard",
+                            "difficulty": "Hard",
+                            "events": 2482,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 87.833,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 0
+                            },
+                            "maxScore": 271515
+                        },
+                        {
+                            "njs": 17.0,
+                            "offset": -0.1,
+                            "notes": 428,
+                            "bombs": 48,
+                            "obstacles": 38,
+                            "nps": 4.873,
+                            "length": 263.5,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 2482,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 87.833,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 1,
+                                "resets": 0
+                            },
+                            "maxScore": 386515
+                        },
+                        {
+                            "njs": 20.0,
+                            "offset": -0.3,
+                            "notes": 518,
+                            "bombs": 48,
+                            "obstacles": 27,
+                            "nps": 5.898,
+                            "length": 263.5,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 2867,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 87.833,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 5,
+                                "resets": 0
+                            },
+                            "maxScore": 469315
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/0f1ccd14075ce937bc152cb88069d496301bc215.mp3"
+                }
+            ],
+            "createdAt": "2022-07-12T18:40:04.134607Z",
+            "updatedAt": "2022-07-12T19:14:09.477843Z",
+            "lastPublishedAt": "2022-07-12T19:14:09.477843Z",
+            "tags": [
+                "j-rock",
+                "anime",
+                "balanced"
+            ]
+        },
+        {
+            "id": "6a0d",
+            "name": "Seven Deadly Sins - Man with a Mission Opening",
+            "description": "Seven Deadly Sins by Man with a Mission, from The Seven Deadly Sins (Nanatsu no taizai), hard, expert and expert+ levels, some parts of expert and expert+ are fast.\nVideo: https://www.youtube.com/watch?v=-zimSTWu474",
+            "uploader": {
+                "id": 27262,
+                "name": "a_krouson",
+                "hash": "5d4906baadb1a200062a0e26",
+                "avatar": "https://www.gravatar.com/avatar/5d4906baadb1a200062a0e26?d=retro",
+                "type": "SIMPLE",
+                "curator": false
+            },
+            "metadata": {
+                "bpm": 143.0,
+                "duration": 89,
+                "songName": "Seven Deadly Sins",
+                "songSubName": "",
+                "songAuthorName": "Man With a Mission",
+                "levelAuthorName": "Krouton_06"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 247,
+                "downvotes": 51,
+                "score": 0.7697
+            },
+            "uploaded": "2019-10-16T01:42:33.301Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "1089fbb71d45055f02bbf88924e3eeadba308413",
+                    "key": "6a0d",
+                    "state": "Published",
+                    "createdAt": "2019-10-16T01:42:33.301Z",
+                    "sageScore": 4,
+                    "diffs": [
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 345,
+                            "bombs": 0,
+                            "obstacles": 4,
+                            "nps": 4.238,
+                            "length": 194.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Hard",
+                            "events": 566,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 81.399,
+                            "paritySummary": {
+                                "errors": 27,
+                                "warns": 34,
+                                "resets": 0
+                            },
+                            "maxScore": 310155
+                        },
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 381,
+                            "bombs": 32,
+                            "obstacles": 4,
+                            "nps": 4.681,
+                            "length": 194.0,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 566,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 81.399,
+                            "paritySummary": {
+                                "errors": 31,
+                                "warns": 41,
+                                "resets": 0
+                            },
+                            "maxScore": 343275
+                        },
+                        {
+                            "njs": 12.0,
+                            "offset": 0.0,
+                            "notes": 381,
+                            "bombs": 32,
+                            "obstacles": 14,
+                            "nps": 4.681,
+                            "length": 194.0,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 566,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 81.399,
+                            "paritySummary": {
+                                "errors": 31,
+                                "warns": 21,
+                                "resets": 0
+                            },
+                            "maxScore": 343275
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/1089fbb71d45055f02bbf88924e3eeadba308413.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/1089fbb71d45055f02bbf88924e3eeadba308413.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/1089fbb71d45055f02bbf88924e3eeadba308413.mp3"
+                }
+            ],
+            "createdAt": "2019-10-16T01:42:33.301Z",
+            "updatedAt": "2019-10-16T01:42:33.301Z",
+            "lastPublishedAt": "2019-10-16T01:42:33.301Z",
+            "tags": [
+                "pop",
+                "anime",
+                "rock",
+                "j-rock"
+            ]
+        },
+        {
+            "id": "18f20",
+            "name": "MAN WITH A MISSION - When My Devil Rises",
+            "description": "N\u304bEx\u3067\u904a\u3093\u3067\u3002\nEx+\u306fpepega\u306b\u7247\u8db3\u7a81\u3063\u8fbc\u3093\u3067\u307e\u3059\u3002",
+            "uploader": {
+                "id": 4285118,
+                "name": "okazu",
+                "hash": "601ab3ab5ab13d000607a85a",
+                "avatar": "https://cdn.beatsaver.com/avatar/643349183394480128.png",
+                "type": "DISCORD",
+                "curator": false
+            },
+            "metadata": {
+                "bpm": 107.0,
+                "duration": 256,
+                "songName": "When My Devil Rises",
+                "songSubName": "",
+                "songAuthorName": "MAN WITH A MISSION",
+                "levelAuthorName": "okazu"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 46,
+                "downvotes": 7,
+                "score": 0.7572
+            },
+            "uploaded": "2021-06-08T13:31:07.760Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "016fa82af6b72f29ccc854c4501302c802d46d34",
+                    "key": "18f20",
+                    "state": "Published",
+                    "createdAt": "2021-06-08T13:31:07.760Z",
+                    "sageScore": 6,
+                    "diffs": [
+                        {
+                            "njs": 12.0,
+                            "offset": -0.5,
+                            "notes": 681,
+                            "bombs": 0,
+                            "obstacles": 112,
+                            "nps": 2.697,
+                            "length": 450.25,
+                            "characteristic": "Standard",
+                            "difficulty": "Normal",
+                            "events": 5604,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 252.477,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 0,
+                                "resets": 0
+                            },
+                            "maxScore": 619275
+                        },
+                        {
+                            "njs": 16.0,
+                            "offset": -0.8,
+                            "notes": 1263,
+                            "bombs": 17,
+                            "obstacles": 344,
+                            "nps": 5.002,
+                            "length": 450.25,
+                            "characteristic": "Standard",
+                            "difficulty": "Expert",
+                            "events": 5604,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 252.477,
+                            "paritySummary": {
+                                "errors": 0,
+                                "warns": 26,
+                                "resets": 1
+                            },
+                            "maxScore": 1154715
+                        },
+                        {
+                            "njs": 21.0,
+                            "offset": -0.6,
+                            "notes": 1544,
+                            "bombs": 88,
+                            "obstacles": 77,
+                            "nps": 6.115,
+                            "length": 450.25,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 5603,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 252.477,
+                            "paritySummary": {
+                                "errors": 10,
+                                "warns": 84,
+                                "resets": 13
+                            },
+                            "maxScore": 1413235
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/016fa82af6b72f29ccc854c4501302c802d46d34.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/016fa82af6b72f29ccc854c4501302c802d46d34.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/016fa82af6b72f29ccc854c4501302c802d46d34.mp3"
+                }
+            ],
+            "createdAt": "2021-06-08T13:31:07.760Z",
+            "updatedAt": "2022-06-28T06:53:03.489191Z",
+            "lastPublishedAt": "2021-06-08T13:31:07.760Z",
+            "tags": [
+                "tech"
+            ]
+        },
+        {
+            "id": "1db3e",
+            "name": "MAN WITH A MISSION  Out of Control",
+            "description": "",
+            "uploader": {
+                "id": 4297802,
+                "name": "Kwerty",
+                "avatar": "https://cdn.beatsaver.com/avatar/4297802.jpg",
+                "type": "SIMPLE",
+                "curator": false
+            },
+            "metadata": {
+                "bpm": 156.0,
+                "duration": 198,
+                "songName": "Out of Control",
+                "songSubName": "ft. zebrahead",
+                "songAuthorName": "MAN WITH A MISSION",
+                "levelAuthorName": "Kwerty"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 2,
+                "downvotes": 2,
+                "score": 0.5
+            },
+            "uploaded": "2021-11-06T19:40:33.498406Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "7a2dc7a046e5d617a735425bb6a55086886864ec",
+                    "state": "Published",
+                    "createdAt": "2021-11-06T19:53:43.800485Z",
+                    "sageScore": 4,
+                    "diffs": [
+                        {
+                            "njs": 20.0,
+                            "offset": -0.7,
+                            "notes": 1530,
+                            "bombs": 24,
+                            "obstacles": 23,
+                            "nps": 8.135,
+                            "length": 489.0,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 1079,
+                            "chroma": true,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 188.077,
+                            "paritySummary": {
+                                "errors": 2,
+                                "warns": 0,
+                                "resets": 12
+                            },
+                            "maxScore": 1400355
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/7a2dc7a046e5d617a735425bb6a55086886864ec.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/7a2dc7a046e5d617a735425bb6a55086886864ec.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/7a2dc7a046e5d617a735425bb6a55086886864ec.mp3"
+                }
+            ],
+            "createdAt": "2021-11-06T19:40:27.960777Z",
+            "updatedAt": "2021-11-06T19:53:50.268092Z",
+            "lastPublishedAt": "2021-11-06T19:53:50.268092Z"
+        },
+        {
+            "id": "114de",
+            "name": "vinland saga op 2 - MAN WITH A MISSION dark crow",
+            "description": "it will f ur brain",
+            "uploader": {
+                "id": 1508,
+                "name": "yolibork",
+                "hash": "5fbd0a4739a74300069f285f",
+                "avatar": "https://www.gravatar.com/avatar/5fbd0a4739a74300069f285f?d=retro",
+                "type": "SIMPLE",
+                "curator": false
+            },
+            "metadata": {
+                "bpm": 148.0,
+                "duration": 88,
+                "songName": "dark crow",
+                "songSubName": "",
+                "songAuthorName": "man with a mission",
+                "levelAuthorName": "yoli"
+            },
+            "stats": {
+                "plays": 0,
+                "downloads": 0,
+                "upvotes": 8,
+                "downvotes": 21,
+                "score": 0.3564
+            },
+            "uploaded": "2020-11-25T18:35:01.968Z",
+            "automapper": false,
+            "ranked": false,
+            "qualified": false,
+            "versions": [
+                {
+                    "hash": "d6e775956f70ff3292d3fe3a9e5a1206515e14c2",
+                    "key": "114de",
+                    "state": "Published",
+                    "createdAt": "2020-11-25T18:35:01.968Z",
+                    "sageScore": 3,
+                    "diffs": [
+                        {
+                            "njs": 20.767527,
+                            "offset": -0.6242994,
+                            "notes": 468,
+                            "bombs": 0,
+                            "obstacles": 2,
+                            "nps": 5.521,
+                            "length": 209.1,
+                            "characteristic": "Standard",
+                            "difficulty": "ExpertPlus",
+                            "events": 0,
+                            "chroma": false,
+                            "me": false,
+                            "ne": false,
+                            "cinema": false,
+                            "seconds": 84.77,
+                            "paritySummary": {
+                                "errors": 68,
+                                "warns": 49,
+                                "resets": 0
+                            },
+                            "maxScore": 423315
+                        }
+                    ],
+                    "downloadURL": "https://r2cdn.beatsaver.com/d6e775956f70ff3292d3fe3a9e5a1206515e14c2.zip",
+                    "coverURL": "https://na.cdn.beatsaver.com/d6e775956f70ff3292d3fe3a9e5a1206515e14c2.jpg",
+                    "previewURL": "https://na.cdn.beatsaver.com/d6e775956f70ff3292d3fe3a9e5a1206515e14c2.mp3"
+                }
+            ],
+            "createdAt": "2020-11-25T18:35:01.968Z",
+            "updatedAt": "2020-11-25T18:35:01.968Z",
+            "lastPublishedAt": "2020-11-25T18:35:01.968Z"
+        }
+    ]
+}
