@@ -2,10 +2,13 @@ from pathlib import Path
 from typing import Any, List
 
 import pytest
+from unitunes.matcher import DefaultMatcherStrategy
+from unitunes.searcher import DefaultSearcherStrategy
 from unitunes.services.services import cache
 from unitunes.services.beatsaber import BeatsaberService, BeatsaverAPIWrapper
 
 from tests.conftest import cache_path
+from unitunes.track import AliasedString, Track
 from unitunes.uri import BeatsaberTrackURI
 
 
@@ -58,7 +61,7 @@ def test_get_map(beatsaver_api_wrapper: BeatsaverAPIWrapper):
     assert expected.items() <= map.items()
 
 
-def test_search(beatsaver_api_wrapper: BeatsaverAPIWrapper):
+def test_search_wrapper(beatsaver_api_wrapper: BeatsaverAPIWrapper):
     results = beatsaver_api_wrapper.search("my hero MAN WITH A MISSION", 0)
     first = results[0]
     assert len(results) > 1
@@ -74,3 +77,14 @@ def test_pull_track(Beatsaber: BeatsaberService):
     track = Beatsaber.pull_track(BeatsaberTrackURI.from_uri("27b65"))
     assert track.name.value == "My Hero (TV Size)"
     assert track.artists[0].value == "MAN WITH A MISSION"
+
+
+def test_search(Beatsaber: BeatsaberService):
+    searcher = DefaultSearcherStrategy(DefaultMatcherStrategy())
+    query_track = Track(
+        name=AliasedString("My Hero"), artists=[AliasedString("MAN WITH A MISSION")]
+    )
+    results = searcher.search(Beatsaber, query_track, 3)
+    assert len(results) > 0
+    assert results[0].artists[0].value == "MAN WITH A MISSION"
+    assert "My Hero" in results[0].name.value

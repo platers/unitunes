@@ -52,6 +52,7 @@ class BeatsaverAPIWrapper(BeatsaberWrapper):
 
 
 class BeatsaberService(StreamingService):
+    # Tracks are online at beatsaver.com, playlists are local .bplist files
     wrapper: BeatsaberWrapper
 
     def __init__(self, name: str, wrapper: BeatsaverAPIWrapper) -> None:
@@ -66,3 +67,16 @@ class BeatsaberService(StreamingService):
             length=res["metadata"]["duration"],
         )
         return track
+
+    def search_query(self, query: str) -> List[Track]:
+        results = self.wrapper.search(query, 1)
+        return [
+            self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
+        ]
+
+    def query_generator(self, track: Track) -> List[str]:
+        return [
+            f"{track.name.value} {track.artists[0].value}",
+            track.name.value,
+            track.artists[0].value,
+        ]
