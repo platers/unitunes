@@ -6,6 +6,11 @@ from unitunes.index import Index
 from unitunes.matcher import MatcherStrategy
 from unitunes.playlist import Playlist
 from unitunes.searcher import SearcherStrategy
+from unitunes.services.beatsaber import (
+    BeatsaberService,
+    BeatsaberWrapper,
+    BeatsaverAPIWrapper,
+)
 from unitunes.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
 from unitunes.services.services import (
     Searchable,
@@ -40,6 +45,8 @@ def service_factory(
         return YTM(name, YtmAPIWrapper(config_path, cache_path))
     elif service_type == ServiceType.MB:
         return MusicBrainz(MusicBrainzWrapper(cache_path))
+    elif service_type == ServiceType.BEATSABER:
+        return BeatsaberService(name, BeatsaverAPIWrapper(None, cache_path))
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 

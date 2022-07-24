@@ -69,7 +69,7 @@ class BeatsaberService(StreamingService):
         return track
 
     def search_query(self, query: str) -> List[Track]:
-        results = self.wrapper.search(query, 1)
+        results = self.wrapper.search(query, 0)
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
         ]
@@ -77,6 +77,5 @@ class BeatsaberService(StreamingService):
     def query_generator(self, track: Track) -> List[str]:
         return [
             f"{track.name.value} {track.artists[0].value}",
-            track.name.value,
-            track.artists[0].value,
+            # track.name.value,
         ]

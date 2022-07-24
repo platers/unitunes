@@ -17,7 +17,7 @@ console = Console()
 @service_app.command()
 def add(
     service_type: ServiceType = typer.Argument(None, help="Service to add."),
-    service_config_path: str = typer.Argument(None, help="Path to service config."),
+    service_config_path: str = typer.Argument("", help="Path to service config."),
     service_name: Optional[str] = typer.Argument(
         None, help="Name of service. Defaults to service type."
     ),
@@ -25,7 +25,7 @@ def add(
     """
     Add a service.
 
-    If no namm is provided, the service type will be used as the name.
+    If no name is provided, the service type will be used as the name.
     """
 
     pm = get_playlist_manager(Path.cwd())
