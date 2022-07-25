@@ -159,7 +159,7 @@ def test_get_playlist_metadatas(Beatsaber: BeatsaberService):
 
 def test_pull_tracks(Beatsaber: BeatsaberService):
     tracks = Beatsaber.pull_tracks(
-        BeatsaberPlaylistURI.from_uri("bass_house_music_pack")
+        BeatsaberPlaylistURI.from_uri("bass_house_music_pack.bplist")
     )
     assert len(tracks) == 2
     assert tracks[0].name.value == "Jump Around"
@@ -167,7 +167,7 @@ def test_pull_tracks(Beatsaber: BeatsaberService):
 
 
 def test_add_remove_tracks(Beatsaber: BeatsaberService):
-    playlist = BeatsaberPlaylistURI.from_uri("bass_house_music_pack")
+    playlist = BeatsaberPlaylistURI.from_uri("bass_house_music_pack.bplist")
     track = Track(
         name=AliasedString("My Hero"),
         artists=[AliasedString("MAN WITH A MISSION")],

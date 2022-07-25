@@ -127,11 +127,11 @@ class BeatsaberService(StreamingService):
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
-    def write_bplist(self, playlist_uri: PlaylistURI, bp: BPList) -> None:
+    def write_bplist(self, playlist_uri: BeatsaberPlaylistURI, bp: BPList) -> None:
         with (self.dir / (playlist_uri.uri)).open("w") as f:
             f.write(bp.json(indent=4))
 
-    def read_playlist(self, playlist_uri: PlaylistURI) -> BPList:
+    def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
         return BPList.parse_file(self.dir / (playlist_uri.uri))
 
     def create_playlist(
@@ -167,7 +167,9 @@ class BeatsaberService(StreamingService):
         bp.songs.extend(new_songs)
         self.write_bplist(playlist_uri, bp)
 
-    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+    def remove_tracks(
+        self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
+    ) -> None:
         bp = self.read_playlist(playlist_uri)
         removed_songs = [self.get_song(track) for track in tracks]
         bp.songs = [
