@@ -2,7 +2,7 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
-from unitunes import PlaylistManager, FileManager
+from unitunes import PlaylistManager, FileManager, Index
 
 dpg.create_context()
 dpg.create_viewport(title="Unitunes", width=600, height=600)
@@ -16,23 +16,25 @@ class GUI:
     app_config: AppConfig
     pm: PlaylistManager
 
+    def load_playlist_manager(self):
+        fm = FileManager(self.app_config.unitunes_dir)
+        try:
+            fm.load_index()
+        except FileNotFoundError:
+            fm.save_index(Index())
+
+        self.pm = PlaylistManager(fm.load_index(), fm)
+
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
             with dpg.child_window(tag="settings_window"):
-
                 with dpg.group(horizontal=True):
-
+                    # File Dialog
                     def change_unitunes_dir(sender, app_data):
-                        print(sender, app_data)
                         self.app_config.unitunes_dir = Path(app_data["current_path"])
                         self.save_app_config()
-                        update_unitunes_dir_text()
-
-                    def update_unitunes_dir_text():
-                        dpg.set_item_label(
-                            "unitunes_dir_button",
-                            str(self.app_config.unitunes_dir),
-                        )
+                        self.load_playlist_manager()
+                        sync_unitunes_dir_text()
 
                     file_dialog = dpg.add_file_dialog(
                         label="Unitunes Directory",
@@ -40,18 +42,27 @@ class GUI:
                         directory_selector=True,
                         show=False,
                         height=300,
+                        width=600,
                         callback=change_unitunes_dir,
                     )
 
                     dpg.add_text(
                         "Unitunes Directory:",
                     )
+
+                    # Button
+                    def sync_unitunes_dir_text():
+                        dpg.set_item_label(
+                            "unitunes_dir_button",
+                            str(self.app_config.unitunes_dir),
+                        )
+
                     dpg.add_button(
                         tag="unitunes_dir_button",
                         label="placeholder",
                         callback=lambda: dpg.show_item(file_dialog),
                     )
-                    update_unitunes_dir_text()
+                    sync_unitunes_dir_text()
 
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
@@ -67,7 +78,14 @@ class GUI:
 
     def services_tab_setup(self):
         with dpg.tab(label="Services"):
-            dpg.add_text("This is the services tab!")
+            with dpg.child_window(tag="services_window"):
+                with dpg.tab_bar():
+                    with dpg.tab(label="Spotify"):
+                        with dpg.child_window(tag="spotify_window"):
+                            dpg.add_text("This is the spotify window!")
+                    with dpg.tab(label="YouTube"):
+                        with dpg.child_window(tag="youtube_window"):
+                            dpg.add_text("This is the youtube window!")
 
     def main_window_setup(self):
         with dpg.window(label="Example Window", tag="Primary"):
@@ -100,8 +118,7 @@ class GUI:
 
     def setup(self):
         self.load_app_config()
-        fm = FileManager(self.app_config.unitunes_dir)
-        self.pm = PlaylistManager(fm.load_index(), fm)
+        self.load_playlist_manager()
         self.main_window_setup()
 
 
