@@ -2,9 +2,10 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
+from unitunes import PlaylistManager, FileManager
 
 dpg.create_context()
-dpg.create_viewport(title="Custom Title", width=600, height=600)
+dpg.create_viewport(title="Unitunes", width=600, height=600)
 
 
 class AppConfig(BaseModel):
@@ -13,6 +14,7 @@ class AppConfig(BaseModel):
 
 class GUI:
     app_config: AppConfig
+    pm: PlaylistManager
 
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
@@ -98,6 +100,8 @@ class GUI:
 
     def setup(self):
         self.load_app_config()
+        fm = FileManager(self.app_config.unitunes_dir)
+        self.pm = PlaylistManager(fm.load_index(), fm)
         self.main_window_setup()
 
 
