@@ -34,6 +34,7 @@ ratelimit = "^2.2.1"
 youtube-title-parse = "^1.0.0"
 tqdm = "^4.64.0"
 dearpygui = "^1.6.2"
+appdirs = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
