@@ -21,7 +21,9 @@ class GUI:
         try:
             fm.load_index()
         except FileNotFoundError:
+            # Create a new index if it doesn't exist
             fm.save_index(Index())
+            print(f"Created new index at {fm.index_path.absolute()}")
 
         self.pm = PlaylistManager(fm.load_index(), fm)
 
@@ -79,13 +81,18 @@ class GUI:
     def services_tab_setup(self):
         with dpg.tab(label="Services"):
             with dpg.child_window(tag="services_window"):
-                with dpg.tab_bar():
-                    with dpg.tab(label="Spotify"):
-                        with dpg.child_window(tag="spotify_window"):
-                            dpg.add_text("This is the spotify window!")
-                    with dpg.tab(label="YouTube"):
-                        with dpg.child_window(tag="youtube_window"):
-                            dpg.add_text("This is the youtube window!")
+                with dpg.tab_bar(tag="services_tab_bar"):
+
+                    def add_service_tab(service_name: str):
+                        with dpg.tab(
+                            label=service_name, tag=f"service_tab_{service_name}"
+                        ):
+                            with dpg.child_window(tag=f"service_window_{service_name}"):
+                                dpg.add_text(service_name)
+
+                    for service_name in self.pm.services:
+                        add_service_tab(service_name)
+                    dpg.add_tab(label="+", tag="add_service_tab")
 
     def main_window_setup(self):
         with dpg.window(label="Example Window", tag="Primary"):
