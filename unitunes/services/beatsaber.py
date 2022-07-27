@@ -115,7 +115,7 @@ class BeatsaberService(StreamingService):
                     PlaylistMetadata(
                         name=bp.playlistTitle,
                         description=bp.playlistDescription,
-                        uri=BeatsaberPlaylistURI.from_uri(file.stem),
+                        uri=BeatsaberPlaylistURI.from_uri(file.name),
                     )
                 )
 

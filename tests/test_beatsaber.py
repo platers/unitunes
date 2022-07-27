@@ -154,7 +154,7 @@ def test_get_playlist_metadatas(Beatsaber: BeatsaberService):
     assert len(metas) == 1
     assert metas[0].name == "Bass House Music Pack"
     assert metas[0].description == "A description"
-    assert metas[0].uri.uri == "bass_house_music_pack"
+    assert metas[0].uri.uri == "bass_house_music_pack.bplist"
 
 
 def test_pull_tracks(Beatsaber: BeatsaberService):
