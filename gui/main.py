@@ -69,14 +69,14 @@ class GUI:
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
             with dpg.child_window(tag="playlist_window"):
-                dpg.add_text("This is the playlist window!")
 
-    def add_playlist_row(self, name: str):
-        with dpg.child_window(
-            tag=f"playlist_row_{name}", parent="playlist_window", height=40
-        ):
-            with dpg.group(horizontal=True):
-                dpg.add_text(name)
+                def add_playlist_row(name: str):
+                    with dpg.child_window(tag=f"playlist_row_{name}", height=40):
+                        with dpg.group(horizontal=True):
+                            dpg.add_text(name)
+
+                for playlist in self.pm.playlists:
+                    add_playlist_row(playlist)
 
     def services_tab_setup(self):
         with dpg.tab(label="Services"):
@@ -131,9 +131,6 @@ class GUI:
 
 gui = GUI()
 gui.setup()
-
-for i in range(10):
-    gui.add_playlist_row(str(i))
 
 
 dpg.setup_dearpygui()
