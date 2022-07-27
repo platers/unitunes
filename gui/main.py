@@ -2,6 +2,7 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
+from gui.engine import Engine, SleepJob
 from unitunes import PlaylistManager, FileManager, Index
 
 dpg.create_context()
@@ -15,6 +16,13 @@ class AppConfig(BaseModel):
 class GUI:
     app_config: AppConfig
     pm: PlaylistManager
+    engine: Engine
+
+    def __init__(self):
+        self.load_app_config()
+        self.load_playlist_manager()
+        self.main_window_setup()
+        self.engine = Engine(self.pm)
 
     def load_playlist_manager(self):
         fm = FileManager(self.app_config.unitunes_dir)
@@ -26,6 +34,46 @@ class GUI:
             print(f"Created new index at {fm.index_path.absolute()}")
 
         self.pm = PlaylistManager(fm.load_index(), fm)
+
+    def main_window_setup(self):
+        with dpg.window(label="Example Window", tag="Primary"):
+            with dpg.tab_bar():
+                self.playlists_tab_setup()
+                self.services_tab_setup()
+                self.jobs_tab_setup()
+                self.settings_tab_setup()
+
+    def jobs_tab_setup(self):
+        with dpg.tab(label="Jobs"):
+            with dpg.child_window(tag="jobs_window"):
+                dpg.add_text("Jobs")
+                dpg.add_button(label="Clear Completed", tag="clear_completed_button")
+
+                def add_sleep_job():
+                    job_id = self.engine.push_job(
+                        SleepJob(2, lambda: self.sync_job_row(job_id))
+                    )
+                    self.add_job_row_placeholder(job_id)
+                    self.sync_job_row(job_id)
+
+                dpg.add_button(
+                    label="Add sleep job", tag="add_sleep_job", callback=add_sleep_job
+                )
+
+    def add_job_row_placeholder(self, job_id: int):
+        with dpg.child_window(tag=f"job_row_{job_id}", height=60, parent="jobs_window"):
+            with dpg.group(horizontal=True):
+                dpg.add_text("placeholder", tag=f"job_description_{job_id}")
+                dpg.add_progress_bar(tag=f"job_progress_{job_id}")
+                dpg.add_text("placeholder", tag=f"job_progress_text_{job_id}")
+            with dpg.group(horizontal=True):
+                dpg.add_button(label="Cancel", tag=f"cancel_button_{job_id}")
+
+    def sync_job_row(self, job_id: int):
+        job = self.engine.get_job(job_id)
+        dpg.set_value(f"job_description_{job_id}", job.description)
+        dpg.set_value(f"job_progress_{job_id}", job.progress / job.size)
+        dpg.set_value(f"job_progress_text_{job_id}", f"{job.progress}/{job.size}")
 
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
@@ -71,9 +119,15 @@ class GUI:
             with dpg.child_window(tag="playlist_window"):
 
                 def add_playlist_row(name: str):
-                    with dpg.child_window(tag=f"playlist_row_{name}", height=40):
+                    pl = self.pm.playlists[name]
+                    with dpg.child_window(tag=f"playlist_row_{name}", height=60):
                         with dpg.group(horizontal=True):
-                            dpg.add_text(name)
+                            dpg.add_text(pl.name)
+                        with dpg.group(horizontal=True):
+                            dpg.add_text(f"{len(pl.tracks)} tracks")
+                            dpg.add_button(label="Pull", tag=f"pull_button_{name}")
+                            dpg.add_button(label="Search", tag=f"search_button_{name}")
+                            dpg.add_button(label="Push", tag=f"push_button_{name}")
 
                 for playlist in self.pm.playlists:
                     add_playlist_row(playlist)
@@ -93,13 +147,6 @@ class GUI:
                     for service_name in self.pm.services:
                         add_service_tab(service_name)
                     dpg.add_tab(label="+", tag="add_service_tab")
-
-    def main_window_setup(self):
-        with dpg.window(label="Example Window", tag="Primary"):
-            with dpg.tab_bar():
-                self.playlists_tab_setup()
-                self.services_tab_setup()
-                self.settings_tab_setup()
 
     def load_app_config(self):
         # If the config file doesn't exist, create it
@@ -123,14 +170,8 @@ class GUI:
         with open(config_path, "w") as f:
             f.write(self.app_config.json())
 
-    def setup(self):
-        self.load_app_config()
-        self.load_playlist_manager()
-        self.main_window_setup()
-
 
 gui = GUI()
-gui.setup()
 
 
 dpg.setup_dearpygui()
