@@ -47,7 +47,22 @@ class GUI:
         with dpg.tab(label="Jobs"):
             with dpg.child_window(tag="jobs_window"):
                 dpg.add_text("Jobs")
-                dpg.add_button(label="Clear Completed", tag="clear_completed_button")
+
+                def clear_completed_jobs():
+                    # loop children of jobs_window and remove those that are complete
+                    children: list[int] = dpg.get_item_children("jobs_window", 1)  # type: ignore
+                    for child in children:
+                        tag = dpg.get_item_alias(child)
+                        if tag.startswith("job_row_"):
+                            job_id = int(tag.split("_")[-1])
+                            if self.engine.get_job(job_id).is_done():
+                                dpg.delete_item(child)
+
+                dpg.add_button(
+                    label="Clear Completed",
+                    tag="clear_completed_button",
+                    callback=clear_completed_jobs,
+                )
 
                 def add_sleep_job():
                     job_id = self.engine.push_job(

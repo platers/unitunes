@@ -1,13 +1,20 @@
 from abc import ABC, abstractmethod
 from enum import Enum
-from pathlib import Path
 from queue import Queue
 from threading import Thread
 from typing import Callable
-from unitunes import PlaylistManager, FileManager, Index
+from unitunes import PlaylistManager
 import time
 
 GuiCallback = Callable[[], None]
+
+
+class JobStatus(Enum):
+    PENDING = 0
+    RUNNING = 1
+    SUCCESS = 2
+    FAILED = 3
+    CANCELLED = 4
 
 
 class Job(ABC):
@@ -18,10 +25,15 @@ class Job(ABC):
     size: int
     progress: int = 0
     gui_callback: GuiCallback
+    status: JobStatus = JobStatus.PENDING
 
     @abstractmethod
     def execute(self):
         ...
+
+    def is_done(self):
+        completed_states = [JobStatus.SUCCESS, JobStatus.FAILED, JobStatus.CANCELLED]
+        return self.status in completed_states
 
 
 class SleepJob(Job):
@@ -39,6 +51,7 @@ class SleepJob(Job):
             time.sleep(1)
             self.progress += 1
             self.gui_callback()
+        self.status = JobStatus.SUCCESS
 
 
 class Engine:
@@ -57,7 +70,13 @@ class Engine:
             job_id = self._queue.get()
             job = self._jobs[job_id]
             print(f"Executing job {job_id}: {job.description}")
-            job.execute()
+            job.status = JobStatus.RUNNING
+            try:
+                job.execute()
+            except Exception as e:
+                print(f"Job {job_id} failed: {e}")
+                job.status = JobStatus.FAILED
+            assert job.status != JobStatus.RUNNING
             print(f"Finished job {job_id}: {job.description}")
 
     def _generate_id(self) -> int:
