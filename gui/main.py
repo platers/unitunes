@@ -86,6 +86,12 @@ class GUI:
             dpg.set_value(f"job_progress_{job_id}", 0)
             dpg.set_value(f"job_progress_text_{job_id}", "")
 
+        # Show save button if any playlists changed
+        if self.engine.touched_playlists:
+            dpg.show_item("save_changes_button")
+        else:
+            dpg.hide_item("save_changes_button")
+
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
             with dpg.child_window(tag="settings_window"):
@@ -128,6 +134,17 @@ class GUI:
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
             with dpg.child_window(tag="playlist_window"):
+
+                def save_changes_callback():
+                    self.engine.save()
+                    dpg.hide_item("save_changes_button")
+
+                dpg.add_button(
+                    label="Save Changes",
+                    tag="save_changes_button",
+                    show=False,
+                    callback=save_changes_callback,
+                )
 
                 def add_playlist_row(name: str):
                     pl = self.pm.playlists[name]

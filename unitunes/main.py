@@ -289,6 +289,8 @@ class PlaylistManager:
                     if not track.find_uri(service.type)
                 ]
             )
+        print(f"{len(tracks_to_search)} tracks to search")
+
         matcher = DefaultMatcherStrategy()
         searcher = DefaultSearcherStrategy(matcher)
 

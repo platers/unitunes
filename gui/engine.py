@@ -1,10 +1,8 @@
-from abc import ABC, abstractmethod
 from enum import Enum
 from queue import Queue
 from threading import Thread
 from typing import Callable
 from unitunes import PlaylistManager
-import time
 
 GuiCallback = Callable[[], None]
 
@@ -87,6 +85,7 @@ class Engine:
     _pm: PlaylistManager
     _queue: Queue[int] = Queue()
     _jobs: dict[int, Job] = {}
+    touched_playlists: set[str] = set()
     thread: Thread
 
     def __init__(self, pm: PlaylistManager) -> None:
@@ -100,13 +99,14 @@ class Engine:
             job = self._jobs[job_id]
             print(f"Executing job {job_id}: {job.description}")
             job.status = JobStatus.RUNNING
-            try:
-                job.execute()
-            except Exception as e:
-                print(f"Job {job_id} failed: {e}")
-                job.status = JobStatus.FAILED
+
+            job.execute()
+
             assert job.status != JobStatus.RUNNING
             print(f"Finished job {job_id}: {job.description}")
+
+            self.touched_playlists.add(job.playlist_name)
+            job.gui_callback()
 
     def _generate_id(self) -> int:
         """Generate a unique job id."""
@@ -120,3 +120,8 @@ class Engine:
 
     def get_job(self, job_id: int) -> Job:
         return self._jobs[job_id]
+
+    def save(self) -> None:
+        for playlist_name in self.touched_playlists:
+            self._pm.save_playlist(playlist_name)
+        self.touched_playlists.clear()
