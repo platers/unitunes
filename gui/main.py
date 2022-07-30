@@ -2,7 +2,7 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
-from gui.engine import Engine, PullJob, SleepJob
+from gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
 
 dpg.create_context()
@@ -55,24 +55,13 @@ class GUI:
                         tag = dpg.get_item_alias(child)
                         if tag.startswith("job_row_"):
                             job_id = int(tag.split("_")[-1])
-                            if self.engine.get_job(job_id).is_done():
+                            if self.engine.get_job(job_id).status == JobStatus.SUCCESS:
                                 dpg.delete_item(child)
 
                 dpg.add_button(
                     label="Clear Completed",
                     tag="clear_completed_button",
                     callback=clear_completed_jobs,
-                )
-
-                def add_sleep_job():
-                    job_id = self.engine.push_job(
-                        SleepJob(2, lambda: self.sync_job_row(job_id))
-                    )
-                    self.add_job_row_placeholder(job_id)
-                    self.sync_job_row(job_id)
-
-                dpg.add_button(
-                    label="Add sleep job", tag="add_sleep_job", callback=add_sleep_job
                 )
 
     def add_job_row_placeholder(self, job_id: int):
@@ -147,9 +136,10 @@ class GUI:
                             dpg.add_text(pl.name)
                         with dpg.group(horizontal=True):
 
-                            def add_pull_job():
+                            def add_job(self, job_type: JobType):
                                 job_id = self.engine.push_job(
-                                    PullJob(
+                                    Job(
+                                        job_type,
                                         pl.name,
                                         lambda: self.sync_job_row(job_id),
                                         self.pm,
@@ -162,10 +152,18 @@ class GUI:
                             dpg.add_button(
                                 label="Pull",
                                 tag=f"pull_button_{name}",
-                                callback=add_pull_job,
+                                callback=lambda: add_job(self, JobType.PULL),
                             )
-                            dpg.add_button(label="Search", tag=f"search_button_{name}")
-                            dpg.add_button(label="Push", tag=f"push_button_{name}")
+                            dpg.add_button(
+                                label="Search",
+                                tag=f"search_button_{name}",
+                                callback=lambda: add_job(self, JobType.SEARCH),
+                            )
+                            dpg.add_button(
+                                label="Push",
+                                tag=f"push_button_{name}",
+                                callback=lambda: add_job(self, JobType.PUSH),
+                            )
 
                 for playlist in self.pm.playlists:
                     add_playlist_row(playlist)

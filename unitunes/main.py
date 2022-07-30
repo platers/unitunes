@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Tuple
 from pathlib import Path
 from unitunes.file_manager import FileManager
 from unitunes.index import Index
@@ -13,8 +13,9 @@ from unitunes.pull_playlist import (
     remove_tracks,
     remove_uris,
     tracks_to_add,
+    tracks_to_remove,
 )
-from unitunes.searcher import SearcherStrategy
+from unitunes.searcher import DefaultSearcherStrategy, SearcherStrategy
 from unitunes.services.beatsaber import (
     BeatsaberService,
     BeatsaverAPIWrapper,
@@ -22,6 +23,7 @@ from unitunes.services.beatsaber import (
 from unitunes.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
 from unitunes.services.services import (
     PlaylistPullable,
+    Pushable,
     Searchable,
     StreamingService,
     TrackPullable,
@@ -169,9 +171,8 @@ class PlaylistManager:
 
         pullable_services = [
             service_name
-            for service_name in self.services
+            for service_name in playlist.uris
             if isinstance(self.services[service_name], PlaylistPullable)
-            and service_name in playlist.uris
         ]
 
         progress = 0
@@ -217,6 +218,94 @@ class PlaylistManager:
 
         merge_new_tracks(playlist.tracks, new_tracks, DefaultMatcherStrategy())
         remove_tracks(playlist.tracks, missing_uris)
+
+    def push_playlist(
+        self,
+        playlist_name: str,
+        progress_callback: Callable[[int, int], None] = lambda x, y: None,
+    ) -> None:
+        """Push all tracks from a playlist to its services."""
+        playlist = self.playlists[playlist_name]
+
+        pushable_services = [
+            service_name
+            for service_name in playlist.uris
+            if isinstance(self.services[service_name], Pushable)
+        ]
+
+        progress = 0
+        progress_callback(progress, len(pushable_services))
+
+        for service_name in pushable_services:
+            service = self.services[service_name]
+            assert isinstance(service, Pushable)
+
+            for uri in playlist.uris[service_name]:
+                current_tracks = service.pull_tracks(uri)
+                new_tracks = tracks_to_add(
+                    service.type, current_tracks, playlist.tracks
+                )
+                removed_tracks = tracks_to_remove(
+                    service.type, current_tracks, playlist.tracks
+                )
+
+                if new_tracks:
+                    service.add_tracks(uri, new_tracks)
+                if removed_tracks:
+                    service.remove_tracks(uri, removed_tracks)
+
+            # Update progress
+            progress += 1
+            progress_callback(progress, len(pushable_services))
+
+    def search_playlist(
+        self,
+        playlist_name: str,
+        progress_callback: Callable[[int, int], None] = lambda x, y: None,
+    ) -> None:
+
+        """
+        Search for tracks on a service. Adds found URI's to tracks.
+        """
+
+        playlist = self.playlists[playlist_name]
+
+        searchable_services = [
+            service_name
+            for service_name in playlist.uris
+            if isinstance(self.services[service_name], Searchable)
+        ]
+
+        tracks_to_search: List[Tuple[str, Track]] = []
+
+        for service_name in searchable_services:
+            service = self.services[service_name]
+            assert isinstance(service, Searchable)
+
+            tracks_to_search.extend(
+                [
+                    (service_name, track)
+                    for track in playlist.tracks
+                    if not track.find_uri(service.type)
+                ]
+            )
+        matcher = DefaultMatcherStrategy()
+        searcher = DefaultSearcherStrategy(matcher)
+
+        progress = 0
+        progress_callback(progress, len(tracks_to_search))
+
+        for service_name, track in tracks_to_search:
+            service = self.services[service_name]
+            predicted = get_prediction_track(
+                service, track, matcher, searcher, threshold=0.7
+            )
+            if predicted:
+                track.merge(predicted)
+
+            # Update progress
+            progress += 1
+            progress_callback(progress, len(tracks_to_search))
 
 
 def get_predicted_tracks(
