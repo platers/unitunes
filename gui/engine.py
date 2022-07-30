@@ -21,8 +21,7 @@ class Job(ABC):
     type: str
     description: str
     playlist_name: str  # playlist the job operates on
-    service_names: list[str]  # services the job operates on
-    size: int
+    size: int = 0
     progress: int = 0
     gui_callback: GuiCallback
     status: JobStatus = JobStatus.PENDING
@@ -52,6 +51,37 @@ class SleepJob(Job):
             self.progress += 1
             self.gui_callback()
         self.status = JobStatus.SUCCESS
+
+
+class PullJob(Job):
+    type = "pull"
+    pm: PlaylistManager
+
+    def __init__(
+        self, playlist_name: str, gui_callback: GuiCallback, pm: PlaylistManager
+    ):
+        self.playlist_name = playlist_name
+        self.gui_callback = gui_callback
+        self.pm = pm
+        self.description = f"Pull {playlist_name}"
+
+    def execute(self):
+        def progress_callback(progress: int, size: int):
+            self.progress = progress
+            self.size = size
+            assert self.progress <= self.size
+            assert self.size > 0
+            self.gui_callback()
+
+        print(f"Pulling playlist {self.playlist_name}")
+        self.status = JobStatus.RUNNING
+        self.gui_callback()
+        self.pm.pull_playlist(
+            self.playlist_name,
+            progress_callback=progress_callback,
+        )
+        self.status = JobStatus.SUCCESS
+        self.gui_callback()
 
 
 class Engine:

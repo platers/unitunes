@@ -1,5 +1,5 @@
 import json
-from typing import Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 from pathlib import Path
 from unitunes.file_manager import FileManager
 from unitunes.index import Index
@@ -155,7 +155,11 @@ class PlaylistManager:
     # Pulling and pushing
     ###########################################################################
 
-    def pull_playlist(self, playlist_name: str) -> None:
+    def pull_playlist(
+        self,
+        playlist_name: str,
+        progress_callback: Callable[[int, int], None] = lambda x, y: None,
+    ) -> None:
         """Pull all tracks from a playlist from its services."""
         playlist = self.playlists[playlist_name]
 
@@ -163,35 +167,48 @@ class PlaylistManager:
         missing_uris: List[TrackURIs] = []
         invalid_uris: List[TrackURIs] = []
 
-        for service_name in playlist.uris:
+        pullable_services = [
+            service_name
+            for service_name in self.services
+            if isinstance(self.services[service_name], PlaylistPullable)
+            and service_name in playlist.uris
+        ]
+
+        progress = 0
+        progress_callback(progress, len(pullable_services))
+
+        for service_name in pullable_services:
             service = self.services[service_name]
-            if isinstance(service, PlaylistPullable):
-                for uri in playlist.uris[service_name]:
-                    # Get remote tracks
-                    remote_tracks = service.pull_tracks(uri)
+            assert isinstance(service, PlaylistPullable)
 
-                    # Record new tracks not already in the playlist
-                    new_tracks.extend(
-                        tracks_to_add(service.type, playlist.tracks, remote_tracks)
-                    )
+            for uri in playlist.uris[service_name]:
+                # Get remote tracks
+                remote_tracks = service.pull_tracks(uri)
 
-                    # Update URIs if they do not match the remote URIs (YTM URIs are not stable)
-                    add_changed_uris(playlist.tracks, remote_tracks)
+                # Record new tracks not already in the playlist
+                new_tracks.extend(
+                    tracks_to_add(service.type, playlist.tracks, remote_tracks)
+                )
 
-                    # Record URIs that are no longer in the remote
-                    new_missing = get_missing_uris(
-                        service.type, playlist.tracks, remote_tracks
-                    )
+                # Update URIs if they do not match the remote URIs (YTM URIs are not stable)
+                add_changed_uris(playlist.tracks, remote_tracks)
 
-                    # Record URIs that are invalid (e.g. not found on the service. Usually YTM)
-                    invalid_uris.extend(get_invalid_uris(service, new_missing))
+                # Record URIs that are no longer in the remote
+                new_missing = get_missing_uris(
+                    service.type, playlist.tracks, remote_tracks
+                )
 
-                    # Remove invalid URIs from the missing list
-                    new_missing = [
-                        uri for uri in new_missing if uri not in invalid_uris
-                    ]
+                # Record URIs that are invalid (e.g. not found on the service. Usually YTM)
+                invalid_uris.extend(get_invalid_uris(service, new_missing))
 
-                    missing_uris.extend(new_missing)
+                # Remove invalid URIs from the missing list
+                new_missing = [uri for uri in new_missing if uri not in invalid_uris]
+
+                missing_uris.extend(new_missing)
+
+            # Update progress
+            progress += 1
+            progress_callback(progress, len(pullable_services))
 
         remove_uris(playlist.tracks, invalid_uris)
 

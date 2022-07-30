@@ -12,8 +12,7 @@ from unitunes.services.services import (
 from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
-    URI,
-    PlaylistURIs,
+    AlbumURI,
     SpotifyPlaylistURI,
     SpotifyTrackURI,
 )
@@ -212,12 +211,12 @@ class SpotifyService(StreamingService):
         tracks = [track for track in tracks if track.uris]
         return tracks
 
-    def get_tracks_in_album(self, album_uri: URI) -> List[Track]:
+    def get_tracks_in_album(self, album_uri: AlbumURI) -> List[Track]:
         album_id = album_uri.uri.split("/")[-1]
         results = self.wrapper.album_tracks(album_id)
         return [self.raw_to_track(track) for track in results["items"]]
 
-    def pull_track(self, uri: URI) -> Track:
+    def pull_track(self, uri: SpotifyTrackURI) -> Track:
         track_id = uri.uri.split("/")[-1]
         results = self.wrapper.track(track_id)
         if not results:
@@ -255,7 +254,7 @@ class SpotifyService(StreamingService):
 
         return [query]
 
-    def create_playlist(self, name: str, description: str = "") -> PlaylistURIs:
+    def create_playlist(self, name: str, description: str = "") -> SpotifyPlaylistURI:
         playlist = self.wrapper.user_playlist_create(
             self.wrapper.current_user()["id"],
             name,

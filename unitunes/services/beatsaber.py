@@ -8,23 +8,16 @@ from unitunes.playlist import Playlist, PlaylistMetadata
 import requests
 
 from unitunes.services.services import (
-    Pushable,
-    Searchable,
     ServiceWrapper,
     StreamingService,
-    TrackPullable,
-    UserPlaylistPullable,
     cache,
 )
 from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
-    URI,
     BeatsaberPlaylistURI,
     BeatsaberTrackURI,
     PlaylistURI,
-    PlaylistURIs,
-    TrackURI,
 )
 
 

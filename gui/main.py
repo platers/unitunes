@@ -2,7 +2,7 @@ from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
-from gui.engine import Engine, SleepJob
+from gui.engine import Engine, PullJob, SleepJob
 from unitunes import PlaylistManager, FileManager, Index
 
 dpg.create_context()
@@ -83,12 +83,19 @@ class GUI:
                 dpg.add_text("placeholder", tag=f"job_progress_text_{job_id}")
             with dpg.group(horizontal=True):
                 dpg.add_button(label="Cancel", tag=f"cancel_button_{job_id}")
+                dpg.add_text("placeholder", tag=f"job_status_text_{job_id}")
 
     def sync_job_row(self, job_id: int):
         job = self.engine.get_job(job_id)
         dpg.set_value(f"job_description_{job_id}", job.description)
-        dpg.set_value(f"job_progress_{job_id}", job.progress / job.size)
-        dpg.set_value(f"job_progress_text_{job_id}", f"{job.progress}/{job.size}")
+        dpg.set_value(f"job_status_text_{job_id}", job.status.name)
+
+        if job.size > 0:
+            dpg.set_value(f"job_progress_{job_id}", job.progress / job.size)
+            dpg.set_value(f"job_progress_text_{job_id}", f"{job.progress}/{job.size}")
+        else:
+            dpg.set_value(f"job_progress_{job_id}", 0)
+            dpg.set_value(f"job_progress_text_{job_id}", "")
 
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
@@ -139,8 +146,24 @@ class GUI:
                         with dpg.group(horizontal=True):
                             dpg.add_text(pl.name)
                         with dpg.group(horizontal=True):
+
+                            def add_pull_job():
+                                job_id = self.engine.push_job(
+                                    PullJob(
+                                        pl.name,
+                                        lambda: self.sync_job_row(job_id),
+                                        self.pm,
+                                    )
+                                )
+                                self.add_job_row_placeholder(job_id)
+                                self.sync_job_row(job_id)
+
                             dpg.add_text(f"{len(pl.tracks)} tracks")
-                            dpg.add_button(label="Pull", tag=f"pull_button_{name}")
+                            dpg.add_button(
+                                label="Pull",
+                                tag=f"pull_button_{name}",
+                                callback=add_pull_job,
+                            )
                             dpg.add_button(label="Search", tag=f"search_button_{name}")
                             dpg.add_button(label="Push", tag=f"push_button_{name}")
 
