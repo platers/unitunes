@@ -6,12 +6,10 @@ from unitunes.main import FileManager, PlaylistManager
 from rich import print
 from rich.table import Table
 from rich.console import Console
-from unitunes.matcher import DefaultMatcherStrategy, MatcherStrategy
 from unitunes.playlist import Playlist
 from unitunes.services.services import StreamingService
 
 from unitunes.track import Track
-from unitunes.types import ServiceType
 
 console = Console()
 
@@ -111,38 +109,3 @@ def expand_services(
             raise typer.Exit()
 
     return [pm.services[service_name] for service_name in service_names]
-
-
-def tracks_match_and_on_service(
-    service: ServiceType,
-    t1: Track,
-    t2: Track,
-    matcher: MatcherStrategy = DefaultMatcherStrategy(),
-) -> bool:
-    return (
-        matcher.are_same(t1, t2)
-        and t1.is_on_service(service)
-        and t2.is_on_service(service)
-    )
-
-
-def tracks_to_add(
-    service: ServiceType, current: List[Track], new: List[Track]
-) -> List[Track]:
-    new_on_service = [track for track in new if track.is_on_service(service)]
-    return [
-        track
-        for track in new_on_service
-        if not any(tracks_match_and_on_service(service, track, t) for t in current)
-    ]
-
-
-def tracks_to_remove(
-    service: ServiceType, current: List[Track], new: List[Track]
-) -> List[Track]:
-    current_on_service = [track for track in current if track.is_on_service(service)]
-    return [
-        track
-        for track in current_on_service
-        if not any(tracks_match_and_on_service(service, t, track) for t in new)
-    ]

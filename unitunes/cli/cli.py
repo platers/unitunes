@@ -1,6 +1,5 @@
 from tqdm import tqdm
 import typer
-from unitunes.cli.pull import pull_playlist
 from unitunes.cli.utils import (
     expand_playlists,
     expand_services,
@@ -9,8 +8,6 @@ from unitunes.cli.utils import (
     print_playlist,
     print_tracks,
     toggleable_confirm,
-    tracks_to_add,
-    tracks_to_remove,
 )
 from unitunes.main import (
     FileManager,
@@ -120,6 +117,7 @@ def pull(
     If no service is specified, all services are used.
     """
 
+    return
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)
@@ -163,6 +161,7 @@ def push(
     If no playlist is specified, all playlists are pushed.
     If no service is specified, all services are used.
     """
+    return
     pm = get_playlist_manager(Path.cwd())
 
     playlists = expand_playlists(pm, playlist_names)

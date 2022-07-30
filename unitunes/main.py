@@ -3,8 +3,17 @@ from typing import Dict, List, Optional
 from pathlib import Path
 from unitunes.file_manager import FileManager
 from unitunes.index import Index
-from unitunes.matcher import MatcherStrategy
+from unitunes.matcher import DefaultMatcherStrategy, MatcherStrategy
 from unitunes.playlist import Playlist
+from unitunes.pull_playlist import (
+    add_changed_uris,
+    get_invalid_uris,
+    get_missing_uris,
+    merge_new_tracks,
+    remove_tracks,
+    remove_uris,
+    tracks_to_add,
+)
 from unitunes.searcher import SearcherStrategy
 from unitunes.services.beatsaber import (
     BeatsaberService,
@@ -12,6 +21,7 @@ from unitunes.services.beatsaber import (
 )
 from unitunes.services.musicbrainz import MusicBrainz, MusicBrainzWrapper
 from unitunes.services.services import (
+    PlaylistPullable,
     Searchable,
     StreamingService,
     TrackPullable,
@@ -25,7 +35,7 @@ from unitunes.services.spotify import (
 from unitunes.services.ytm import YTM, YtmAPIWrapper
 from unitunes.track import Track
 from unitunes.types import ServiceType
-from unitunes.uri import PlaylistURIs, TrackURI
+from unitunes.uri import PlaylistURIs, TrackURI, TrackURIs
 
 
 def service_factory(
@@ -140,6 +150,56 @@ class PlaylistManager:
                 if uri in uris:
                     return True
         return False
+
+    ###########################################################################
+    # Pulling and pushing
+    ###########################################################################
+
+    def pull_playlist(self, playlist_name: str) -> None:
+        """Pull all tracks from a playlist from its services."""
+        playlist = self.playlists[playlist_name]
+
+        new_tracks: List[Track] = []
+        missing_uris: List[TrackURIs] = []
+        invalid_uris: List[TrackURIs] = []
+
+        for service_name in playlist.uris:
+            service = self.services[service_name]
+            if isinstance(service, PlaylistPullable):
+                for uri in playlist.uris[service_name]:
+                    # Get remote tracks
+                    remote_tracks = service.pull_tracks(uri)
+
+                    # Record new tracks not already in the playlist
+                    new_tracks.extend(
+                        tracks_to_add(service.type, playlist.tracks, remote_tracks)
+                    )
+
+                    # Update URIs if they do not match the remote URIs (YTM URIs are not stable)
+                    add_changed_uris(playlist.tracks, remote_tracks)
+
+                    # Record URIs that are no longer in the remote
+                    new_missing = get_missing_uris(
+                        service.type, playlist.tracks, remote_tracks
+                    )
+
+                    # Record URIs that are invalid (e.g. not found on the service. Usually YTM)
+                    invalid_uris.extend(get_invalid_uris(service, new_missing))
+
+                    # Remove invalid URIs from the missing list
+                    new_missing = [
+                        uri for uri in new_missing if uri not in invalid_uris
+                    ]
+
+                    missing_uris.extend(new_missing)
+
+        remove_uris(playlist.tracks, invalid_uris)
+
+        print(f"{len(new_tracks)} new tracks")
+        print(f"{len(missing_uris)} missing tracks")
+
+        merge_new_tracks(playlist.tracks, new_tracks, DefaultMatcherStrategy())
+        remove_tracks(playlist.tracks, missing_uris)
 
 
 def get_predicted_tracks(
