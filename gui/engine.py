@@ -55,7 +55,6 @@ class Job:
             self.progress = progress
             self.size = size
             assert self.progress <= self.size
-            assert self.size > 0
             self.gui_callback()
 
         self.status = JobStatus.RUNNING

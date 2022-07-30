@@ -71,13 +71,23 @@ class GUI:
                 dpg.add_progress_bar(tag=f"job_progress_{job_id}")
                 dpg.add_text("placeholder", tag=f"job_progress_text_{job_id}")
             with dpg.group(horizontal=True):
-                dpg.add_button(label="Cancel", tag=f"cancel_button_{job_id}")
+                # dpg.add_button(label="Cancel", tag=f"cancel_button_{job_id}")
                 dpg.add_text("placeholder", tag=f"job_status_text_{job_id}")
 
     def sync_job_row(self, job_id: int):
         job = self.engine.get_job(job_id)
         dpg.set_value(f"job_description_{job_id}", job.description)
         dpg.set_value(f"job_status_text_{job_id}", job.status.name)
+        if job.status == JobStatus.SUCCESS:
+            status_color = (0, 255, 0)  # green
+        elif job.status == JobStatus.FAILED:
+            status_color = (255, 0, 0)  # red
+        elif job.status == JobStatus.RUNNING:
+            status_color = (255, 255, 0)  # yellow
+        else:
+            status_color = (255, 255, 255)  # white
+
+        dpg.configure_item(f"job_status_text_{job_id}", color=status_color)
 
         if job.size > 0:
             dpg.set_value(f"job_progress_{job_id}", job.progress / job.size)
@@ -131,20 +141,64 @@ class GUI:
                     )
                     sync_unitunes_dir_text()
 
+    def add_job(self, job_type: JobType, playlist: str):
+        job_id = self.engine.push_job(
+            Job(
+                job_type,
+                playlist,
+                lambda: self.sync_job_row(job_id),
+                self.pm,
+            )
+        )
+        self.add_job_row_placeholder(job_id)
+        self.sync_job_row(job_id)
+
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
             with dpg.child_window(tag="playlist_window"):
+                with dpg.group(horizontal=True):
 
-                def save_changes_callback():
-                    self.engine.save()
-                    dpg.hide_item("save_changes_button")
+                    def save_changes_callback():
+                        self.engine.save()
+                        dpg.hide_item("save_changes_button")
 
-                dpg.add_button(
-                    label="Save Changes",
-                    tag="save_changes_button",
-                    show=False,
-                    callback=save_changes_callback,
-                )
+                    # Red button
+                    dpg.add_button(
+                        label="Save Changes",
+                        tag="save_changes_button",
+                        show=False,
+                        callback=save_changes_callback,
+                    )
+
+                    def pull_all_callback():
+                        for playlist in self.pm.playlists:
+                            self.add_job(JobType.PULL, playlist)
+
+                    dpg.add_button(
+                        label="Pull All",
+                        tag="pull_all_button",
+                        callback=pull_all_callback,
+                    )
+
+                    def search_all_callback():
+                        for playlist in self.pm.playlists:
+                            self.add_job(JobType.SEARCH, playlist)
+
+                    dpg.add_button(
+                        label="Search All",
+                        tag="search_all_button",
+                        callback=search_all_callback,
+                    )
+
+                    def push_all_callback():
+                        for playlist in self.pm.playlists:
+                            self.add_job(JobType.PUSH, playlist)
+
+                    dpg.add_button(
+                        label="Push All",
+                        tag="push_all_button",
+                        callback=push_all_callback,
+                    )
 
                 def add_playlist_row(name: str):
                     pl = self.pm.playlists[name]
@@ -153,33 +207,21 @@ class GUI:
                             dpg.add_text(pl.name)
                         with dpg.group(horizontal=True):
 
-                            def add_job(self, job_type: JobType):
-                                job_id = self.engine.push_job(
-                                    Job(
-                                        job_type,
-                                        pl.name,
-                                        lambda: self.sync_job_row(job_id),
-                                        self.pm,
-                                    )
-                                )
-                                self.add_job_row_placeholder(job_id)
-                                self.sync_job_row(job_id)
-
                             dpg.add_text(f"{len(pl.tracks)} tracks")
                             dpg.add_button(
                                 label="Pull",
                                 tag=f"pull_button_{name}",
-                                callback=lambda: add_job(self, JobType.PULL),
+                                callback=lambda: self.add_job(JobType.PULL, name),
                             )
                             dpg.add_button(
                                 label="Search",
                                 tag=f"search_button_{name}",
-                                callback=lambda: add_job(self, JobType.SEARCH),
+                                callback=lambda: self.add_job(JobType.SEARCH, name),
                             )
                             dpg.add_button(
                                 label="Push",
                                 tag=f"push_button_{name}",
-                                callback=lambda: add_job(self, JobType.PUSH),
+                                callback=lambda: self.add_job(JobType.PUSH, name),
                             )
 
                 for playlist in self.pm.playlists:
