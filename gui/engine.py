@@ -84,7 +84,6 @@ class Engine:
     _pm: PlaylistManager
     _queue: Queue[int] = Queue()
     _jobs: dict[int, Job] = {}
-    touched_playlists: set[str] = set()
     thread: Thread
 
     def __init__(self, pm: PlaylistManager) -> None:
@@ -104,7 +103,6 @@ class Engine:
             assert job.status != JobStatus.RUNNING
             print(f"Finished job {job_id}: {job.description}")
 
-            self.touched_playlists.add(job.playlist_name)
             job.gui_callback()
 
     def _generate_id(self) -> int:
@@ -119,8 +117,3 @@ class Engine:
 
     def get_job(self, job_id: int) -> Job:
         return self._jobs[job_id]
-
-    def save(self) -> None:
-        for playlist_name in self.touched_playlists:
-            self._pm.save_playlist(playlist_name)
-        self.touched_playlists.clear()

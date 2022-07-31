@@ -113,16 +113,11 @@ class PlaylistManager:
 
         for playlist in self.playlists.values():
             playlist.remove_service(name)
-            self.file_manager.save_playlist(playlist)
-
-        self.file_manager.save_index(self.index)
 
     def add_playlist(self, name: str) -> None:
         """Initialize a UP. Raise ValueError if the playlist already exists."""
         self.index.add_playlist(name)
         self.playlists[name] = Playlist(name=name)
-        self.file_manager.save_index(self.index)
-        self.file_manager.save_playlist(self.playlists[name])
 
     def remove_playlist(self, name: str) -> None:
         """Remove a playlist from the index and filesystem."""
@@ -131,7 +126,6 @@ class PlaylistManager:
         self.file_manager.delete_playlist(name)
         del self.playlists[name]
         self.index.remove_playlist(name)
-        self.file_manager.save_index(self.index)
 
     def add_uri_to_playlist(
         self, playlist_name: str, service_name: str, uri: PlaylistURIs
@@ -140,11 +134,8 @@ class PlaylistManager:
         pl = self.playlists[playlist_name]
         pl.add_uri(service_name, uri)
 
-        self.file_manager.save_index(self.index)
-        self.file_manager.save_playlist(pl)
-
-    def save_playlist(self, playlist_name: str) -> None:
-        self.file_manager.save_playlist(self.playlists[playlist_name])
+    def save_playlist(self, playlist_id: str) -> None:
+        self.file_manager.save_playlist(self.playlists[playlist_id], playlist_id)
 
     def is_tracking_playlist(self, uri: PlaylistURIs) -> bool:
         for playlist in self.playlists.values():

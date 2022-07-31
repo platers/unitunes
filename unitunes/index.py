@@ -16,10 +16,10 @@ class Index(BaseModel):
     services: Dict[str, IndexServiceEntry] = {}
     playlists: List[str] = []
 
-    def add_playlist(self, name: str):
-        if name in self.playlists:
-            raise ValueError(f"Playlist {name} already exists")
-        self.playlists.append(name)
+    def add_playlist(self, playlist_id: str):
+        if playlist_id in self.playlists:
+            raise ValueError(f"Playlist {playlist_id} already exists")
+        self.playlists.append(playlist_id)
 
     def add_service(self, name: str, service: str, config_path: str):
         if name in self.services:

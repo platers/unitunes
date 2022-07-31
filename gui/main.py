@@ -17,6 +17,7 @@ class GUI:
     app_config: AppConfig
     pm: PlaylistManager
     engine: Engine
+    touched_playlists: set[str] = set()
 
     def __init__(self):
         self.load_app_config()
@@ -74,6 +75,10 @@ class GUI:
                 # dpg.add_button(label="Cancel", tag=f"cancel_button_{job_id}")
                 dpg.add_text("placeholder", tag=f"job_status_text_{job_id}")
 
+    def touch_playlist(self, playlist: str):
+        self.touched_playlists.add(playlist)
+        dpg.show_item("save_changes_button")
+
     def sync_job_row(self, job_id: int):
         job = self.engine.get_job(job_id)
         dpg.set_value(f"job_description_{job_id}", job.description)
@@ -96,11 +101,7 @@ class GUI:
             dpg.set_value(f"job_progress_{job_id}", 0)
             dpg.set_value(f"job_progress_text_{job_id}", "")
 
-        # Show save button if any playlists changed
-        if self.engine.touched_playlists:
-            dpg.show_item("save_changes_button")
-        else:
-            dpg.hide_item("save_changes_button")
+        self.touch_playlist(job.playlist_name)
 
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
@@ -159,7 +160,9 @@ class GUI:
                 with dpg.group(horizontal=True):
 
                     def save_changes_callback():
-                        self.engine.save()
+                        for playlist_name in self.touched_playlists:
+                            self.pm.save_playlist(playlist_name)
+                        self.touched_playlists.clear()
                         dpg.hide_item("save_changes_button")
 
                     # Red button
@@ -200,14 +203,47 @@ class GUI:
                         callback=push_all_callback,
                     )
 
+                with dpg.window(
+                    tag="edit_playlist_window",
+                    modal=True,
+                    show=False,
+                    label="Edit Playlist",
+                    width=500,
+                    height=500,
+                ):
+                    dpg.add_input_text(
+                        tag="playlist_name_input",
+                        label="Playlist Name",
+                    )
+
+                def edit_playlist_row(playlist_id: str):
+                    dpg.show_item("edit_playlist_window")
+                    dpg.set_value(
+                        "playlist_name_input", self.pm.playlists[playlist_id].name
+                    )
+
+                    def name_input_callback(sender, app_data):
+                        self.pm.playlists[playlist_id].name = app_data
+                        print(f"Renamed {playlist_id} to {app_data}")
+                        self.touch_playlist(playlist_id)
+                        self.sync_playlist_row(playlist_id)
+
+                    dpg.set_item_callback(
+                        "playlist_name_input",
+                        name_input_callback,
+                    )
+
                 def add_playlist_row(name: str):
                     pl = self.pm.playlists[name]
                     with dpg.child_window(tag=f"playlist_row_{name}", height=60):
                         with dpg.group(horizontal=True):
-                            dpg.add_text(pl.name)
+                            dpg.add_text(pl.name, tag=f"playlist_row_name_{name}")
                         with dpg.group(horizontal=True):
 
-                            dpg.add_text(f"{len(pl.tracks)} tracks")
+                            dpg.add_text(
+                                "placeholder",
+                                tag=f"playlist_track_count_{name}",
+                            )
                             dpg.add_button(
                                 label="Pull",
                                 tag=f"pull_button_{name}",
@@ -224,8 +260,20 @@ class GUI:
                                 callback=lambda: self.add_job(JobType.PUSH, name),
                             )
 
+                            dpg.add_button(
+                                label="Edit",
+                                tag=f"edit_button_{name}",
+                                callback=lambda: edit_playlist_row(name),
+                            )
+
                 for playlist in self.pm.playlists:
                     add_playlist_row(playlist)
+                    self.sync_playlist_row(playlist)
+
+    def sync_playlist_row(self, name: str):
+        pl = self.pm.playlists[name]
+        dpg.set_value(f"playlist_track_count_{name}", f"{len(pl.tracks)} tracks")
+        dpg.set_value(f"playlist_row_name_{name}", pl.name)
 
     def services_tab_setup(self):
         with dpg.tab(label="Services"):

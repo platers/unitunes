@@ -45,8 +45,8 @@ class FileManager:
             raise FileNotFoundError(f"index file not found: {self.index_path}")
         return Index.parse_file(self.index_path)
 
-    def save_playlist(self, playlist: Playlist) -> None:
-        with open(self.get_playlist_path(playlist.name), "w") as f:
+    def save_playlist(self, playlist: Playlist, playlist_id: str) -> None:
+        with open(self.get_playlist_path(playlist_id), "w") as f:
             f.write(playlist.json(indent=4))
 
     def load_playlist(self, name: str) -> Playlist:
