@@ -36,6 +36,28 @@ class GUI:
 
         self.pm = PlaylistManager(fm.load_index(), fm)
 
+    def load_app_config(self):
+        # If the config file doesn't exist, create it
+        config_dir = Path(user_data_dir("unitunes"))
+        config_dir.mkdir(exist_ok=True)
+        config_path = config_dir / "config.json"
+        if not config_path.exists():
+            config_path.touch()
+            self.app_config = AppConfig(unitunes_dir=config_dir)
+        # Load the config file
+        try:
+            self.app_config = AppConfig.parse_file(config_path)
+        except Exception as e:
+            print(e)
+            print("Could not load config file. Using default config.")
+            self.app_config = AppConfig(unitunes_dir=config_dir)
+            self.save_app_config()
+
+    def save_app_config(self):
+        config_path = Path(user_data_dir("unitunes")) / "config.json"
+        with open(config_path, "w") as f:
+            f.write(self.app_config.json())
+
     def main_window_setup(self):
         with dpg.window(label="Example Window", tag="Primary"):
             with dpg.tab_bar():
@@ -44,10 +66,13 @@ class GUI:
                 self.jobs_tab_setup()
                 self.settings_tab_setup()
 
+    ########################################
+    # Jobs tab
+    ########################################
+
     def jobs_tab_setup(self):
         with dpg.tab(label="Jobs"):
             with dpg.child_window(tag="jobs_window"):
-                dpg.add_text("Jobs")
 
                 def clear_completed_jobs():
                     # loop children of jobs_window and remove those that are complete
@@ -103,6 +128,21 @@ class GUI:
 
         self.touch_playlist(job.playlist_name)
 
+    def add_job(self, job_type: JobType, playlist: str):
+        job_id = self.engine.push_job(
+            Job(
+                job_type,
+                playlist,
+                lambda: self.sync_job_row(job_id),
+                self.pm,
+            )
+        )
+        self.add_job_row_placeholder(job_id)
+        self.sync_job_row(job_id)
+
+    ########################################
+    # Settings tab
+    ########################################
     def settings_tab_setup(self):
         with dpg.tab(label="Settings"):
             with dpg.child_window(tag="settings_window"):
@@ -142,17 +182,9 @@ class GUI:
                     )
                     sync_unitunes_dir_text()
 
-    def add_job(self, job_type: JobType, playlist: str):
-        job_id = self.engine.push_job(
-            Job(
-                job_type,
-                playlist,
-                lambda: self.sync_job_row(job_id),
-                self.pm,
-            )
-        )
-        self.add_job_row_placeholder(job_id)
-        self.sync_job_row(job_id)
+    ########################################
+    # Playlists tab
+    ########################################
 
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
@@ -215,11 +247,20 @@ class GUI:
                         tag="playlist_name_input",
                         label="Playlist Name",
                     )
+                    dpg.add_input_text(
+                        tag="playlist_description_input",
+                        label="Playlist Description",
+                        multiline=True,
+                    )
 
                 def edit_playlist_row(playlist_id: str):
                     dpg.show_item("edit_playlist_window")
                     dpg.set_value(
                         "playlist_name_input", self.pm.playlists[playlist_id].name
+                    )
+                    dpg.set_value(
+                        "playlist_description_input",
+                        self.pm.playlists[playlist_id].description,
                     )
 
                     def name_input_callback(sender, app_data):
@@ -231,6 +272,17 @@ class GUI:
                     dpg.set_item_callback(
                         "playlist_name_input",
                         name_input_callback,
+                    )
+
+                    def description_input_callback(sender, app_data):
+                        self.pm.playlists[playlist_id].description = app_data
+                        print(f"Renamed {playlist_id} to {app_data}")
+                        self.touch_playlist(playlist_id)
+                        self.sync_playlist_row(playlist_id)
+
+                    dpg.set_item_callback(
+                        "playlist_description_input",
+                        description_input_callback,
                     )
 
                 def add_playlist_row(name: str):
@@ -275,6 +327,10 @@ class GUI:
         dpg.set_value(f"playlist_track_count_{name}", f"{len(pl.tracks)} tracks")
         dpg.set_value(f"playlist_row_name_{name}", pl.name)
 
+    ########################################
+    # Services tab
+    ########################################
+
     def services_tab_setup(self):
         with dpg.tab(label="Services"):
             with dpg.child_window(tag="services_window"):
@@ -290,28 +346,6 @@ class GUI:
                     for service_name in self.pm.services:
                         add_service_tab(service_name)
                     dpg.add_tab(label="+", tag="add_service_tab")
-
-    def load_app_config(self):
-        # If the config file doesn't exist, create it
-        config_dir = Path(user_data_dir("unitunes"))
-        config_dir.mkdir(exist_ok=True)
-        config_path = config_dir / "config.json"
-        if not config_path.exists():
-            config_path.touch()
-            self.app_config = AppConfig(unitunes_dir=config_dir)
-        # Load the config file
-        try:
-            self.app_config = AppConfig.parse_file(config_path)
-        except Exception as e:
-            print(e)
-            print("Could not load config file. Using default config.")
-            self.app_config = AppConfig(unitunes_dir=config_dir)
-            self.save_app_config()
-
-    def save_app_config(self):
-        config_path = Path(user_data_dir("unitunes")) / "config.json"
-        with open(config_path, "w") as f:
-            f.write(self.app_config.json())
 
 
 gui = GUI()
