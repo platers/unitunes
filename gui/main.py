@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
@@ -192,6 +193,7 @@ class GUI:
                 with dpg.group(horizontal=True):
 
                     def save_changes_callback():
+                        self.pm.save_index()
                         for playlist_name in self.touched_playlists:
                             self.pm.save_playlist(playlist_name)
                         self.touched_playlists.clear()
@@ -235,6 +237,18 @@ class GUI:
                         callback=push_all_callback,
                     )
 
+                    def add_playlist_callback():
+                        playlist_id = f"New Playlist {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                        self.pm.add_playlist(playlist_id)
+                        self.touch_playlist(playlist_id)
+                        self.sync_playlist_list()
+
+                    dpg.add_button(
+                        label="Add Playlist",
+                        tag="add_playlist_button",
+                        callback=add_playlist_callback,
+                    )
+
                 with dpg.window(
                     tag="edit_playlist_window",
                     modal=True,
@@ -253,74 +267,80 @@ class GUI:
                         multiline=True,
                     )
 
-                def edit_playlist_row(playlist_id: str):
-                    dpg.show_item("edit_playlist_window")
-                    dpg.set_value(
-                        "playlist_name_input", self.pm.playlists[playlist_id].name
-                    )
-                    dpg.set_value(
-                        "playlist_description_input",
-                        self.pm.playlists[playlist_id].description,
-                    )
+        self.sync_playlist_list()
 
-                    def name_input_callback(sender, app_data):
-                        self.pm.playlists[playlist_id].name = app_data
-                        print(f"Renamed {playlist_id} to {app_data}")
-                        self.touch_playlist(playlist_id)
-                        self.sync_playlist_row(playlist_id)
+    def edit_playlist_row(self, playlist_id: str):
+        dpg.show_item("edit_playlist_window")
+        dpg.set_value("playlist_name_input", self.pm.playlists[playlist_id].name)
+        dpg.set_value(
+            "playlist_description_input",
+            self.pm.playlists[playlist_id].description,
+        )
 
-                    dpg.set_item_callback(
-                        "playlist_name_input",
-                        name_input_callback,
-                    )
+        def name_input_callback(sender, app_data):
+            self.pm.playlists[playlist_id].name = app_data
+            print(f"Renamed {playlist_id} to {app_data}")
+            self.touch_playlist(playlist_id)
+            self.sync_playlist_row(playlist_id)
 
-                    def description_input_callback(sender, app_data):
-                        self.pm.playlists[playlist_id].description = app_data
-                        print(f"Renamed {playlist_id} to {app_data}")
-                        self.touch_playlist(playlist_id)
-                        self.sync_playlist_row(playlist_id)
+        dpg.set_item_callback(
+            "playlist_name_input",
+            name_input_callback,
+        )
 
-                    dpg.set_item_callback(
-                        "playlist_description_input",
-                        description_input_callback,
-                    )
+        def description_input_callback(sender, app_data):
+            self.pm.playlists[playlist_id].description = app_data
+            print(f"Renamed {playlist_id} to {app_data}")
+            self.touch_playlist(playlist_id)
+            self.sync_playlist_row(playlist_id)
 
-                def add_playlist_row(name: str):
-                    pl = self.pm.playlists[name]
-                    with dpg.child_window(tag=f"playlist_row_{name}", height=60):
-                        with dpg.group(horizontal=True):
-                            dpg.add_text(pl.name, tag=f"playlist_row_name_{name}")
-                        with dpg.group(horizontal=True):
+        dpg.set_item_callback(
+            "playlist_description_input",
+            description_input_callback,
+        )
 
-                            dpg.add_text(
-                                "placeholder",
-                                tag=f"playlist_track_count_{name}",
-                            )
-                            dpg.add_button(
-                                label="Pull",
-                                tag=f"pull_button_{name}",
-                                callback=lambda: self.add_job(JobType.PULL, name),
-                            )
-                            dpg.add_button(
-                                label="Search",
-                                tag=f"search_button_{name}",
-                                callback=lambda: self.add_job(JobType.SEARCH, name),
-                            )
-                            dpg.add_button(
-                                label="Push",
-                                tag=f"push_button_{name}",
-                                callback=lambda: self.add_job(JobType.PUSH, name),
-                            )
+    def add_placeholder_playlist_row(self, name: str):
+        pl = self.pm.playlists[name]
+        with dpg.child_window(
+            tag=f"playlist_row_{name}", height=60, parent="playlist_window"
+        ):
+            with dpg.group(horizontal=True):
+                dpg.add_text(pl.name, tag=f"playlist_row_name_{name}")
+            with dpg.group(horizontal=True):
+                dpg.add_text(
+                    "placeholder",
+                    tag=f"playlist_track_count_{name}",
+                )
+                dpg.add_button(
+                    label="Pull",
+                    tag=f"pull_button_{name}",
+                    callback=lambda: self.add_job(JobType.PULL, name),
+                )
+                dpg.add_button(
+                    label="Search",
+                    tag=f"search_button_{name}",
+                    callback=lambda: self.add_job(JobType.SEARCH, name),
+                )
+                dpg.add_button(
+                    label="Push",
+                    tag=f"push_button_{name}",
+                    callback=lambda: self.add_job(JobType.PUSH, name),
+                )
 
-                            dpg.add_button(
-                                label="Edit",
-                                tag=f"edit_button_{name}",
-                                callback=lambda: edit_playlist_row(name),
-                            )
+                dpg.add_button(
+                    label="Edit",
+                    tag=f"edit_button_{name}",
+                    callback=lambda: self.edit_playlist_row(name),
+                )
 
-                for playlist in self.pm.playlists:
-                    add_playlist_row(playlist)
-                    self.sync_playlist_row(playlist)
+    def sync_playlist_list(self):
+        """Remove all playlist rows and add them again."""
+        for playlist in self.pm.playlists:
+            # Delete row if it exists
+            if dpg.does_item_exist(f"playlist_row_{playlist}"):
+                dpg.delete_item(f"playlist_row_{playlist}")
+            self.add_placeholder_playlist_row(playlist)
+            self.sync_playlist_row(playlist)
 
     def sync_playlist_row(self, name: str):
         pl = self.pm.playlists[name]
