@@ -242,6 +242,8 @@ class GUI:
                         self.pm.add_playlist(playlist_id)
                         self.touch_playlist(playlist_id)
                         self.sync_playlist_list()
+                        # Open playlist edit window
+                        self.edit_playlist_row(playlist_id)
 
                     dpg.add_button(
                         label="Add Playlist",
@@ -267,6 +269,29 @@ class GUI:
                         multiline=True,
                     )
 
+                with dpg.window(
+                    tag="delete_playlist_window",
+                    modal=True,
+                    label="Delete Playlist",
+                    width=400,
+                    height=100,
+                    show=False,
+                    pos=(100, 200),
+                ):
+                    dpg.add_text(
+                        f"placeholder",
+                        tag="delete_playlist_text",
+                    )
+                    with dpg.group(horizontal=True):
+                        dpg.add_button(
+                            label="Yes",
+                            tag="delete_playlist_yes_button",
+                        ),
+                        dpg.add_button(
+                            label="No",
+                            tag="delete_playlist_no_button",
+                            callback=lambda: dpg.hide_item("delete_playlist_window"),
+                        )
         self.sync_playlist_list()
 
     def edit_playlist_row(self, playlist_id: str):
@@ -299,38 +324,44 @@ class GUI:
             description_input_callback,
         )
 
-    def add_placeholder_playlist_row(self, name: str):
-        pl = self.pm.playlists[name]
+    def add_placeholder_playlist_row(self, playlist_id: str):
+        pl = self.pm.playlists[playlist_id]
         with dpg.child_window(
-            tag=f"playlist_row_{name}", height=60, parent="playlist_window"
+            tag=f"playlist_row_{playlist_id}", height=60, parent="playlist_window"
         ):
             with dpg.group(horizontal=True):
-                dpg.add_text(pl.name, tag=f"playlist_row_name_{name}")
+                dpg.add_text(pl.name, tag=f"playlist_row_name_{playlist_id}")
             with dpg.group(horizontal=True):
                 dpg.add_text(
                     "placeholder",
-                    tag=f"playlist_track_count_{name}",
+                    tag=f"playlist_track_count_{playlist_id}",
                 )
                 dpg.add_button(
                     label="Pull",
-                    tag=f"pull_button_{name}",
-                    callback=lambda: self.add_job(JobType.PULL, name),
+                    tag=f"pull_button_{playlist_id}",
+                    callback=lambda: self.add_job(JobType.PULL, playlist_id),
                 )
                 dpg.add_button(
                     label="Search",
-                    tag=f"search_button_{name}",
-                    callback=lambda: self.add_job(JobType.SEARCH, name),
+                    tag=f"search_button_{playlist_id}",
+                    callback=lambda: self.add_job(JobType.SEARCH, playlist_id),
                 )
                 dpg.add_button(
                     label="Push",
-                    tag=f"push_button_{name}",
-                    callback=lambda: self.add_job(JobType.PUSH, name),
+                    tag=f"push_button_{playlist_id}",
+                    callback=lambda: self.add_job(JobType.PUSH, playlist_id),
                 )
 
                 dpg.add_button(
                     label="Edit",
-                    tag=f"edit_button_{name}",
-                    callback=lambda: self.edit_playlist_row(name),
+                    tag=f"edit_button_{playlist_id}",
+                    callback=lambda: self.edit_playlist_row(playlist_id),
+                )
+
+                dpg.add_button(
+                    label="Delete",
+                    tag=f"delete_button_{playlist_id}",
+                    callback=lambda: self.delete_playlist(playlist_id),
                 )
 
     def sync_playlist_list(self):
@@ -342,10 +373,36 @@ class GUI:
             self.add_placeholder_playlist_row(playlist)
             self.sync_playlist_row(playlist)
 
-    def sync_playlist_row(self, name: str):
-        pl = self.pm.playlists[name]
-        dpg.set_value(f"playlist_track_count_{name}", f"{len(pl.tracks)} tracks")
-        dpg.set_value(f"playlist_row_name_{name}", pl.name)
+    def sync_playlist_row(self, playlist_id: str):
+        pl = self.pm.playlists[playlist_id]
+        dpg.set_value(f"playlist_track_count_{playlist_id}", f"{len(pl.tracks)} tracks")
+        dpg.set_value(f"playlist_row_name_{playlist_id}", pl.name)
+
+    def delete_playlist(self, playlist_id: str):
+        dpg.show_item("delete_playlist_window")
+        dpg.set_value(
+            "delete_playlist_text",
+            f"Are you sure you want to delete {self.pm.playlists[playlist_id].name}?",
+        )
+
+        def delete_playlist_yes_callback():
+            self.pm.remove_playlist(playlist_id)
+            self.pm.save_index()
+            self.sync_playlist_list()
+            dpg.hide_item("delete_playlist_window")
+
+        dpg.set_item_callback(
+            "delete_playlist_yes_button",
+            delete_playlist_yes_callback,
+        )
+
+        def delete_playlist_no_callback():
+            dpg.hide_item("delete_playlist_window")
+
+        dpg.set_item_callback(
+            "delete_playlist_no_button",
+            delete_playlist_no_callback,
+        )
 
     ########################################
     # Services tab
