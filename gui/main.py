@@ -5,6 +5,7 @@ from appdirs import user_data_dir
 from pydantic import BaseModel
 from gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
+from unitunes.uri import PlaylistURIs, playlistURI_from_url
 
 dpg.create_context()
 dpg.create_viewport(title="Unitunes", width=600, height=600)
@@ -257,7 +258,7 @@ class GUI:
                     show=False,
                     label="Edit Playlist",
                     width=500,
-                    height=500,
+                    height=600,
                 ):
                     dpg.add_input_text(
                         tag="playlist_name_input",
@@ -267,7 +268,39 @@ class GUI:
                         tag="playlist_description_input",
                         label="Playlist Description",
                         multiline=True,
+                        height=50,
                     )
+                    with dpg.child_window(
+                        tag="add_playlist_url_window",
+                        label="Add Playlist URL",
+                        height=100,
+                    ):
+                        with dpg.group(horizontal=True):
+                            dpg.add_combo(
+                                tag="service_combo", label="Service", width=100
+                            )
+                            dpg.add_input_text(
+                                tag="playlist_url_input",
+                                hint="Playlist URL",
+                                width=200,
+                            )
+                            dpg.add_button(
+                                label="Add URL",
+                                tag="add_playlist_url_button_2",
+                            )
+
+                        with dpg.table(
+                            tag="uri_table",
+                            resizable=True,
+                            policy=dpg.mvTable_SizingStretchProp,
+                        ):
+                            dpg.add_table_column(
+                                label="Service",
+                                width_stretch=True,
+                                init_width_or_weight=0.5,
+                            )
+                            dpg.add_table_column(label="URL")
+                            dpg.add_table_column()  # Delete button
 
                 with dpg.window(
                     tag="delete_playlist_window",
@@ -322,6 +355,53 @@ class GUI:
         dpg.set_item_callback(
             "playlist_description_input",
             description_input_callback,
+        )
+
+        # Set up URI table
+        def delete_uri_callback(sender, app_data, user_data):
+            (service_name, uri) = user_data
+            print(f"Deleted {service_name} {uri}")
+            self.pm.playlists[playlist_id].remove_uri(service_name, uri)
+            self.touch_playlist(playlist_id)
+            self.edit_playlist_row(playlist_id)
+
+        # Delete current rows
+        rows: list[int] = dpg.get_item_children("uri_table", 1)  # type: ignore
+        for row in rows:
+            dpg.delete_item(row)
+
+        for service_name, uris in self.pm.playlists[playlist_id].uris.items():
+            service_type = self.pm.services[service_name].type
+            for uri in uris:
+                with dpg.table_row(parent="uri_table"):
+                    dpg.add_text(service_name)
+                    dpg.add_text(uri.url)
+                    dpg.add_button(
+                        label="Delete",
+                        callback=delete_uri_callback,
+                        tag=f"delete_uri_button_{service_name}_{uri.url}",
+                        user_data=(service_name, uri),
+                    )
+
+        dpg.set_value("playlist_url_input", "")
+        # Set up service combo
+        dpg.set_value("service_combo", "")
+        dpg.configure_item("service_combo", items=list(self.pm.services.keys()))
+
+        # Set up add playlist URL button
+        def add_playlist_url_callback(sender, app_data):
+            service_name = dpg.get_value("service_combo")
+            url = dpg.get_value("playlist_url_input")
+            if service_name and url:
+                self.pm.playlists[playlist_id].add_uri(
+                    service_name, playlistURI_from_url(url)
+                )
+                self.touch_playlist(playlist_id)
+                self.edit_playlist_row(playlist_id)
+
+        dpg.set_item_callback(
+            "add_playlist_url_button_2",
+            add_playlist_url_callback,
         )
 
     def add_placeholder_playlist_row(self, playlist_id: str):
