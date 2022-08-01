@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import webbrowser
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
@@ -13,6 +14,11 @@ dpg.create_viewport(title="Unitunes", width=600, height=600)
 
 class AppConfig(BaseModel):
     unitunes_dir: Path
+
+
+def hyperlink(url: str) -> None:
+    b = dpg.add_button(label=url, callback=lambda: webbrowser.open(url))
+    dpg.bind_item_theme(b, "hyperlinkTheme")
 
 
 class GUI:
@@ -60,7 +66,16 @@ class GUI:
         with open(config_path, "w") as f:
             f.write(self.app_config.json())
 
+    def init_themes(self):
+        with dpg.theme(tag="hyperlinkTheme"):
+            with dpg.theme_component(dpg.mvButton):
+                dpg.add_theme_color(dpg.mvThemeCol_Button, [0, 0, 0, 0])
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, [0, 0, 0, 0])
+                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, [29, 151, 236, 25])
+                dpg.add_theme_color(dpg.mvThemeCol_Text, [29, 151, 236])
+
     def main_window_setup(self):
+        self.init_themes()
         with dpg.window(label="Example Window", tag="Primary"):
             with dpg.tab_bar():
                 self.playlists_tab_setup()
@@ -375,7 +390,7 @@ class GUI:
             for uri in uris:
                 with dpg.table_row(parent="uri_table"):
                     dpg.add_text(service_name)
-                    dpg.add_text(uri.url)
+                    hyperlink(uri.url)
                     dpg.add_button(
                         label="Delete",
                         callback=delete_uri_callback,
