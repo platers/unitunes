@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 import time
 from typing import Any, List, Optional
+from pydantic import BaseModel
 from tqdm import tqdm
 from ytmusicapi import YTMusic
 from unitunes.playlist import PlaylistMetadata
@@ -9,12 +10,9 @@ from youtube_title_parse import get_artist_title
 
 
 from unitunes.services.services import (
-    Pushable,
-    Searchable,
+    ServiceConfig,
     ServiceWrapper,
     StreamingService,
-    TrackPullable,
-    UserPlaylistPullable,
     cache,
 )
 from unitunes.track import (
@@ -29,6 +27,10 @@ from unitunes.uri import (
     YtmPlaylistURI,
     YtmTrackURI,
 )
+
+
+class YtmConfig(BaseModel, ServiceConfig):
+    headers: str = ""
 
 
 class YtmWrapper(ServiceWrapper, ABC):
@@ -70,9 +72,13 @@ class YtmWrapper(ServiceWrapper, ABC):
 
 
 class YtmAPIWrapper(YtmWrapper):
-    def __init__(self, config_path: Path, cache_root: Path) -> None:
+    def __init__(self, config: YtmConfig, cache_root: Path) -> None:
         super().__init__("ytm", cache_root=cache_root)
-        self.ytm = YTMusic(config_path.__str__())
+        headers_path = (
+            cache_root / "ytm_headers.json"
+        )  # not the best place but convenient to code
+        YTMusic.setup(headers_raw=config.headers, filepath=str(headers_path))
+        self.ytm = YTMusic(str(headers_path))
 
     def get_playlist(self, *args, **kwargs):
         kwargs["limit"] = 100000  # probably no playlist this big
@@ -132,9 +138,12 @@ class YtmAPIWrapper(YtmWrapper):
 class YTM(StreamingService):
     wrapper: YtmWrapper
 
-    def __init__(self, name: str, wrapper: YtmWrapper) -> None:
-        super().__init__(name, ServiceType.YTM)
-        self.wrapper = wrapper
+    def __init__(self, name: str, config: YtmConfig, cache_root: Path) -> None:
+        super().__init__(name, ServiceType.YTM, cache_root)
+        self.load_config(config, cache_root)
+
+    def load_config(self, config: YtmConfig, cache_root: Path) -> None:
+        self.wrapper = YtmAPIWrapper(config, cache_root)
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         results = self.wrapper.get_library_playlists()

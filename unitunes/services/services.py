@@ -15,6 +15,10 @@ from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
 
 
+class ServiceConfig(ABC):
+    pass
+
+
 def cache(method):
     def wrapper(self, *args, use_cache=True, **kwargs):
         file_path = self.cache_path / f"{method.__name__}.json"
@@ -113,7 +117,14 @@ class StreamingService(ABC):
     name: str
     type: ServiceType
     wrapper: ServiceWrapper
+    config: ServiceConfig
+    cache_root: Path
 
-    def __init__(self, name: str, type: ServiceType) -> None:
+    def __init__(self, name: str, type: ServiceType, cache_root: Path) -> None:
         self.name = name
         self.type = type
+        self.cache_root = cache_root
+
+    @abstractmethod
+    def load_config(self, config: ServiceConfig) -> None:
+        """Loads the config for the service"""

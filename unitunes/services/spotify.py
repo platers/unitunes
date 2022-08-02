@@ -1,10 +1,13 @@
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any, List
+from pydantic import BaseModel
 import spotipy
 from spotipy import SpotifyOAuth
 from unitunes.playlist import PlaylistMetadata
 
 from unitunes.services.services import (
+    ServiceConfig,
     ServiceWrapper,
     StreamingService,
     cache,
@@ -16,6 +19,12 @@ from unitunes.uri import (
     SpotifyPlaylistURI,
     SpotifyTrackURI,
 )
+
+
+class SpotifyConfig(BaseModel, ServiceConfig):
+    client_id: str = ""
+    client_secret: str = ""
+    redirect_uri: str = ""
 
 
 class SpotifyWrapper(ServiceWrapper, ABC):
@@ -78,13 +87,16 @@ class SpotifyWrapper(ServiceWrapper, ABC):
 
 
 class SpotifyAPIWrapper(SpotifyWrapper):
-    def __init__(self, config, cache_root) -> None:
+    def __init__(self, config: SpotifyConfig, cache_root) -> None:
         super().__init__("spotify", cache_root=cache_root)
+        self.init_config(config)
+
+    def init_config(self, config: SpotifyConfig) -> None:
         self.sp = spotipy.Spotify(
             auth_manager=SpotifyOAuth(
-                client_id=config["client_id"],
-                client_secret=config["client_secret"],
-                redirect_uri=config["redirect_uri"],
+                client_id=config.client_id,
+                client_secret=config.client_secret,
+                redirect_uri=config.redirect_uri,
                 scope="user-library-read playlist-modify-private, playlist-modify-public, user-library-modify",
             )
         )
@@ -156,10 +168,15 @@ class SpotifyAPIWrapper(SpotifyWrapper):
 
 class SpotifyService(StreamingService):
     wrapper: SpotifyWrapper
+    config: SpotifyConfig
 
-    def __init__(self, name: str, wrapper: SpotifyWrapper) -> None:
-        super().__init__(name, ServiceType.SPOTIFY)
-        self.wrapper = wrapper
+    def __init__(self, name: str, config: SpotifyConfig, cache_root: Path) -> None:
+        super().__init__(name, ServiceType.SPOTIFY, cache_root)
+        self.load_config(config)
+
+    def load_config(self, config: SpotifyConfig) -> None:
+        self.config = config
+        self.wrapper = SpotifyAPIWrapper(config, self.cache_root)
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         results = self.wrapper.current_user_playlists()

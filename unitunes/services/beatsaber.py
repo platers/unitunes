@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, List
+from platformdirs import user_documents_dir
 
 from pydantic import BaseModel
 from unitunes.file_manager import format_filename
@@ -8,6 +9,7 @@ from unitunes.playlist import Playlist, PlaylistMetadata
 import requests
 
 from unitunes.services.services import (
+    ServiceConfig,
     ServiceWrapper,
     StreamingService,
     cache,
@@ -19,6 +21,18 @@ from unitunes.uri import (
     BeatsaberTrackURI,
     PlaylistURI,
 )
+
+
+class BeatsaberSearchConfig(BaseModel):
+    minNps: int = 0
+    maxNps: int = 1000
+    minRating: float = 0.51
+    sortOrder: str = "Relevance"
+
+
+class BeatsaberConfig(BaseModel, ServiceConfig):
+    dir: Path = Path(user_documents_dir()) / "Beatsaber"
+    search_config: BeatsaberSearchConfig = BeatsaberSearchConfig()
 
 
 class BeatsaverAPIWrapper(ServiceWrapper):
@@ -58,19 +72,15 @@ class BPList(BaseModel):
 class BeatsaberService(StreamingService):
     # Tracks are online at beatsaver.com, playlists are local .bplist files
     wrapper: BeatsaverAPIWrapper
-    search_config = {}
-    dir: Path
+    config: BeatsaberConfig
 
-    def __init__(self, name: str, wrapper: BeatsaverAPIWrapper, config) -> None:
-        super().__init__(name, ServiceType.BEATSABER)
-        self.wrapper = wrapper
+    def __init__(self, name: str, config: BeatsaberConfig, cache_root: Path) -> None:
+        super().__init__(name, ServiceType.BEATSABER, cache_root)
+        self.wrapper = BeatsaverAPIWrapper(cache_root)
+        self.load_config(config)
 
-        if "dir" not in config:
-            raise ValueError("No beatsaber directory specified")
-        self.dir = Path(config["dir"])
-
-        if "search_config" in config:
-            self.search_config = config["search_config"]
+    def load_config(self, config: BeatsaberConfig) -> None:
+        self.config = config
 
     def pull_track(self, uri: BeatsaberTrackURI) -> Track:
         res = self.wrapper.map(uri.uri)
@@ -86,7 +96,7 @@ class BeatsaberService(StreamingService):
         results = self.wrapper.search(
             query,
             0,
-            search_config=self.search_config,
+            search_config=self.config.search_config.dict(),
         )
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
@@ -101,7 +111,7 @@ class BeatsaberService(StreamingService):
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         # find .bplist files in the beatsaber directory
         playlists = []
-        for file in self.dir.iterdir():
+        for file in self.config.dir.iterdir():
             if file.suffix == ".bplist":
                 bp = BPList.parse_file(file)
                 playlists.append(
@@ -115,17 +125,17 @@ class BeatsaberService(StreamingService):
         return playlists
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        bp = BPList.parse_file(self.dir / (uri.uri))
+        bp = BPList.parse_file(self.config.dir / (uri.uri))
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
     def write_bplist(self, playlist_uri: BeatsaberPlaylistURI, bp: BPList) -> None:
-        with (self.dir / (playlist_uri.uri)).open("w") as f:
+        with (self.config.dir / (playlist_uri.uri)).open("w") as f:
             f.write(bp.json(indent=4))
 
     def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
-        return BPList.parse_file(self.dir / (playlist_uri.uri))
+        return BPList.parse_file(self.config.dir / (playlist_uri.uri))
 
     def create_playlist(
         self, title: str, description: str = ""

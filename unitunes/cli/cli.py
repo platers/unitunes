@@ -22,20 +22,17 @@ from rich.console import Console
 from rich.table import Table
 from unitunes.cli.service_cli import service_app
 from unitunes.matcher import DefaultMatcherStrategy, MatcherStrategy
-from unitunes.playlist import Playlist
 from unitunes.searcher import DefaultSearcherStrategy
 from unitunes.services.services import (
-    Checkable,
     PlaylistPullable,
     Pushable,
     Searchable,
-    StreamingService,
     UserPlaylistPullable,
 )
 from unitunes.track import Track
 
 from unitunes.types import ServiceType
-from unitunes.uri import PlaylistURIs, TrackURIs, playlistURI_from_url
+from unitunes.uri import playlistURI_from_url
 
 
 console = Console()

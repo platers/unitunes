@@ -6,6 +6,7 @@ from appdirs import user_data_dir
 from pydantic import BaseModel
 from gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
+from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURIs, playlistURI_from_url
 
 dpg.create_context()
@@ -513,11 +514,45 @@ class GUI:
                             label=service_name, tag=f"service_tab_{service_name}"
                         ):
                             with dpg.child_window(tag=f"service_window_{service_name}"):
-                                dpg.add_text(service_name)
+                                service = self.pm.services[service_name]
+                                if service.type == ServiceType.SPOTIFY:
 
-                    for service_name in self.pm.services:
-                        add_service_tab(service_name)
-                    dpg.add_tab(label="+", tag="add_service_tab")
+                                    def sync_spotify_service_callback():
+                                        service = self.pm.services[service_name]
+                                        assert service.type == ServiceType.SPOTIFY
+                                        # service.wrapper
+
+                                    dpg.add_input_text(
+                                        label="SPOTIPY_CLIENT_ID",
+                                        tag=f"spotify_client_id_input_{service_name}",
+                                        callback=sync_spotify_service_callback,
+                                    )
+                                    dpg.add_input_text(
+                                        label="SPOTIPY_CLIENT_SECRET",
+                                        tag=f"spotify_client_secret_input_{service_name}",
+                                    )
+                                    dpg.add_input_text(
+                                        label="SPOTIPY_REDIRECT_URI",
+                                        tag=f"spotify_redirect_uri_input_{service_name}",
+                                    )
+                                elif service.type == ServiceType.YTM:
+                                    dpg.add_input_text(
+                                        label="Headers",
+                                        tag=f"ytm_headers_input_{service_name}",
+                                        multiline=True,
+                                    )
+
+                    def load_service_tabs():
+                        # Delete current tabs
+                        tabs: list[str] = dpg.get_item_children("services_tab_bar", 1)  # type: ignore
+                        for tab in tabs:
+                            dpg.delete_item(tab)
+                        # Add tabs
+                        for service_name in self.pm.services:
+                            add_service_tab(service_name)
+                        dpg.add_tab(label="+", tag="add_service_tab")
+
+                    load_service_tabs()
 
 
 gui = GUI()

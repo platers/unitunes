@@ -32,9 +32,10 @@ from unitunes.services.services import (
 
 from unitunes.services.spotify import (
     SpotifyAPIWrapper,
+    SpotifyConfig,
     SpotifyService,
 )
-from unitunes.services.ytm import YTM, YtmAPIWrapper
+from unitunes.services.ytm import YTM, YtmAPIWrapper, YtmConfig
 from unitunes.track import Track
 from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURIs, TrackURI, TrackURIs
@@ -49,17 +50,18 @@ def service_factory(
 
     if service_type == ServiceType.SPOTIFY:
         assert config_path is not None
-        index = json.load(config_path.open())
-        return SpotifyService(name, SpotifyAPIWrapper(index, cache_path))
+        config = SpotifyConfig.parse_file(config_path)
+        return SpotifyService(name, config, cache_path)
     elif service_type == ServiceType.YTM:
         assert config_path is not None
-        return YTM(name, YtmAPIWrapper(config_path, cache_path))
+        config = YtmConfig.parse_file(config_path)
+        return YTM(name, config, cache_path)
     elif service_type == ServiceType.MB:
-        return MusicBrainz(MusicBrainzWrapper(cache_path))
+        return MusicBrainz(cache_path)
     elif service_type == ServiceType.BEATSABER:
         assert config_path is not None
         config = json.load(config_path.open())
-        return BeatsaberService(name, BeatsaverAPIWrapper(cache_path), config)
+        return BeatsaberService(name, config, cache_path)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 

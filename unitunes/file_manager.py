@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 import string
 
 from unitunes.index import Index
 from unitunes.playlist import Playlist
+from unitunes.services.services import ServiceConfig
 
 
 def format_filename(s):
@@ -22,15 +24,16 @@ class FileManager:
     index_path: Path
     playlist_folder: Path
     cache_path: Path
+    service_configs_path: Path
 
     def __init__(self, dir: Path) -> None:
         self.dir = dir
         self.index_path = dir / "index.json"
         self.playlist_folder = dir / "playlists"
         self.cache_path = dir / "cache"
+        self.service_configs_path = dir / "service_configs"
 
     def get_playlist_path(self, name: str) -> Path:
-
         return self.playlist_folder / f"{format_filename(name)}.json"
 
     def make_playlist_dir(self) -> None:
@@ -60,3 +63,8 @@ class FileManager:
         if not path.exists():
             raise FileNotFoundError(f"Playlist file not found: {path}")
         path.unlink()
+
+    def save_service_config(self, service_name: str, config: ServiceConfig) -> None:
+        path = self.service_configs_path / f"{service_name}.json"
+        with open(path, "w") as f:
+            f.write(json.dumps(config, indent=4))

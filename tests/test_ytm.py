@@ -3,59 +3,16 @@ from typing import Any, List
 
 import pytest
 from unitunes.services.services import cache
-from unitunes.services.ytm import YTM, YtmAPIWrapper, YtmWrapper
+from unitunes.services.ytm import YTM, YtmAPIWrapper, YtmConfig, YtmWrapper
 from unitunes.uri import YtmTrackURI
 
 from tests.conftest import cache_path
 
 
-class YtmLocalWrapper(YtmWrapper):
-    def __init__(self, cache_root):
-        super().__init__("ytm", cache_root=cache_root)
-
-    @cache
-    def get_playlist(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
-
-    @cache
-    def get_song(self, *args, use_cache=True, **kwargs) -> Any:
-        raise NotImplementedError
-
-    @cache
-    def search(self, *args, use_cache=True, **kwargs) -> Any:
-        raise NotImplementedError
-
-    def create_playlist(self, title: str, description: str = "") -> str:
-        raise NotImplementedError
-
-    def edit_title(self, playlist_id: str, title: str) -> None:
-        raise NotImplementedError
-
-    def edit_description(self, playlist_id: str, description: str) -> None:
-        raise NotImplementedError
-
-    def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
-        raise NotImplementedError
-
-    def remove_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
-        raise NotImplementedError
-
-    def get_library_playlists(self, *args, **kwargs) -> Any:
-        raise NotImplementedError
-
-
 @pytest.fixture(scope="module")
-def ytm_wrapper(pytestconfig):
-    ytm_config_path = pytestconfig.getoption("ytm")
-    if not ytm_config_path:
-        return YtmLocalWrapper(cache_path)
-    else:
-        return YtmAPIWrapper(ytm_config_path, cache_path)
-
-
-@pytest.fixture(scope="module")
-def ytm_service(ytm_wrapper):
-    return YTM("ytmtest", ytm_wrapper)
+def ytm_service(pytestconfig):
+    config_path = pytestconfig.getoption("ytm", skip=True)
+    return YTM("ytmtest", YtmConfig.parse_file(config_path), cache_path)
 
 
 def test_ytm_can_pull_track(ytm_service):
