@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
 from unitunes.index import IndexServiceEntry
-from unitunes.services.beatsaber import BeatsaberConfig
+from unitunes.services.beatsaber import BeatsaberConfig, BeatsaberSearchConfig
 from unitunes.services.spotify import SpotifyConfig
 from unitunes.services.ytm import YtmConfig
 from unitunes.types import ServiceType
@@ -645,7 +645,75 @@ class GUI:
                                         callback=sync_ytm_service_callback,
                                     )
                                 elif service_entry.service == ServiceType.BEATSABER:
-                                    pass
+
+                                    def sync_beatsaber_service_callback():
+                                        self.pm.file_manager.save_service_config(
+                                            service_name,
+                                            BeatsaberConfig(
+                                                dir=Path(
+                                                    dpg.get_item_label(
+                                                        f"beatsaber_dir_button_{service_name}",
+                                                    )  # type: ignore
+                                                ),
+                                                search_config=BeatsaberSearchConfig(
+                                                    minNps=dpg.get_value(
+                                                        f"beatsaber_min_nps_input_{service_name}",
+                                                    ),
+                                                    maxNps=dpg.get_value(
+                                                        f"beatsaber_max_nps_input_{service_name}",
+                                                    ),
+                                                    minRating=dpg.get_value(
+                                                        f"beatsaber_min_rating_input_{service_name}",
+                                                    ),
+                                                ),
+                                            ),
+                                        )
+                                        sync_service_tab(service_entry)
+
+                                    def add_beatsaber_dir_callback(sender, app_data):
+                                        dpg.set_item_label(
+                                            f"beatsaber_dir_button_{service_name}",
+                                            app_data["current_path"],
+                                        )
+
+                                    dpg.add_file_dialog(
+                                        label="Beat Saber Playlist Directory",
+                                        tag=f"beatsaber_dir_input_{service_name}",
+                                        width=400,
+                                        height=400,
+                                        show=False,
+                                        directory_selector=True,
+                                        callback=add_beatsaber_dir_callback,
+                                    )
+                                    with dpg.group(horizontal=True):
+                                        dpg.add_text(
+                                            "Beatsaber Playlist Directory: ",
+                                        )
+                                        dpg.add_button(
+                                            label="placeholder",
+                                            tag=f"beatsaber_dir_button_{service_name}",
+                                            callback=lambda: dpg.show_item(
+                                                f"beatsaber_dir_input_{service_name}"
+                                            ),
+                                        )
+                                    dpg.add_input_int(
+                                        label="Min Notes per Second",
+                                        tag=f"beatsaber_min_nps_input_{service_name}",
+                                    )
+                                    dpg.add_input_int(
+                                        label="Max Notes per Second",
+                                        tag=f"beatsaber_max_nps_input_{service_name}",
+                                    )
+                                    dpg.add_input_float(
+                                        label="Min Rating",
+                                        tag=f"beatsaber_min_rating_input_{service_name}",
+                                    )
+
+                                    dpg.add_button(
+                                        label="Save",
+                                        tag=f"beatsaber_save_button_{service_name}",
+                                        callback=sync_beatsaber_service_callback,
+                                    )
 
                                 def delete_service_callback():
                                     self.pm.remove_service(service_name)
@@ -700,7 +768,29 @@ class GUI:
                                 config.headers,
                             )
                         elif service_entry.service == ServiceType.BEATSABER:
-                            pass
+                            config = BeatsaberConfig.parse_file(
+                                service_entry.config_path
+                            )
+                            dpg.set_item_label(
+                                f"beatsaber_dir_button_{service_entry.name}",
+                                str(config.dir),
+                            )
+                            dpg.set_value(
+                                f"beatsaber_min_nps_input_{service_entry.name}",
+                                config.search_config.minNps,
+                            )
+                            dpg.set_value(
+                                f"beatsaber_max_nps_input_{service_entry.name}",
+                                config.search_config.maxNps,
+                            )
+                            dpg.set_value(
+                                f"beatsaber_min_rating_input_{service_entry.name}",
+                                config.search_config.minRating,
+                            )
+                        else:
+                            raise Exception(
+                                f"Unknown service type {service_entry.service}"
+                            )
 
                     def load_service_tabs():
                         # Delete current tabs
