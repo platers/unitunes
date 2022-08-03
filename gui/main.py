@@ -600,6 +600,9 @@ class GUI:
                                         )
                                         sync_service_tab(service_entry)
 
+                                    hyperlink(
+                                        "https://spotipy.readthedocs.io/en/2.19.0/#getting-started"
+                                    )
                                     dpg.add_input_text(
                                         label="SPOTIPY_CLIENT_ID",
                                         tag=f"spotify_client_id_input_{service_name}",

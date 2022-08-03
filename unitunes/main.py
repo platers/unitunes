@@ -17,6 +17,7 @@ from unitunes.pull_playlist import (
 )
 from unitunes.searcher import DefaultSearcherStrategy, SearcherStrategy
 from unitunes.services.beatsaber import (
+    BeatsaberConfig,
     BeatsaberService,
     BeatsaverAPIWrapper,
 )
@@ -61,7 +62,7 @@ def service_factory(
         return MusicBrainz(cache_path)
     elif service_type == ServiceType.BEATSABER:
         assert config_path is not None
-        config = json.load(config_path.open())
+        config = BeatsaberConfig.parse_file(config_path)
         return BeatsaberService(name, config, cache_path)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
