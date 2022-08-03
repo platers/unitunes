@@ -584,13 +584,25 @@ class GUI:
                                 if service_entry.service == ServiceType.SPOTIFY:
 
                                     def sync_spotify_service_callback():
-                                        # service.wrapper
-                                        pass
+                                        self.pm.file_manager.save_service_config(
+                                            service_name,
+                                            SpotifyConfig(
+                                                client_id=dpg.get_value(
+                                                    f"spotify_client_id_input_{service_name}",
+                                                ),
+                                                client_secret=dpg.get_value(
+                                                    f"spotify_client_secret_input_{service_name}",
+                                                ),
+                                                redirect_uri=dpg.get_value(
+                                                    f"spotify_redirect_uri_input_{service_name}",
+                                                ),
+                                            ),
+                                        )
+                                        sync_service_tab(service_entry)
 
                                     dpg.add_input_text(
                                         label="SPOTIPY_CLIENT_ID",
                                         tag=f"spotify_client_id_input_{service_name}",
-                                        callback=sync_spotify_service_callback,
                                     )
                                     dpg.add_input_text(
                                         label="SPOTIPY_CLIENT_SECRET",
@@ -599,6 +611,11 @@ class GUI:
                                     dpg.add_input_text(
                                         label="SPOTIPY_REDIRECT_URI",
                                         tag=f"spotify_redirect_uri_input_{service_name}",
+                                    )
+                                    dpg.add_button(
+                                        label="Save",
+                                        tag=f"spotify_save_button_{service_name}",
+                                        callback=sync_spotify_service_callback,
                                     )
                                 elif service_entry.service == ServiceType.YTM:
 
@@ -613,10 +630,18 @@ class GUI:
                                         )
                                         sync_service_tab(service_entry)
 
+                                    hyperlink(
+                                        "https://ytmusicapi.readthedocs.io/en/latest/setup.html#copy-authentication-headers"
+                                    )
+
                                     dpg.add_input_text(
                                         label="Headers",
                                         tag=f"ytm_headers_input_{service_name}",
                                         multiline=True,
+                                    )
+                                    dpg.add_button(
+                                        label="Save",
+                                        tag=f"ytm_save_button_{service_name}",
                                         callback=sync_ytm_service_callback,
                                     )
                                 elif service_entry.service == ServiceType.BEATSABER:
@@ -646,6 +671,7 @@ class GUI:
 
                     def sync_service_tab(service_entry: IndexServiceEntry):
                         # Check if service is properly initialized
+                        print(f"Syncing service tab {service_entry.name}")
                         self.pm.load_services()
                         if service_entry.name in self.pm.services:
                             dpg.hide_item(f"service_failed_text_{service_entry.name}")
@@ -653,7 +679,20 @@ class GUI:
                             dpg.show_item(f"service_failed_text_{service_entry.name}")
 
                         if service_entry.service == ServiceType.SPOTIFY:
-                            pass
+                            config = SpotifyConfig.parse_file(service_entry.config_path)
+                            print(service_entry.config_path)
+                            dpg.set_value(
+                                f"spotify_client_id_input_{service_entry.name}",
+                                config.client_id,
+                            )
+                            dpg.set_value(
+                                f"spotify_client_secret_input_{service_entry.name}",
+                                config.client_secret,
+                            )
+                            dpg.set_value(
+                                f"spotify_redirect_uri_input_{service_entry.name}",
+                                config.redirect_uri,
+                            )
                         elif service_entry.service == ServiceType.YTM:
                             config = YtmConfig.parse_file(service_entry.config_path)
                             dpg.set_value(

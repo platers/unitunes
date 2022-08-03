@@ -65,7 +65,9 @@ class FileManager:
         path.unlink()
 
     def service_config_path(self, service_name: str) -> Path:
-        return self.service_configs_path / f"{format_filename(service_name)}.json"
+        return (
+            self.service_configs_path / f"{format_filename(service_name)}_config.json"
+        )
 
     def save_service_config(self, service_name: str, config: ServiceConfig) -> None:
         path = self.service_config_path(service_name)

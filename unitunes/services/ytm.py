@@ -30,7 +30,7 @@ from unitunes.uri import (
 
 
 class YtmConfig(ServiceConfig):
-    headers: str = "Paste your headers here"
+    headers: str = "accept: */*\naccept-encoding: ... Paste your headers here ..."
 
 
 class YtmWrapper(ServiceWrapper, ABC):

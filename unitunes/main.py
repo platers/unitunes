@@ -91,6 +91,7 @@ class PlaylistManager:
             "MusicBrainz",
             cache_path=self.file_manager.cache_path,
         )
+        self.services = {}
         for s in self.index.services.values():
             service_config_path = Path(s.config_path)
             try:
