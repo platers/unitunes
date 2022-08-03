@@ -117,3 +117,6 @@ class Engine:
 
     def get_job(self, job_id: int) -> Job:
         return self._jobs[job_id]
+
+    def jobs(self) -> list[Job]:
+        return list(self._jobs.values())

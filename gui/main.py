@@ -93,7 +93,7 @@ class GUI:
     ########################################
 
     def jobs_tab_setup(self):
-        with dpg.tab(label="Jobs"):
+        with dpg.tab(label="Jobs", tag="jobs_tab"):
             with dpg.child_window(tag="jobs_window"):
 
                 def clear_completed_jobs():
@@ -149,6 +149,14 @@ class GUI:
             dpg.set_value(f"job_progress_text_{job_id}", "")
 
         self.touch_playlist(job.playlist_name)
+
+        # update job count in tab label
+        active_jobs = [
+            j
+            for j in self.engine.jobs()
+            if j.status == JobStatus.PENDING or j.status == JobStatus.RUNNING
+        ]
+        dpg.set_item_label("jobs_tab", f"Jobs ({len(active_jobs)})")
 
     def add_job(self, job_type: JobType, playlist: str):
         job_id = self.engine.push_job(
@@ -211,22 +219,38 @@ class GUI:
     def playlists_tab_setup(self):
         with dpg.tab(label="Playlists"):
             with dpg.child_window(tag="playlist_window"):
-                with dpg.group(horizontal=True):
 
-                    def save_changes_callback():
-                        self.pm.save_index()
-                        for playlist_name in self.touched_playlists:
-                            self.pm.save_playlist(playlist_name)
-                        self.touched_playlists.clear()
-                        dpg.hide_item("save_changes_button")
+                def save_changes_callback():
+                    self.pm.save_index()
+                    for playlist_name in self.touched_playlists:
+                        self.pm.save_playlist(playlist_name)
+                    self.touched_playlists.clear()
+                    dpg.hide_item("save_changes_button")
 
-                    # Red button
-                    dpg.add_button(
-                        label="Save Changes",
-                        tag="save_changes_button",
-                        show=False,
-                        callback=save_changes_callback,
+                dpg.add_button(
+                    label="Save Changes",
+                    tag="save_changes_button",
+                    show=False,
+                    callback=save_changes_callback,
+                )
+
+                def add_playlist_callback():
+                    playlist_id = (
+                        f"New Playlist {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     )
+                    self.pm.add_playlist(playlist_id)
+                    self.touch_playlist(playlist_id)
+                    self.sync_playlist_list()
+                    # Open playlist edit window
+                    self.edit_playlist_row(playlist_id)
+
+                dpg.add_button(
+                    label="Add Playlist",
+                    tag="add_playlist_button",
+                    callback=add_playlist_callback,
+                )
+
+                with dpg.group(horizontal=True):
 
                     def pull_all_callback():
                         for playlist in self.pm.playlists:
@@ -256,20 +280,6 @@ class GUI:
                         label="Push All",
                         tag="push_all_button",
                         callback=push_all_callback,
-                    )
-
-                    def add_playlist_callback():
-                        playlist_id = f"New Playlist {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                        self.pm.add_playlist(playlist_id)
-                        self.touch_playlist(playlist_id)
-                        self.sync_playlist_list()
-                        # Open playlist edit window
-                        self.edit_playlist_row(playlist_id)
-
-                    dpg.add_button(
-                        label="Add Playlist",
-                        tag="add_playlist_button",
-                        callback=add_playlist_callback,
                     )
 
                 with dpg.window(
