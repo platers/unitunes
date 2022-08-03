@@ -6,6 +6,10 @@ from appdirs import user_data_dir
 from pydantic import BaseModel
 from gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
+from unitunes.index import IndexServiceEntry
+from unitunes.services.beatsaber import BeatsaberConfig
+from unitunes.services.spotify import SpotifyConfig
+from unitunes.services.ytm import YtmConfig
 from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURIs, playlistURI_from_url
 
@@ -507,20 +511,81 @@ class GUI:
     def services_tab_setup(self):
         with dpg.tab(label="Services"):
             with dpg.child_window(tag="services_window"):
+                with dpg.group(horizontal=True):
+
+                    def create_service_callback(type: ServiceType):
+                        if type == ServiceType.SPOTIFY:
+                            config = SpotifyConfig()
+                        elif type == ServiceType.YTM:
+                            config = YtmConfig()
+                        elif type == ServiceType.BEATSABER:
+                            config = BeatsaberConfig()
+                        else:
+                            raise ValueError(f"Unknown service type {type}")
+
+                        name = dpg.get_value("service_name_input")
+                        if not name:
+                            return
+                        fm = self.pm.file_manager
+                        fm.save_service_config(name, config)
+                        self.pm.add_service(type, fm.service_config_path(name), name)
+                        self.pm.save_index()
+                        load_service_tabs()
+
+                    dpg.add_input_text(
+                        tag="service_name_input", width=200, hint="New Service Name"
+                    )
+                    dpg.add_button(
+                        label="Add Spotify",
+                        tag="add_spotify_button",
+                        callback=lambda: create_service_callback(ServiceType.SPOTIFY),
+                    )
+                    dpg.add_button(
+                        label="Add YouTube",
+                        tag="add_youtube_button",
+                        callback=lambda: create_service_callback(ServiceType.YTM),
+                    )
+                    dpg.add_button(
+                        label="Add Beatsaber",
+                        tag="add_beatsaber_button",
+                        callback=lambda: create_service_callback(ServiceType.BEATSABER),
+                    )
+                    with dpg.window(
+                        tag=f"delete_service_popup",
+                        popup=True,
+                        show=False,
+                    ):
+                        dpg.add_text("Are you sure you want to delete this service?")
+                        with dpg.group(horizontal=True):
+                            dpg.add_button(
+                                label="Yes",
+                                tag=f"delete_service_yes_button",
+                            )
+                            dpg.add_button(
+                                label="No",
+                                tag=f"delete_service_no_button",
+                            )
                 with dpg.tab_bar(tag="services_tab_bar"):
 
-                    def add_service_tab(service_name: str):
+                    def add_service_tab(service_entry: IndexServiceEntry):
+                        service_name = service_entry.name
+                        print(f"Adding service tab {service_name}")
                         with dpg.tab(
-                            label=service_name, tag=f"service_tab_{service_name}"
+                            label=service_name,
+                            tag=f"service_tab_{service_name}",
+                            parent="services_tab_bar",
                         ):
                             with dpg.child_window(tag=f"service_window_{service_name}"):
-                                service = self.pm.services[service_name]
-                                if service.type == ServiceType.SPOTIFY:
+                                dpg.add_text(
+                                    "Failed to initialize service. Please fix the configuration.",
+                                    tag=f"service_failed_text_{service_name}",
+                                )
+
+                                if service_entry.service == ServiceType.SPOTIFY:
 
                                     def sync_spotify_service_callback():
-                                        service = self.pm.services[service_name]
-                                        assert service.type == ServiceType.SPOTIFY
                                         # service.wrapper
+                                        pass
 
                                     dpg.add_input_text(
                                         label="SPOTIPY_CLIENT_ID",
@@ -535,12 +600,68 @@ class GUI:
                                         label="SPOTIPY_REDIRECT_URI",
                                         tag=f"spotify_redirect_uri_input_{service_name}",
                                     )
-                                elif service.type == ServiceType.YTM:
+                                elif service_entry.service == ServiceType.YTM:
+
+                                    def sync_ytm_service_callback():
+                                        self.pm.file_manager.save_service_config(
+                                            service_name,
+                                            YtmConfig(
+                                                headers=dpg.get_value(
+                                                    f"ytm_headers_input_{service_name}"
+                                                )
+                                            ),
+                                        )
+                                        sync_service_tab(service_entry)
+
                                     dpg.add_input_text(
                                         label="Headers",
                                         tag=f"ytm_headers_input_{service_name}",
                                         multiline=True,
+                                        callback=sync_ytm_service_callback,
                                     )
+                                elif service_entry.service == ServiceType.BEATSABER:
+                                    pass
+
+                                def delete_service_callback():
+                                    self.pm.remove_service(service_name)
+                                    self.pm.save_index()
+                                    load_service_tabs()
+                                    dpg.hide_item(f"delete_service_popup")
+
+                                dpg.add_button(
+                                    label="Delete",
+                                    tag=f"delete_service_button_{service_name}",
+                                    callback=lambda: dpg.show_item(
+                                        "delete_service_popup"
+                                    ),
+                                )
+                                dpg.set_item_callback(
+                                    "delete_service_yes_button",
+                                    delete_service_callback,
+                                )
+                                dpg.set_item_callback(
+                                    "delete_service_no_button",
+                                    lambda: dpg.hide_item("delete_service_popup"),
+                                )
+
+                    def sync_service_tab(service_entry: IndexServiceEntry):
+                        # Check if service is properly initialized
+                        self.pm.load_services()
+                        if service_entry.name in self.pm.services:
+                            dpg.hide_item(f"service_failed_text_{service_entry.name}")
+                        else:
+                            dpg.show_item(f"service_failed_text_{service_entry.name}")
+
+                        if service_entry.service == ServiceType.SPOTIFY:
+                            pass
+                        elif service_entry.service == ServiceType.YTM:
+                            config = YtmConfig.parse_file(service_entry.config_path)
+                            dpg.set_value(
+                                f"ytm_headers_input_{service_entry.name}",
+                                config.headers,
+                            )
+                        elif service_entry.service == ServiceType.BEATSABER:
+                            pass
 
                     def load_service_tabs():
                         # Delete current tabs
@@ -548,9 +669,9 @@ class GUI:
                         for tab in tabs:
                             dpg.delete_item(tab)
                         # Add tabs
-                        for service_name in self.pm.services:
-                            add_service_tab(service_name)
-                        dpg.add_tab(label="+", tag="add_service_tab")
+                        for service_entry in self.pm.index.services.values():
+                            add_service_tab(service_entry)
+                            sync_service_tab(service_entry)
 
                     load_service_tabs()
 

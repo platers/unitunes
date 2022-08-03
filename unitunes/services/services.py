@@ -8,6 +8,8 @@ from typing import (
     Protocol,
     runtime_checkable,
 )
+
+from pydantic import BaseModel
 from unitunes.playlist import PlaylistMetadata
 from unitunes.track import Track
 
@@ -15,7 +17,7 @@ from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
 
 
-class ServiceConfig(ABC):
+class ServiceConfig(ABC, BaseModel):
     pass
 
 

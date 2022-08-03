@@ -64,7 +64,16 @@ class FileManager:
             raise FileNotFoundError(f"Playlist file not found: {path}")
         path.unlink()
 
+    def service_config_path(self, service_name: str) -> Path:
+        return self.service_configs_path / f"{format_filename(service_name)}.json"
+
     def save_service_config(self, service_name: str, config: ServiceConfig) -> None:
-        path = self.service_configs_path / f"{service_name}.json"
+        path = self.service_config_path(service_name)
         with open(path, "w") as f:
-            f.write(json.dumps(config, indent=4))
+            f.write(config.json(indent=4))
+
+    def delete_service_config(self, service_name: str) -> None:
+        path = self.service_config_path(service_name)
+        if not path.exists():
+            raise FileNotFoundError(f"Service config file not found: {path}")
+        path.unlink()

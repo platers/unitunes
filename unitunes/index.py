@@ -1,10 +1,12 @@
 from pydantic import BaseModel
 from typing import Dict, List
 
+from unitunes.types import ServiceType
+
 
 class IndexServiceEntry(BaseModel):
     name: str
-    service: str
+    service: ServiceType
     config_path: str
 
 
@@ -21,7 +23,7 @@ class Index(BaseModel):
             raise ValueError(f"Playlist {playlist_id} already exists")
         self.playlists.append(playlist_id)
 
-    def add_service(self, name: str, service: str, config_path: str):
+    def add_service(self, name: str, service: ServiceType, config_path: str):
         if name in self.services:
             raise ValueError(f"Service {name} already exists")
         self.services[name] = IndexServiceEntry(

@@ -30,7 +30,7 @@ class BeatsaberSearchConfig(BaseModel):
     sortOrder: str = "Relevance"
 
 
-class BeatsaberConfig(BaseModel, ServiceConfig):
+class BeatsaberConfig(ServiceConfig):
     dir: Path = Path(user_documents_dir()) / "Beatsaber"
     search_config: BeatsaberSearchConfig = BeatsaberSearchConfig()
 

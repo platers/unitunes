@@ -25,6 +25,7 @@ from unitunes.services.services import (
     PlaylistPullable,
     Pushable,
     Searchable,
+    ServiceConfig,
     StreamingService,
     TrackPullable,
 )
@@ -92,26 +93,27 @@ class PlaylistManager:
         )
         for s in self.index.services.values():
             service_config_path = Path(s.config_path)
-            self.services[s.name] = service_factory(
-                ServiceType(s.service),
-                s.name,
-                config_path=service_config_path,
-                cache_path=self.file_manager.cache_path,
-            )
+            try:
+                self.services[s.name] = service_factory(
+                    s.service,
+                    s.name,
+                    config_path=service_config_path,
+                    cache_path=self.file_manager.cache_path,
+                )
+            except Exception as e:
+                print(f"Failed to load service {s.name}: {e}")
 
     def add_service(
         self, service: ServiceType, service_config_path: Path, name: str
     ) -> None:
-        self.index.add_service(
-            name, service.value, service_config_path.absolute().as_posix()
-        )
-        self.load_services()
+        self.index.add_service(name, service, service_config_path.absolute().as_posix())
         self.file_manager.save_index(self.index)
 
     def remove_service(self, name: str) -> None:
         if name not in self.index.services:
             raise ValueError(f"Service {name} not found")
         self.index.remove_service(name)
+        self.file_manager.delete_service_config(name)
 
         for playlist in self.playlists.values():
             playlist.remove_service(name)

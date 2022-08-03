@@ -47,7 +47,8 @@ class Playlist(BaseModel):
             del self.uris[service_name]
 
     def remove_service(self, service_name: str) -> None:
-        del self.uris[service_name]
+        if service_name in self.uris:
+            del self.uris[service_name]
 
     def contains_uri(self, uri: PlaylistURIs) -> bool:
         for service_name, uris in self.uris.items():

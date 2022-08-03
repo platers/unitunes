@@ -29,8 +29,8 @@ from unitunes.uri import (
 )
 
 
-class YtmConfig(BaseModel, ServiceConfig):
-    headers: str = ""
+class YtmConfig(ServiceConfig):
+    headers: str = "Paste your headers here"
 
 
 class YtmWrapper(ServiceWrapper, ABC):

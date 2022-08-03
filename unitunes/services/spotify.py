@@ -21,7 +21,7 @@ from unitunes.uri import (
 )
 
 
-class SpotifyConfig(BaseModel, ServiceConfig):
+class SpotifyConfig(ServiceConfig):
     client_id: str = ""
     client_secret: str = ""
     redirect_uri: str = ""
