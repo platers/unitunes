@@ -17,9 +17,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-unitunes = "unitunes.cli.cli:app"
-# up-data= "unitunes.eval.data.create_dataset:main"
-# up-eval = "unitunes.eval.eval:eval_app"
+unitunes = "gui.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"

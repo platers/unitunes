@@ -818,11 +818,11 @@ class GUI:
                     load_service_tabs()
 
 
-gui = GUI()
+def main():
+    gui = GUI()
 
-
-dpg.setup_dearpygui()
-dpg.show_viewport()
-dpg.set_primary_window("Primary", True)
-dpg.start_dearpygui()
-dpg.destroy_context()
+    dpg.setup_dearpygui()
+    dpg.show_viewport()
+    dpg.set_primary_window("Primary", True)
+    dpg.start_dearpygui()
+    dpg.destroy_context()
