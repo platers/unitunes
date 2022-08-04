@@ -100,6 +100,8 @@ class SpotifyPlaylistURI(PlaylistURI):
     def url_to_uri(url: str) -> str:
         if url == "spotify:liked_songs":
             return "Liked Songs"
+        # remove params
+        url = url.split("?")[0]
         return url.split("/")[-1]
 
     @staticmethod

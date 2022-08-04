@@ -156,7 +156,7 @@ class GUI:
             dpg.set_value(f"job_progress_{job_id}", 0)
             dpg.set_value(f"job_progress_text_{job_id}", "")
 
-        self.touch_playlist(job.playlist_name)
+        self.touch_playlist(job.playlist_id)
 
         # update job count in tab label
         active_jobs = [
@@ -165,6 +165,8 @@ class GUI:
             if j.status == JobStatus.PENDING or j.status == JobStatus.RUNNING
         ]
         dpg.set_item_label("jobs_tab", f"Jobs ({len(active_jobs)})")
+
+        self.sync_playlist_row(job.playlist_id)
 
     def add_job(self, job_type: JobType, playlist: str):
         job_id = self.engine.push_job(
@@ -224,7 +226,9 @@ class GUI:
     ########################################
 
     def playlists_tab_setup(self):
-        with dpg.tab(label="Playlists"):
+        if dpg.does_item_exist("playlists_tab"):
+            dpg.delete_item("playlists_tab")
+        with dpg.tab(label="Playlists", tag="playlists_tab"):
             with dpg.child_window(tag="playlist_window"):
 
                 def save_changes_callback():
@@ -483,11 +487,9 @@ class GUI:
 
     def sync_playlist_list(self):
         """Remove all playlist rows and add them again."""
-        rows: list[int] = dpg.get_item_children("playlist_window", 1)  # type: ignore
-        for row in rows:
-            dpg.delete_item(row)
-
         for playlist in self.pm.playlists:
+            if dpg.does_item_exist(f"playlist_row_{playlist}"):
+                dpg.delete_item(f"playlist_row_{playlist}")
             self.add_placeholder_playlist_row(playlist)
             self.sync_playlist_row(playlist)
 

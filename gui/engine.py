@@ -24,7 +24,7 @@ class JobType(Enum):
 class Job:
     type: JobType
     description: str
-    playlist_name: str  # playlist the job operates on
+    playlist_id: str  # playlist the job operates on
     size: int = 0
     progress: int = 0
     gui_callback: GuiCallback
@@ -38,7 +38,7 @@ class Job:
         gui_callback: GuiCallback,
         pm: PlaylistManager,
     ):
-        self.playlist_name = playlist_name
+        self.playlist_id = playlist_name
         self.gui_callback = gui_callback
         self.pm = pm
         self.type = type
@@ -62,17 +62,17 @@ class Job:
 
         if self.type == JobType.PULL:
             self.pm.pull_playlist(
-                self.playlist_name,
+                self.playlist_id,
                 progress_callback=progress_callback,
             )
         elif self.type == JobType.PUSH:
             self.pm.push_playlist(
-                self.playlist_name,
+                self.playlist_id,
                 progress_callback=progress_callback,
             )
         elif self.type == JobType.SEARCH:
             self.pm.search_playlist(
-                self.playlist_name,
+                self.playlist_id,
                 progress_callback=progress_callback,
             )
 

@@ -36,9 +36,6 @@ class FileManager:
     def get_playlist_path(self, name: str) -> Path:
         return self.playlist_folder / f"{format_filename(name)}.json"
 
-    def make_playlist_dir(self) -> None:
-        self.playlist_folder.mkdir(exist_ok=True)
-
     def save_index(self, index: Index) -> None:
         with open(self.index_path, "w") as f:
             f.write(index.json(indent=4))
@@ -49,6 +46,7 @@ class FileManager:
         return Index.parse_file(self.index_path)
 
     def save_playlist(self, playlist: Playlist, playlist_id: str) -> None:
+        self.playlist_folder.mkdir(exist_ok=True)
         with open(self.get_playlist_path(playlist_id), "w") as f:
             f.write(playlist.json(indent=4))
 
@@ -70,6 +68,7 @@ class FileManager:
         )
 
     def save_service_config(self, service_name: str, config: ServiceConfig) -> None:
+        self.service_configs_path.mkdir(exist_ok=True)
         path = self.service_config_path(service_name)
         with open(path, "w") as f:
             f.write(config.json(indent=4))
