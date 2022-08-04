@@ -35,8 +35,16 @@ class GUI:
     def __init__(self):
         self.load_app_config()
         self.load_playlist_manager()
-        self.main_window_setup()
         self.engine = Engine(self.pm)
+        self.main_window_setup()
+        self.init()
+
+    def init(self):
+        self.load_app_config()
+        self.load_playlist_manager()
+        self.engine = Engine(self.pm)
+        self.sync_playlist_list()
+        self.sync_service_tabs()
 
     def load_playlist_manager(self):
         fm = FileManager(self.app_config.unitunes_dir)
@@ -80,8 +88,8 @@ class GUI:
                 dpg.add_theme_color(dpg.mvThemeCol_Text, [29, 151, 236])
 
     def main_window_setup(self):
-        self.init_themes()
-        with dpg.window(label="Example Window", tag="Primary"):
+        with dpg.window(label="Example Window", tag="primary_window"):
+            self.init_themes()
             with dpg.tab_bar():
                 self.playlists_tab_setup()
                 self.services_tab_setup()
@@ -181,8 +189,7 @@ class GUI:
                     def change_unitunes_dir(sender, app_data):
                         self.app_config.unitunes_dir = Path(app_data["current_path"])
                         self.save_app_config()
-                        self.load_playlist_manager()
-                        sync_unitunes_dir_text()
+                        self.init()
 
                     file_dialog = dpg.add_file_dialog(
                         label="Unitunes Directory",
@@ -476,10 +483,11 @@ class GUI:
 
     def sync_playlist_list(self):
         """Remove all playlist rows and add them again."""
+        rows: list[int] = dpg.get_item_children("playlist_window", 1)  # type: ignore
+        for row in rows:
+            dpg.delete_item(row)
+
         for playlist in self.pm.playlists:
-            # Delete row if it exists
-            if dpg.does_item_exist(f"playlist_row_{playlist}"):
-                dpg.delete_item(f"playlist_row_{playlist}")
             self.add_placeholder_playlist_row(playlist)
             self.sync_playlist_row(playlist)
 
@@ -540,7 +548,7 @@ class GUI:
                         fm.save_service_config(name, config)
                         self.pm.add_service(type, fm.service_config_path(name), name)
                         self.pm.save_index()
-                        load_service_tabs()
+                        self.sync_service_tabs()
 
                     dpg.add_input_text(
                         tag="service_name_input", width=200, hint="New Service Name"
@@ -576,246 +584,242 @@ class GUI:
                                 tag=f"delete_service_no_button",
                             )
                 with dpg.tab_bar(tag="services_tab_bar"):
+                    self.sync_service_tabs()
 
-                    def add_service_tab(service_entry: IndexServiceEntry):
-                        service_name = service_entry.name
-                        print(f"Adding service tab {service_name}")
-                        with dpg.tab(
-                            label=service_name,
-                            tag=f"service_tab_{service_name}",
-                            parent="services_tab_bar",
-                        ):
-                            with dpg.child_window(tag=f"service_window_{service_name}"):
-                                dpg.add_text(
-                                    "Failed to initialize service. Please fix the configuration.",
-                                    tag=f"service_failed_text_{service_name}",
+    def sync_service_tabs(self):
+        # Delete current tabs
+        tabs: list[str] = dpg.get_item_children("services_tab_bar", 1)  # type: ignore
+        for tab in tabs:
+            dpg.delete_item(tab)
+        # Add tabs
+        for service_entry in self.pm.index.services.values():
+            self.add_service_tab(service_entry)
+            self.sync_service_tab(service_entry)
+
+    def sync_service_tab(self, service_entry: IndexServiceEntry):
+        # Check if service is properly initialized
+        print(f"Syncing service tab {service_entry.name}")
+        self.pm.load_services()
+        if service_entry.name in self.pm.services:
+            dpg.hide_item(f"service_failed_text_{service_entry.name}")
+        else:
+            dpg.show_item(f"service_failed_text_{service_entry.name}")
+
+        if service_entry.service == ServiceType.SPOTIFY:
+            config = SpotifyConfig.parse_file(service_entry.config_path)
+            print(service_entry.config_path)
+            dpg.set_value(
+                f"spotify_client_id_input_{service_entry.name}",
+                config.client_id,
+            )
+            dpg.set_value(
+                f"spotify_client_secret_input_{service_entry.name}",
+                config.client_secret,
+            )
+            dpg.set_value(
+                f"spotify_redirect_uri_input_{service_entry.name}",
+                config.redirect_uri,
+            )
+        elif service_entry.service == ServiceType.YTM:
+            config = YtmConfig.parse_file(service_entry.config_path)
+            dpg.set_value(
+                f"ytm_headers_input_{service_entry.name}",
+                config.headers,
+            )
+        elif service_entry.service == ServiceType.BEATSABER:
+            config = BeatsaberConfig.parse_file(service_entry.config_path)
+            dpg.set_item_label(
+                f"beatsaber_dir_button_{service_entry.name}",
+                str(config.dir),
+            )
+            dpg.set_value(
+                f"beatsaber_min_nps_input_{service_entry.name}",
+                config.search_config.minNps,
+            )
+            dpg.set_value(
+                f"beatsaber_max_nps_input_{service_entry.name}",
+                config.search_config.maxNps,
+            )
+            dpg.set_value(
+                f"beatsaber_min_rating_input_{service_entry.name}",
+                config.search_config.minRating,
+            )
+        else:
+            raise Exception(f"Unknown service type {service_entry.service}")
+
+    def add_service_tab(self, service_entry: IndexServiceEntry):
+        service_name = service_entry.name
+        print(f"Adding service tab {service_name}")
+        with dpg.tab(
+            label=service_name,
+            tag=f"service_tab_{service_name}",
+            parent="services_tab_bar",
+        ):
+            with dpg.child_window(tag=f"service_window_{service_name}"):
+                dpg.add_text(
+                    "Failed to initialize service. Please fix the configuration.",
+                    tag=f"service_failed_text_{service_name}",
+                )
+
+                if service_entry.service == ServiceType.SPOTIFY:
+
+                    def sync_spotify_service_callback():
+                        self.pm.file_manager.save_service_config(
+                            service_name,
+                            SpotifyConfig(
+                                client_id=dpg.get_value(
+                                    f"spotify_client_id_input_{service_name}",
+                                ),
+                                client_secret=dpg.get_value(
+                                    f"spotify_client_secret_input_{service_name}",
+                                ),
+                                redirect_uri=dpg.get_value(
+                                    f"spotify_redirect_uri_input_{service_name}",
+                                ),
+                            ),
+                        )
+                        self.sync_service_tab(service_entry)
+
+                    hyperlink(
+                        "https://spotipy.readthedocs.io/en/2.19.0/#getting-started"
+                    )
+                    dpg.add_input_text(
+                        label="SPOTIPY_CLIENT_ID",
+                        tag=f"spotify_client_id_input_{service_name}",
+                    )
+                    dpg.add_input_text(
+                        label="SPOTIPY_CLIENT_SECRET",
+                        tag=f"spotify_client_secret_input_{service_name}",
+                    )
+                    dpg.add_input_text(
+                        label="SPOTIPY_REDIRECT_URI",
+                        tag=f"spotify_redirect_uri_input_{service_name}",
+                    )
+                    dpg.add_button(
+                        label="Save",
+                        tag=f"spotify_save_button_{service_name}",
+                        callback=sync_spotify_service_callback,
+                    )
+                elif service_entry.service == ServiceType.YTM:
+
+                    def sync_ytm_service_callback():
+                        self.pm.file_manager.save_service_config(
+                            service_name,
+                            YtmConfig(
+                                headers=dpg.get_value(
+                                    f"ytm_headers_input_{service_name}"
                                 )
+                            ),
+                        )
+                        self.sync_service_tab(service_entry)
 
-                                if service_entry.service == ServiceType.SPOTIFY:
+                    hyperlink(
+                        "https://ytmusicapi.readthedocs.io/en/latest/setup.html#copy-authentication-headers"
+                    )
 
-                                    def sync_spotify_service_callback():
-                                        self.pm.file_manager.save_service_config(
-                                            service_name,
-                                            SpotifyConfig(
-                                                client_id=dpg.get_value(
-                                                    f"spotify_client_id_input_{service_name}",
-                                                ),
-                                                client_secret=dpg.get_value(
-                                                    f"spotify_client_secret_input_{service_name}",
-                                                ),
-                                                redirect_uri=dpg.get_value(
-                                                    f"spotify_redirect_uri_input_{service_name}",
-                                                ),
-                                            ),
-                                        )
-                                        sync_service_tab(service_entry)
+                    dpg.add_input_text(
+                        label="Headers",
+                        tag=f"ytm_headers_input_{service_name}",
+                        multiline=True,
+                    )
+                    dpg.add_button(
+                        label="Save",
+                        tag=f"ytm_save_button_{service_name}",
+                        callback=sync_ytm_service_callback,
+                    )
+                elif service_entry.service == ServiceType.BEATSABER:
 
-                                    hyperlink(
-                                        "https://spotipy.readthedocs.io/en/2.19.0/#getting-started"
-                                    )
-                                    dpg.add_input_text(
-                                        label="SPOTIPY_CLIENT_ID",
-                                        tag=f"spotify_client_id_input_{service_name}",
-                                    )
-                                    dpg.add_input_text(
-                                        label="SPOTIPY_CLIENT_SECRET",
-                                        tag=f"spotify_client_secret_input_{service_name}",
-                                    )
-                                    dpg.add_input_text(
-                                        label="SPOTIPY_REDIRECT_URI",
-                                        tag=f"spotify_redirect_uri_input_{service_name}",
-                                    )
-                                    dpg.add_button(
-                                        label="Save",
-                                        tag=f"spotify_save_button_{service_name}",
-                                        callback=sync_spotify_service_callback,
-                                    )
-                                elif service_entry.service == ServiceType.YTM:
-
-                                    def sync_ytm_service_callback():
-                                        self.pm.file_manager.save_service_config(
-                                            service_name,
-                                            YtmConfig(
-                                                headers=dpg.get_value(
-                                                    f"ytm_headers_input_{service_name}"
-                                                )
-                                            ),
-                                        )
-                                        sync_service_tab(service_entry)
-
-                                    hyperlink(
-                                        "https://ytmusicapi.readthedocs.io/en/latest/setup.html#copy-authentication-headers"
-                                    )
-
-                                    dpg.add_input_text(
-                                        label="Headers",
-                                        tag=f"ytm_headers_input_{service_name}",
-                                        multiline=True,
-                                    )
-                                    dpg.add_button(
-                                        label="Save",
-                                        tag=f"ytm_save_button_{service_name}",
-                                        callback=sync_ytm_service_callback,
-                                    )
-                                elif service_entry.service == ServiceType.BEATSABER:
-
-                                    def sync_beatsaber_service_callback():
-                                        self.pm.file_manager.save_service_config(
-                                            service_name,
-                                            BeatsaberConfig(
-                                                dir=Path(
-                                                    dpg.get_item_label(
-                                                        f"beatsaber_dir_button_{service_name}",
-                                                    )  # type: ignore
-                                                ),
-                                                search_config=BeatsaberSearchConfig(
-                                                    minNps=dpg.get_value(
-                                                        f"beatsaber_min_nps_input_{service_name}",
-                                                    ),
-                                                    maxNps=dpg.get_value(
-                                                        f"beatsaber_max_nps_input_{service_name}",
-                                                    ),
-                                                    minRating=dpg.get_value(
-                                                        f"beatsaber_min_rating_input_{service_name}",
-                                                    ),
-                                                ),
-                                            ),
-                                        )
-                                        sync_service_tab(service_entry)
-
-                                    def add_beatsaber_dir_callback(sender, app_data):
-                                        dpg.set_item_label(
-                                            f"beatsaber_dir_button_{service_name}",
-                                            app_data["current_path"],
-                                        )
-
-                                    dpg.add_file_dialog(
-                                        label="Beat Saber Playlist Directory",
-                                        tag=f"beatsaber_dir_input_{service_name}",
-                                        width=400,
-                                        height=400,
-                                        show=False,
-                                        directory_selector=True,
-                                        callback=add_beatsaber_dir_callback,
-                                    )
-                                    with dpg.group(horizontal=True):
-                                        dpg.add_text(
-                                            "Beatsaber Playlist Directory: ",
-                                        )
-                                        dpg.add_button(
-                                            label="placeholder",
-                                            tag=f"beatsaber_dir_button_{service_name}",
-                                            callback=lambda: dpg.show_item(
-                                                f"beatsaber_dir_input_{service_name}"
-                                            ),
-                                        )
-                                    dpg.add_input_int(
-                                        label="Min Notes per Second",
-                                        tag=f"beatsaber_min_nps_input_{service_name}",
-                                    )
-                                    dpg.add_input_int(
-                                        label="Max Notes per Second",
-                                        tag=f"beatsaber_max_nps_input_{service_name}",
-                                    )
-                                    dpg.add_input_float(
-                                        label="Min Rating",
-                                        tag=f"beatsaber_min_rating_input_{service_name}",
-                                    )
-
-                                    dpg.add_button(
-                                        label="Save",
-                                        tag=f"beatsaber_save_button_{service_name}",
-                                        callback=sync_beatsaber_service_callback,
-                                    )
-
-                                def delete_service_callback():
-                                    self.pm.remove_service(service_name)
-                                    self.pm.save_index()
-                                    load_service_tabs()
-                                    dpg.hide_item(f"delete_service_popup")
-
-                                dpg.add_button(
-                                    label="Delete",
-                                    tag=f"delete_service_button_{service_name}",
-                                    callback=lambda: dpg.show_item(
-                                        "delete_service_popup"
+                    def sync_beatsaber_service_callback():
+                        self.pm.file_manager.save_service_config(
+                            service_name,
+                            BeatsaberConfig(
+                                dir=Path(
+                                    dpg.get_item_label(
+                                        f"beatsaber_dir_button_{service_name}",
+                                    )  # type: ignore
+                                ),
+                                search_config=BeatsaberSearchConfig(
+                                    minNps=dpg.get_value(
+                                        f"beatsaber_min_nps_input_{service_name}",
                                     ),
-                                )
-                                dpg.set_item_callback(
-                                    "delete_service_yes_button",
-                                    delete_service_callback,
-                                )
-                                dpg.set_item_callback(
-                                    "delete_service_no_button",
-                                    lambda: dpg.hide_item("delete_service_popup"),
-                                )
+                                    maxNps=dpg.get_value(
+                                        f"beatsaber_max_nps_input_{service_name}",
+                                    ),
+                                    minRating=dpg.get_value(
+                                        f"beatsaber_min_rating_input_{service_name}",
+                                    ),
+                                ),
+                            ),
+                        )
+                        self.sync_service_tab(service_entry)
 
-                    def sync_service_tab(service_entry: IndexServiceEntry):
-                        # Check if service is properly initialized
-                        print(f"Syncing service tab {service_entry.name}")
-                        self.pm.load_services()
-                        if service_entry.name in self.pm.services:
-                            dpg.hide_item(f"service_failed_text_{service_entry.name}")
-                        else:
-                            dpg.show_item(f"service_failed_text_{service_entry.name}")
+                    def add_beatsaber_dir_callback(sender, app_data):
+                        dpg.set_item_label(
+                            f"beatsaber_dir_button_{service_name}",
+                            app_data["current_path"],
+                        )
 
-                        if service_entry.service == ServiceType.SPOTIFY:
-                            config = SpotifyConfig.parse_file(service_entry.config_path)
-                            print(service_entry.config_path)
-                            dpg.set_value(
-                                f"spotify_client_id_input_{service_entry.name}",
-                                config.client_id,
-                            )
-                            dpg.set_value(
-                                f"spotify_client_secret_input_{service_entry.name}",
-                                config.client_secret,
-                            )
-                            dpg.set_value(
-                                f"spotify_redirect_uri_input_{service_entry.name}",
-                                config.redirect_uri,
-                            )
-                        elif service_entry.service == ServiceType.YTM:
-                            config = YtmConfig.parse_file(service_entry.config_path)
-                            dpg.set_value(
-                                f"ytm_headers_input_{service_entry.name}",
-                                config.headers,
-                            )
-                        elif service_entry.service == ServiceType.BEATSABER:
-                            config = BeatsaberConfig.parse_file(
-                                service_entry.config_path
-                            )
-                            dpg.set_item_label(
-                                f"beatsaber_dir_button_{service_entry.name}",
-                                str(config.dir),
-                            )
-                            dpg.set_value(
-                                f"beatsaber_min_nps_input_{service_entry.name}",
-                                config.search_config.minNps,
-                            )
-                            dpg.set_value(
-                                f"beatsaber_max_nps_input_{service_entry.name}",
-                                config.search_config.maxNps,
-                            )
-                            dpg.set_value(
-                                f"beatsaber_min_rating_input_{service_entry.name}",
-                                config.search_config.minRating,
-                            )
-                        else:
-                            raise Exception(
-                                f"Unknown service type {service_entry.service}"
-                            )
+                    # delete file dialog if it exists
+                    if dpg.does_item_exist(f"beatsaber_dir_input_{service_name}"):
+                        dpg.delete_item(f"beatsaber_dir_input_{service_name}")
+                    dpg.add_file_dialog(
+                        label="Beat Saber Playlist Directory",
+                        tag=f"beatsaber_dir_input_{service_name}",
+                        width=400,
+                        height=400,
+                        show=False,
+                        directory_selector=True,
+                        callback=add_beatsaber_dir_callback,
+                    )
+                    with dpg.group(horizontal=True):
+                        dpg.add_text(
+                            "Beatsaber Playlist Directory: ",
+                        )
+                        dpg.add_button(
+                            label="placeholder",
+                            tag=f"beatsaber_dir_button_{service_name}",
+                            callback=lambda: dpg.show_item(
+                                f"beatsaber_dir_input_{service_name}"
+                            ),
+                        )
+                    dpg.add_input_int(
+                        label="Min Notes per Second",
+                        tag=f"beatsaber_min_nps_input_{service_name}",
+                    )
+                    dpg.add_input_int(
+                        label="Max Notes per Second",
+                        tag=f"beatsaber_max_nps_input_{service_name}",
+                    )
+                    dpg.add_input_float(
+                        label="Min Rating",
+                        tag=f"beatsaber_min_rating_input_{service_name}",
+                    )
 
-                    def load_service_tabs():
-                        # Delete current tabs
-                        tabs: list[str] = dpg.get_item_children("services_tab_bar", 1)  # type: ignore
-                        for tab in tabs:
-                            dpg.delete_item(tab)
-                        # Add tabs
-                        for service_entry in self.pm.index.services.values():
-                            add_service_tab(service_entry)
-                            sync_service_tab(service_entry)
+                    dpg.add_button(
+                        label="Save",
+                        tag=f"beatsaber_save_button_{service_name}",
+                        callback=sync_beatsaber_service_callback,
+                    )
 
-                    load_service_tabs()
+                def delete_service_callback():
+                    self.pm.remove_service(service_name)
+                    self.pm.save_index()
+                    self.sync_service_tabs()
+                    dpg.hide_item(f"delete_service_popup")
+
+                dpg.add_button(
+                    label="Delete",
+                    tag=f"delete_service_button_{service_name}",
+                    callback=lambda: dpg.show_item("delete_service_popup"),
+                )
+                dpg.set_item_callback(
+                    "delete_service_yes_button",
+                    delete_service_callback,
+                )
+                dpg.set_item_callback(
+                    "delete_service_no_button",
+                    lambda: dpg.hide_item("delete_service_popup"),
+                )
 
 
 def main():
@@ -823,6 +827,6 @@ def main():
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
-    dpg.set_primary_window("Primary", True)
+    dpg.set_primary_window("primary_window", True)
     dpg.start_dearpygui()
     dpg.destroy_context()

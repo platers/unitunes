@@ -19,12 +19,9 @@ unitunes stores your playlists in plain text, allowing you to version control yo
 | MusicBrainz   |          |          |     ✅     |
 | Spotify       |    ✅    |    ✅    |     ✅     |
 | Youtube Music |    ✅    |    ✅    |     ✅     |
+| Beatsaber     |    ✅    |    ✅    |     ✅     |
 
 Want to add support for another service? See [contributing](#contributing).
-
-## Documentation
-
-[Documentation](https://github.com/platers/unitunes/blob/master/docs.md)
 
 ## Quickstart
 
