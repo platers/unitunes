@@ -245,7 +245,7 @@ class SpotifyService(StreamingService):
         )
 
     def query_generator(self, track: Track) -> List[str]:
-        query = f'track:"{track.name}"'
+        query = f'track:"{track.name.value}"'
         if track.artists:
             query += (
                 f" artist:\"{' '.join([artist.value for artist in track.artists])}\""
