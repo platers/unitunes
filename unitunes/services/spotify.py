@@ -86,7 +86,7 @@ class SpotifyAPIWrapper(SpotifyWrapper):
                 client_id=config["client_id"],
                 client_secret=config["client_secret"],
                 redirect_uri=config["redirect_uri"],
-                scope="user-library-read playlist-modify-private, playlist-modify-public, user-library-modify playlist-read-privateq",
+                scope="user-library-read playlist-modify-private, playlist-modify-public, user-library-modify playlist-read-private",
             )
         )
 
