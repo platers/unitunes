@@ -137,6 +137,7 @@ class GUI:
 
     def touch_playlist(self, playlist: str):
         self.touched_playlists.add(playlist)
+        self.pm.save_playlist(playlist)
 
     def sync_job_row(self, job_id: int):
         job = self.engine.get_job(job_id)
@@ -172,11 +173,11 @@ class GUI:
 
         self.sync_playlist_row(job.playlist_id)
 
-    def add_job(self, job_type: JobType, playlist: str):
+    def add_job(self, job_type: JobType, playlist_id: str):
         job_id = self.engine.push_job(
             Job(
                 job_type,
-                playlist,
+                playlist_id,
                 lambda: self.sync_job_row(job_id),
                 self.pm,
             )

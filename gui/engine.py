@@ -35,21 +35,22 @@ class Job:
     def __init__(
         self,
         type: JobType,
-        playlist_name: str,
+        playlist_id: str,
         gui_callback: GuiCallback,
         pm: PlaylistManager,
     ):
-        self.playlist_id = playlist_name
+        self.playlist_id = playlist_id
         self.gui_callback = gui_callback
         self.pm = pm
         self.type = type
+        name = self.pm.playlists[playlist_id].name
 
         if type == JobType.PULL:
-            self.description = f"Pull {playlist_name}"
+            self.description = f"Pull {name}"
         elif type == JobType.PUSH:
-            self.description = f"Push {playlist_name}"
+            self.description = f"Push {name}"
         elif type == JobType.SEARCH:
-            self.description = f"Search {playlist_name}"
+            self.description = f"Search {name}"
 
     def execute(self):
         def progress_callback(progress: int, size: int):
