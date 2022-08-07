@@ -1,11 +1,10 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, List
 from platformdirs import user_documents_dir
 
 from pydantic import BaseModel
 from unitunes.file_manager import format_filename
-from unitunes.playlist import Playlist, PlaylistMetadata
+from unitunes.playlist import PlaylistMetadata
 import requests
 
 from unitunes.services.services import (

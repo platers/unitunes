@@ -137,7 +137,6 @@ class GUI:
 
     def touch_playlist(self, playlist: str):
         self.touched_playlists.add(playlist)
-        dpg.show_item("save_changes_button")
 
     def sync_job_row(self, job_id: int):
         job = self.engine.get_job(job_id)
@@ -233,20 +232,6 @@ class GUI:
         if dpg.does_item_exist("playlist_window"):
             dpg.delete_item("playlist_window")
         with dpg.child_window(tag="playlist_window", parent="playlists_tab"):
-
-            def save_changes_callback():
-                self.pm.save_index()
-                for playlist_name in self.touched_playlists:
-                    self.pm.save_playlist(playlist_name)
-                self.touched_playlists.clear()
-                dpg.hide_item("save_changes_button")
-
-            dpg.add_button(
-                label="Save Changes",
-                tag="save_changes_button",
-                show=False,
-                callback=save_changes_callback,
-            )
 
             def add_playlist_callback():
                 playlist_id = (
