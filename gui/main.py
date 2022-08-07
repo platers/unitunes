@@ -90,7 +90,11 @@ class GUI:
     def main_window_setup(self):
         with dpg.window(label="Example Window", tag="primary_window"):
             self.init_themes()
-            with dpg.tab_bar():
+            with dpg.tab_bar(tag="main_tab_bar"):
+                dpg.add_tab(label="Playlists", tag="playlists_tab")
+                dpg.add_tab(label="Services", tag="services_tab")
+                dpg.add_tab(label="Jobs", tag="jobs_tab")
+                dpg.add_tab(label="Settings", tag="settings_tab")
                 self.playlists_tab_setup()
                 self.services_tab_setup()
                 self.jobs_tab_setup()
@@ -101,24 +105,25 @@ class GUI:
     ########################################
 
     def jobs_tab_setup(self):
-        with dpg.tab(label="Jobs", tag="jobs_tab"):
-            with dpg.child_window(tag="jobs_window"):
+        if dpg.does_item_exist("jobs_window"):
+            dpg.delete_item("jobs_window")
+        with dpg.child_window(tag="jobs_window", parent="jobs_tab"):
 
-                def clear_completed_jobs():
-                    # loop children of jobs_window and remove those that are complete
-                    children: list[int] = dpg.get_item_children("jobs_window", 1)  # type: ignore
-                    for child in children:
-                        tag = dpg.get_item_alias(child)
-                        if tag.startswith("job_row_"):
-                            job_id = int(tag.split("_")[-1])
-                            if self.engine.get_job(job_id).status == JobStatus.SUCCESS:
-                                dpg.delete_item(child)
+            def clear_completed_jobs():
+                # loop children of jobs_window and remove those that are complete
+                children: list[int] = dpg.get_item_children("jobs_window", 1)  # type: ignore
+                for child in children:
+                    tag = dpg.get_item_alias(child)
+                    if tag.startswith("job_row_"):
+                        job_id = int(tag.split("_")[-1])
+                        if self.engine.get_job(job_id).status == JobStatus.SUCCESS:
+                            dpg.delete_item(child)
 
-                dpg.add_button(
-                    label="Clear Completed",
-                    tag="clear_completed_button",
-                    callback=clear_completed_jobs,
-                )
+            dpg.add_button(
+                label="Clear Completed",
+                tag="clear_completed_button",
+                callback=clear_completed_jobs,
+            )
 
     def add_job_row_placeholder(self, job_id: int):
         with dpg.child_window(tag=f"job_row_{job_id}", height=60, parent="jobs_window"):
@@ -184,189 +189,188 @@ class GUI:
     # Settings tab
     ########################################
     def settings_tab_setup(self):
-        with dpg.tab(label="Settings"):
-            with dpg.child_window(tag="settings_window"):
-                with dpg.group(horizontal=True):
-                    # File Dialog
-                    def change_unitunes_dir(sender, app_data):
-                        self.app_config.unitunes_dir = Path(app_data["current_path"])
-                        self.save_app_config()
-                        self.init()
+        with dpg.child_window(tag="settings_window", parent="settings_tab"):
+            with dpg.group(horizontal=True):
+                # File Dialog
+                def change_unitunes_dir(sender, app_data):
+                    self.app_config.unitunes_dir = Path(app_data["current_path"])
+                    self.save_app_config()
+                    self.init()
 
-                    file_dialog = dpg.add_file_dialog(
-                        label="Unitunes Directory",
-                        tag="unitunes_dir_dialog",
-                        directory_selector=True,
-                        show=False,
-                        height=300,
-                        width=600,
-                        callback=change_unitunes_dir,
+                file_dialog = dpg.add_file_dialog(
+                    label="Unitunes Directory",
+                    tag="unitunes_dir_dialog",
+                    directory_selector=True,
+                    show=False,
+                    height=300,
+                    width=600,
+                    callback=change_unitunes_dir,
+                )
+
+                dpg.add_text(
+                    "Unitunes Directory:",
+                )
+
+                # Button
+                def sync_unitunes_dir_text():
+                    dpg.set_item_label(
+                        "unitunes_dir_button",
+                        str(self.app_config.unitunes_dir),
                     )
 
-                    dpg.add_text(
-                        "Unitunes Directory:",
-                    )
-
-                    # Button
-                    def sync_unitunes_dir_text():
-                        dpg.set_item_label(
-                            "unitunes_dir_button",
-                            str(self.app_config.unitunes_dir),
-                        )
-
-                    dpg.add_button(
-                        tag="unitunes_dir_button",
-                        label="placeholder",
-                        callback=lambda: dpg.show_item(file_dialog),
-                    )
-                    sync_unitunes_dir_text()
+                dpg.add_button(
+                    tag="unitunes_dir_button",
+                    label="placeholder",
+                    callback=lambda: dpg.show_item(file_dialog),
+                )
+                sync_unitunes_dir_text()
 
     ########################################
     # Playlists tab
     ########################################
 
     def playlists_tab_setup(self):
-        if dpg.does_item_exist("playlists_tab"):
-            dpg.delete_item("playlists_tab")
-        with dpg.tab(label="Playlists", tag="playlists_tab"):
-            with dpg.child_window(tag="playlist_window"):
+        if dpg.does_item_exist("playlist_window"):
+            dpg.delete_item("playlist_window")
+        with dpg.child_window(tag="playlist_window", parent="playlists_tab"):
 
-                def save_changes_callback():
-                    self.pm.save_index()
-                    for playlist_name in self.touched_playlists:
-                        self.pm.save_playlist(playlist_name)
-                    self.touched_playlists.clear()
-                    dpg.hide_item("save_changes_button")
+            def save_changes_callback():
+                self.pm.save_index()
+                for playlist_name in self.touched_playlists:
+                    self.pm.save_playlist(playlist_name)
+                self.touched_playlists.clear()
+                dpg.hide_item("save_changes_button")
+
+            dpg.add_button(
+                label="Save Changes",
+                tag="save_changes_button",
+                show=False,
+                callback=save_changes_callback,
+            )
+
+            def add_playlist_callback():
+                playlist_id = (
+                    f"New Playlist {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                )
+                self.pm.add_playlist(playlist_id)
+                self.touch_playlist(playlist_id)
+                self.sync_playlist_list()
+                # Open playlist edit window
+                self.edit_playlist_row(playlist_id)
+
+            dpg.add_button(
+                label="Add Playlist",
+                tag="add_playlist_button",
+                callback=add_playlist_callback,
+            )
+
+            with dpg.group(horizontal=True):
+
+                def pull_all_callback():
+                    for playlist in self.pm.playlists:
+                        self.add_job(JobType.PULL, playlist)
 
                 dpg.add_button(
-                    label="Save Changes",
-                    tag="save_changes_button",
-                    show=False,
-                    callback=save_changes_callback,
+                    label="Pull All",
+                    tag="pull_all_button",
+                    callback=pull_all_callback,
                 )
 
-                def add_playlist_callback():
-                    playlist_id = (
-                        f"New Playlist {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                    )
-                    self.pm.add_playlist(playlist_id)
-                    self.touch_playlist(playlist_id)
-                    self.sync_playlist_list()
-                    # Open playlist edit window
-                    self.edit_playlist_row(playlist_id)
+                def search_all_callback():
+                    for playlist in self.pm.playlists:
+                        self.add_job(JobType.SEARCH, playlist)
 
                 dpg.add_button(
-                    label="Add Playlist",
-                    tag="add_playlist_button",
-                    callback=add_playlist_callback,
+                    label="Search All",
+                    tag="search_all_button",
+                    callback=search_all_callback,
                 )
 
-                with dpg.group(horizontal=True):
+                def push_all_callback():
+                    for playlist in self.pm.playlists:
+                        self.add_job(JobType.PUSH, playlist)
 
-                    def pull_all_callback():
-                        for playlist in self.pm.playlists:
-                            self.add_job(JobType.PULL, playlist)
+                dpg.add_button(
+                    label="Push All",
+                    tag="push_all_button",
+                    callback=push_all_callback,
+                )
 
-                    dpg.add_button(
-                        label="Pull All",
-                        tag="pull_all_button",
-                        callback=pull_all_callback,
-                    )
-
-                    def search_all_callback():
-                        for playlist in self.pm.playlists:
-                            self.add_job(JobType.SEARCH, playlist)
-
-                    dpg.add_button(
-                        label="Search All",
-                        tag="search_all_button",
-                        callback=search_all_callback,
-                    )
-
-                    def push_all_callback():
-                        for playlist in self.pm.playlists:
-                            self.add_job(JobType.PUSH, playlist)
-
-                    dpg.add_button(
-                        label="Push All",
-                        tag="push_all_button",
-                        callback=push_all_callback,
-                    )
-
-                with dpg.window(
-                    tag="edit_playlist_window",
-                    modal=True,
-                    show=False,
-                    label="Edit Playlist",
-                    width=500,
-                    height=600,
-                ):
-                    dpg.add_input_text(
-                        tag="playlist_name_input",
-                        label="Playlist Name",
-                    )
-                    dpg.add_input_text(
-                        tag="playlist_description_input",
-                        label="Playlist Description",
-                        multiline=True,
-                        height=50,
-                    )
-                    with dpg.child_window(
-                        tag="add_playlist_url_window",
-                        label="Add Playlist URL",
-                        height=100,
-                    ):
-                        with dpg.group(horizontal=True):
-                            dpg.add_combo(
-                                tag="service_combo", label="Service", width=100
-                            )
-                            dpg.add_input_text(
-                                tag="playlist_url_input",
-                                hint="Playlist URL",
-                                width=200,
-                            )
-                            dpg.add_button(
-                                label="Add URL",
-                                tag="add_playlist_url_button_2",
-                            )
-
-                        with dpg.table(
-                            tag="uri_table",
-                            resizable=True,
-                            policy=dpg.mvTable_SizingStretchProp,
-                        ):
-                            dpg.add_table_column(
-                                label="Service",
-                                width_stretch=True,
-                                init_width_or_weight=0.5,
-                            )
-                            dpg.add_table_column(label="URL")
-                            dpg.add_table_column()  # Delete button
-
-                with dpg.window(
-                    tag="delete_playlist_window",
-                    modal=True,
-                    label="Delete Playlist",
-                    width=400,
+            if dpg.does_item_exist("edit_playlist_window"):
+                dpg.delete_item("edit_playlist_window")
+            with dpg.window(
+                tag="edit_playlist_window",
+                modal=True,
+                show=False,
+                label="Edit Playlist",
+                width=500,
+                height=600,
+            ):
+                dpg.add_input_text(
+                    tag="playlist_name_input",
+                    label="Playlist Name",
+                )
+                dpg.add_input_text(
+                    tag="playlist_description_input",
+                    label="Playlist Description",
+                    multiline=True,
+                    height=50,
+                )
+                with dpg.child_window(
+                    tag="add_playlist_url_window",
+                    label="Add Playlist URL",
                     height=100,
-                    show=False,
-                    pos=(100, 200),
                 ):
-                    dpg.add_text(
-                        f"placeholder",
-                        tag="delete_playlist_text",
-                    )
                     with dpg.group(horizontal=True):
-                        dpg.add_button(
-                            label="Yes",
-                            tag="delete_playlist_yes_button",
-                        ),
-                        dpg.add_button(
-                            label="No",
-                            tag="delete_playlist_no_button",
-                            callback=lambda: dpg.hide_item("delete_playlist_window"),
+                        dpg.add_combo(tag="service_combo", label="Service", width=100)
+                        dpg.add_input_text(
+                            tag="playlist_url_input",
+                            hint="Playlist URL",
+                            width=200,
                         )
-        self.sync_playlist_list()
+                        dpg.add_button(
+                            label="Add URL",
+                            tag="add_playlist_url_button_2",
+                        )
+
+                    with dpg.table(
+                        tag="uri_table",
+                        resizable=True,
+                        policy=dpg.mvTable_SizingStretchProp,
+                    ):
+                        dpg.add_table_column(
+                            label="Service",
+                            width_stretch=True,
+                            init_width_or_weight=0.5,
+                        )
+                        dpg.add_table_column(label="URL")
+                        dpg.add_table_column()  # Delete button
+
+            if dpg.does_item_exist("delete_playlist_window"):
+                dpg.delete_item("delete_playlist_window")
+            with dpg.window(
+                tag="delete_playlist_window",
+                modal=True,
+                label="Delete Playlist",
+                width=400,
+                height=100,
+                show=False,
+                pos=(100, 200),
+            ):
+                dpg.add_text(
+                    f"placeholder",
+                    tag="delete_playlist_text",
+                )
+                with dpg.group(horizontal=True):
+                    dpg.add_button(
+                        label="Yes",
+                        tag="delete_playlist_yes_button",
+                    ),
+                    dpg.add_button(
+                        label="No",
+                        tag="delete_playlist_no_button",
+                        callback=lambda: dpg.hide_item("delete_playlist_window"),
+                    )
 
     def edit_playlist_row(self, playlist_id: str):
         dpg.show_item("edit_playlist_window")
@@ -487,9 +491,9 @@ class GUI:
 
     def sync_playlist_list(self):
         """Remove all playlist rows and add them again."""
+        self.playlists_tab_setup()
+
         for playlist in self.pm.playlists:
-            if dpg.does_item_exist(f"playlist_row_{playlist}"):
-                dpg.delete_item(f"playlist_row_{playlist}")
             self.add_placeholder_playlist_row(playlist)
             self.sync_playlist_row(playlist)
 
@@ -529,64 +533,65 @@ class GUI:
     ########################################
 
     def services_tab_setup(self):
-        with dpg.tab(label="Services"):
-            with dpg.child_window(tag="services_window"):
-                with dpg.group(horizontal=True):
+        if dpg.does_item_exist("services_window"):
+            dpg.delete_item("services_window")
+        with dpg.child_window(tag="services_window", parent="services_tab"):
+            with dpg.group(horizontal=True):
 
-                    def create_service_callback(type: ServiceType):
-                        if type == ServiceType.SPOTIFY:
-                            config = SpotifyConfig()
-                        elif type == ServiceType.YTM:
-                            config = YtmConfig()
-                        elif type == ServiceType.BEATSABER:
-                            config = BeatsaberConfig()
-                        else:
-                            raise ValueError(f"Unknown service type {type}")
+                def create_service_callback(type: ServiceType):
+                    if type == ServiceType.SPOTIFY:
+                        config = SpotifyConfig()
+                    elif type == ServiceType.YTM:
+                        config = YtmConfig()
+                    elif type == ServiceType.BEATSABER:
+                        config = BeatsaberConfig()
+                    else:
+                        raise ValueError(f"Unknown service type {type}")
 
-                        name = dpg.get_value("service_name_input")
-                        if not name:
-                            return
-                        fm = self.pm.file_manager
-                        fm.save_service_config(name, config)
-                        self.pm.add_service(type, fm.service_config_path(name), name)
-                        self.pm.save_index()
-                        self.sync_service_tabs()
-
-                    dpg.add_input_text(
-                        tag="service_name_input", width=200, hint="New Service Name"
-                    )
-                    dpg.add_button(
-                        label="Add Spotify",
-                        tag="add_spotify_button",
-                        callback=lambda: create_service_callback(ServiceType.SPOTIFY),
-                    )
-                    dpg.add_button(
-                        label="Add YouTube",
-                        tag="add_youtube_button",
-                        callback=lambda: create_service_callback(ServiceType.YTM),
-                    )
-                    dpg.add_button(
-                        label="Add Beatsaber",
-                        tag="add_beatsaber_button",
-                        callback=lambda: create_service_callback(ServiceType.BEATSABER),
-                    )
-                    with dpg.window(
-                        tag=f"delete_service_popup",
-                        popup=True,
-                        show=False,
-                    ):
-                        dpg.add_text("Are you sure you want to delete this service?")
-                        with dpg.group(horizontal=True):
-                            dpg.add_button(
-                                label="Yes",
-                                tag=f"delete_service_yes_button",
-                            )
-                            dpg.add_button(
-                                label="No",
-                                tag=f"delete_service_no_button",
-                            )
-                with dpg.tab_bar(tag="services_tab_bar"):
+                    name = dpg.get_value("service_name_input")
+                    if not name:
+                        return
+                    fm = self.pm.file_manager
+                    fm.save_service_config(name, config)
+                    self.pm.add_service(type, fm.service_config_path(name), name)
+                    self.pm.save_index()
                     self.sync_service_tabs()
+
+                dpg.add_input_text(
+                    tag="service_name_input", width=200, hint="New Service Name"
+                )
+                dpg.add_button(
+                    label="Add Spotify",
+                    tag="add_spotify_button",
+                    callback=lambda: create_service_callback(ServiceType.SPOTIFY),
+                )
+                dpg.add_button(
+                    label="Add YouTube",
+                    tag="add_youtube_button",
+                    callback=lambda: create_service_callback(ServiceType.YTM),
+                )
+                dpg.add_button(
+                    label="Add Beatsaber",
+                    tag="add_beatsaber_button",
+                    callback=lambda: create_service_callback(ServiceType.BEATSABER),
+                )
+                with dpg.window(
+                    tag=f"delete_service_popup",
+                    popup=True,
+                    show=False,
+                ):
+                    dpg.add_text("Are you sure you want to delete this service?")
+                    with dpg.group(horizontal=True):
+                        dpg.add_button(
+                            label="Yes",
+                            tag=f"delete_service_yes_button",
+                        )
+                        dpg.add_button(
+                            label="No",
+                            tag=f"delete_service_no_button",
+                        )
+            with dpg.tab_bar(tag="services_tab_bar"):
+                self.sync_service_tabs()
 
     def sync_service_tabs(self):
         # Delete current tabs
@@ -648,6 +653,8 @@ class GUI:
             )
         else:
             raise Exception(f"Unknown service type {service_entry.service}")
+
+        self.sync_playlist_list()
 
     def add_service_tab(self, service_entry: IndexServiceEntry):
         service_name = service_entry.name
@@ -760,6 +767,7 @@ class GUI:
                             f"beatsaber_dir_button_{service_name}",
                             app_data["current_path"],
                         )
+                        self.pm.load_services()
 
                     # delete file dialog if it exists
                     if dpg.does_item_exist(f"beatsaber_dir_input_{service_name}"):

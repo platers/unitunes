@@ -62,11 +62,11 @@ class BPListSong(BaseModel):
 
 
 class BPList(BaseModel):
-    playlistTitle: str
-    playlistAuthor: str
-    playlistDescription: str
-    image: str
-    songs: List[BPListSong]
+    playlistTitle: str = ""
+    playlistAuthor: str = ""
+    playlistDescription: str = ""
+    image: str = ""
+    songs: List[BPListSong] = []
 
 
 class BeatsaberService(StreamingService):
@@ -125,17 +125,19 @@ class BeatsaberService(StreamingService):
         return playlists
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        bp = BPList.parse_file(self.config.dir / (uri.uri))
+        # create a new playlist if it doesn't exist
+        path = self.config.dir / uri.uri
+        if not path.exists():
+            raise FileNotFoundError(f"{path} does not exist. Try pushing first.")
+
+        bp = BPList.parse_file(path)
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
     def write_bplist(self, playlist_uri: BeatsaberPlaylistURI, bp: BPList) -> None:
-        with (self.config.dir / (playlist_uri.uri)).open("w") as f:
+        with (self.config.dir / playlist_uri.uri).open("w") as f:
             f.write(bp.json(indent=4))
-
-    def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
-        return BPList.parse_file(self.config.dir / (playlist_uri.uri))
 
     def create_playlist(
         self, title: str, description: str = ""
@@ -161,6 +163,12 @@ class BeatsaberService(StreamingService):
             hash=results["versions"][0]["hash"],
             songName=results["name"],
         )
+
+    def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
+        path = self.config.dir / playlist_uri.uri
+        if not path.exists():
+            return BPList()
+        return BPList.parse_file(self.config.dir / (playlist_uri.uri))
 
     def add_tracks(
         self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]

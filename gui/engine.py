@@ -1,6 +1,7 @@
 from enum import Enum
 from queue import Queue
 from threading import Thread
+import traceback
 from typing import Callable
 from unitunes import PlaylistManager
 
@@ -98,7 +99,12 @@ class Engine:
             print(f"Executing job {job_id}: {job.description}")
             job.status = JobStatus.RUNNING
 
-            job.execute()
+            try:
+                job.execute()
+            except Exception as e:
+                print(f"Job {job_id} failed: {e}")
+                traceback.print_exc()
+                job.status = JobStatus.FAILED
 
             assert job.status != JobStatus.RUNNING
             print(f"Finished job {job_id}: {job.description}")
