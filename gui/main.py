@@ -401,7 +401,6 @@ class GUI:
             dpg.delete_item(row)
 
         for service_name, uris in self.pm.playlists[playlist_id].uris.items():
-            service_type = self.pm.services[service_name].type
             for uri in uris:
                 with dpg.table_row(parent="uri_table"):
                     dpg.add_text(service_name)

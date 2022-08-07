@@ -33,8 +33,8 @@ class FileManager:
         self.cache_path = dir / "cache"
         self.service_configs_path = dir / "service_configs"
 
-    def get_playlist_path(self, name: str) -> Path:
-        return self.playlist_folder / f"{format_filename(name)}.json"
+    def get_playlist_path(self, playlist_id: str) -> Path:
+        return self.playlist_folder / f"{format_filename(playlist_id)}.json"
 
     def save_index(self, index: Index) -> None:
         with open(self.index_path, "w") as f:
@@ -50,14 +50,14 @@ class FileManager:
         with open(self.get_playlist_path(playlist_id), "w") as f:
             f.write(playlist.json(indent=4))
 
-    def load_playlist(self, name: str) -> Playlist:
-        path = self.get_playlist_path(name)
+    def load_playlist(self, playlist_id: str) -> Playlist:
+        path = self.get_playlist_path(playlist_id)
         if not path.exists():
             raise FileNotFoundError(f"Playlist file not found: {path}")
         return Playlist.parse_file(path)
 
-    def delete_playlist(self, name: str) -> None:
-        path = self.get_playlist_path(name)
+    def delete_playlist(self, playlist_id: str) -> None:
+        path = self.get_playlist_path(playlist_id)
         if not path.exists():
             raise FileNotFoundError(f"Playlist file not found: {path}")
         path.unlink()

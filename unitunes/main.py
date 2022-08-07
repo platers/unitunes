@@ -148,6 +148,22 @@ class PlaylistManager:
     def save_index(self) -> None:
         self.file_manager.save_index(self.index)
 
+    def update_playlist_id(self, old_id: str) -> str:
+        """Update the playlist id to match the playlist name in the index and filesystem.
+        Return the new id."""
+        pl = self.playlists[old_id]
+        new_id = pl.name
+        while new_id in self.index.playlists:
+            new_id += "_"
+
+        self.remove_playlist(old_id)
+        self.index.add_playlist(new_id)
+        self.playlists[new_id] = pl
+
+        self.save_playlist(new_id)
+        self.save_index()
+        return new_id
+
     def is_tracking_playlist(self, uri: PlaylistURIs) -> bool:
         for playlist in self.playlists.values():
             for uris in playlist.uris.values():
