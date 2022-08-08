@@ -223,10 +223,9 @@ class YTM(StreamingService):
 
     def pull_metadata(self, uri: YtmPlaylistURI) -> PlaylistDetails:
         res = self.wrapper.get_playlist(uri.uri)
-        print(res)
         return PlaylistDetails(
             name=res["title"],
-            description=res["description"],
+            description=res["description"] or "",
         )
 
     def update_metadata(

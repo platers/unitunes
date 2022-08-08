@@ -82,6 +82,10 @@ class SpotifyAPIWrapper(ServiceWrapper):
         return self.sp.playlist_items(*args, **kwargs)
 
     def playlist_metadata(self, playlist_id: str) -> PlaylistDetails:
+        if playlist_id == "Liked Songs":
+            # Liked songs has no metadata
+            return PlaylistDetails(name="Liked Songs", description="")
+
         res = self.sp.playlist(playlist_id, fields="name,description")
         return PlaylistDetails(name=res["name"], description=res["description"])
 
