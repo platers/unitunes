@@ -4,7 +4,7 @@ from platformdirs import user_documents_dir
 
 from pydantic import BaseModel
 from unitunes.file_manager import format_filename
-from unitunes.playlist import PlaylistMetadata
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 import requests
 
 from unitunes.services.services import (
@@ -186,3 +186,18 @@ class BeatsaberService(StreamingService):
             song for song in bp.songs if song.key not in [s.key for s in removed_songs]
         ]
         self.write_bplist(playlist_uri, bp)
+
+    def pull_metadata(self, uri: BeatsaberPlaylistURI) -> PlaylistDetails:
+        bp = self.read_playlist(uri)
+        return PlaylistDetails(
+            name=bp.playlistTitle,
+            description=bp.playlistDescription,
+        )
+
+    def update_metadata(
+        self, uri: BeatsaberPlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        bp = self.read_playlist(uri)
+        bp.playlistTitle = metadata.name
+        bp.playlistDescription = metadata.description
+        self.write_bplist(uri, bp)

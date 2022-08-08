@@ -379,7 +379,7 @@ class GUI:
 
         def description_input_callback(sender, app_data):
             self.pm.playlists[playlist_id].description = app_data
-            print(f"Renamed {playlist_id} to {app_data}")
+            print(f"Changed {playlist_id} description to {app_data}")
             self.touch_playlist(playlist_id)
             self.sync_playlist_row(playlist_id)
 

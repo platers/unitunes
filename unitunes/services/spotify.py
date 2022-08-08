@@ -1,10 +1,8 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, List
-from pydantic import BaseModel
+from typing import List
 import spotipy
 from spotipy import SpotifyOAuth
-from unitunes.playlist import PlaylistMetadata
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 
 from unitunes.services.services import (
     ServiceConfig,
@@ -27,66 +25,7 @@ class SpotifyConfig(ServiceConfig):
     redirect_uri: str = ""
 
 
-class SpotifyWrapper(ServiceWrapper, ABC):
-    @abstractmethod
-    def track(self, *args, use_cache=True, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def album_tracks(self, *args, use_cache=True, **kwargs) -> Any:
-        pass
-
-    @cache
-    @abstractmethod
-    def search(self, *args, use_cache=True, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def create_playlist(self, title: str, description: str = "") -> str:
-        pass
-
-    @abstractmethod
-    def add_tracks(self, playlist_id: str, tracks: List[str]) -> None:
-        pass
-
-    @abstractmethod
-    def remove_tracks(self, playlist_id: str, tracks: List[str]) -> None:
-        pass
-
-    @abstractmethod
-    def current_user_playlists(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def user_playlist_replace_tracks(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def playlist_tracks(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def current_user(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def user_playlist_create(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def current_user_saved_tracks(self, limit: int = 20, offset: int = 0) -> Any:
-        pass
-
-    @abstractmethod
-    def current_user_saved_tracks_add(self, tracks: List[str]) -> None:
-        pass
-
-    @abstractmethod
-    def current_user_saved_tracks_delete(self, tracks: List[str]) -> None:
-        pass
-
-
-class SpotifyAPIWrapper(SpotifyWrapper):
+class SpotifyAPIWrapper(ServiceWrapper):
     def __init__(self, config: SpotifyConfig, cache_root) -> None:
         super().__init__("spotify", cache_root=cache_root)
         self.init_config(config)
@@ -142,6 +81,10 @@ class SpotifyAPIWrapper(SpotifyWrapper):
     def playlist_tracks(self, *args, **kwargs):
         return self.sp.playlist_items(*args, **kwargs)
 
+    def playlist_metadata(self, playlist_id: str) -> PlaylistDetails:
+        res = self.sp.playlist(playlist_id, fields="name,description")
+        return PlaylistDetails(name=res["name"], description=res["description"])
+
     def current_user(self, *args, **kwargs):
         return self.sp.current_user(*args, **kwargs)
 
@@ -165,9 +108,14 @@ class SpotifyAPIWrapper(SpotifyWrapper):
         for chunk in chunks:
             self.sp.current_user_saved_tracks_delete(chunk)
 
+    def change_details(self, playlist_id: str, title: str, description: str):
+        self.sp.user_playlist_change_details(
+            self.sp.me()["id"], playlist_id, name=title, description=description
+        )
+
 
 class SpotifyService(StreamingService):
-    wrapper: SpotifyWrapper
+    wrapper: SpotifyAPIWrapper
     config: SpotifyConfig
 
     def __init__(self, name: str, config: SpotifyConfig, cache_root: Path) -> None:
@@ -240,6 +188,9 @@ class SpotifyService(StreamingService):
             raise ValueError(f"Track {uri} not found")
         return self.raw_to_track(results)
 
+    def pull_metadata(self, uri: SpotifyPlaylistURI) -> PlaylistDetails:
+        return self.wrapper.playlist_metadata(uri.uri)
+
     def raw_to_track(self, raw: dict) -> Track:
         return Track(
             name=AliasedString(value=raw["name"]),
@@ -306,3 +257,10 @@ class SpotifyService(StreamingService):
             self.wrapper.current_user_saved_tracks_delete(track_ids)
         else:
             self.wrapper.remove_tracks(playlist_uri.uri, track_ids)
+
+    def update_metadata(
+        self, playlist_uri: SpotifyPlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        self.wrapper.change_details(
+            playlist_uri.uri, metadata.name, metadata.description
+        )

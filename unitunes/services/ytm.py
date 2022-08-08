@@ -5,7 +5,7 @@ from typing import Any, List, Optional
 from pydantic import BaseModel
 from tqdm import tqdm
 from ytmusicapi import YTMusic
-from unitunes.playlist import PlaylistMetadata
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 from youtube_title_parse import get_artist_title
 
 
@@ -33,45 +33,7 @@ class YtmConfig(ServiceConfig):
     headers: str = "accept: */*\naccept-encoding: ... Paste your headers here ..."
 
 
-class YtmWrapper(ServiceWrapper, ABC):
-    @abstractmethod
-    def get_playlist(self, *args, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def get_song(self, *args, use_cache=True, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def search(self, *args, use_cache=True, **kwargs) -> Any:
-        pass
-
-    @abstractmethod
-    def create_playlist(self, title: str, description: str = "") -> str:
-        pass
-
-    @abstractmethod
-    def edit_title(self, playlist_id: str, title: str) -> None:
-        pass
-
-    @abstractmethod
-    def edit_description(self, playlist_id: str, description: str) -> None:
-        pass
-
-    @abstractmethod
-    def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
-        """Add tracks to a playlist."""
-
-    @abstractmethod
-    def remove_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
-        """Remove tracks from a playlist."""
-
-    @abstractmethod
-    def get_library_playlists(self, *args, **kwargs) -> Any:
-        pass
-
-
-class YtmAPIWrapper(YtmWrapper):
+class YtmAPIWrapper(ServiceWrapper):
     def __init__(self, config: YtmConfig, cache_root: Path) -> None:
         super().__init__("ytm", cache_root=cache_root)
         headers_path = (
@@ -134,9 +96,12 @@ class YtmAPIWrapper(YtmWrapper):
     def get_library_playlists(self, *args, **kwargs):
         return self.ytm.get_library_playlists(*args, **kwargs)
 
+    def edit_playlist(self, playlist_id: str, title: str, description: str) -> None:
+        self.ytm.edit_playlist(playlist_id, title=title, description=description)
+
 
 class YTM(StreamingService):
-    wrapper: YtmWrapper
+    wrapper: YtmAPIWrapper
 
     def __init__(self, name: str, config: YtmConfig, cache_root: Path) -> None:
         super().__init__(name, ServiceType.YTM, cache_root)
@@ -255,3 +220,18 @@ class YTM(StreamingService):
     def is_uri_alive(self, uri: TrackURIs) -> bool:
         raw = self.wrapper.get_song(uri.uri)
         return "playabilityStatus" in raw and raw["playabilityStatus"]["status"] == "OK"
+
+    def pull_metadata(self, uri: YtmPlaylistURI) -> PlaylistDetails:
+        res = self.wrapper.get_playlist(uri.uri)
+        print(res)
+        return PlaylistDetails(
+            name=res["title"],
+            description=res["description"],
+        )
+
+    def update_metadata(
+        self, playlist_uri: YtmPlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        self.wrapper.edit_playlist(
+            playlist_uri.uri, metadata.name, metadata.description
+        )

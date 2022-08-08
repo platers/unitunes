@@ -1,9 +1,8 @@
 import pytest
+from unitunes.services.services import Pushable
 from unitunes.services.spotify import (
-    SpotifyAPIWrapper,
     SpotifyConfig,
     SpotifyService,
-    SpotifyWrapper,
 )
 from unitunes.uri import SpotifyPlaylistURI, SpotifyTrackURI
 
@@ -58,3 +57,7 @@ def test_spotify_can_search(spotify_service: SpotifyService):
         'track:"value=\'OBENTO MAGNUM\' aliases=[]" artist:"DOKONJOFINGER(CV:伊東健人、小松昌平、小野友樹、白井悠介)" album:"TVアニメ「SHOW BY ROCK!!STARS!!」挿入歌ミニアルバム Vol.1"'
     )  # this is a tricky URL due to the album. Spotipy returns 404, make sure we handle gracefully.
     assert results is not None
+
+
+def test_spotify_is_pushable(spotify_service: SpotifyService):
+    assert isinstance(spotify_service, Pushable)

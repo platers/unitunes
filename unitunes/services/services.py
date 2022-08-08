@@ -10,7 +10,7 @@ from typing import (
 )
 
 from pydantic import BaseModel
-from unitunes.playlist import PlaylistMetadata
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 from unitunes.track import Track
 
 from unitunes.types import ServiceType
@@ -73,6 +73,10 @@ class PlaylistPullable(Protocol):
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
         """Gets tracks from a playlist"""
 
+    @abstractmethod
+    def pull_metadata(self, uri: PlaylistURI) -> PlaylistDetails:
+        """Gets metadata from a playlist"""
+
 
 @runtime_checkable
 class TrackPullable(Protocol):
@@ -106,6 +110,12 @@ class Pushable(PlaylistPullable, Protocol):
     @abstractmethod
     def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
         """Removes tracks from a playlist"""
+
+    @abstractmethod
+    def update_metadata(
+        self, playlist_uri: PlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        """Updates the metadata of a playlist"""
 
 
 @runtime_checkable

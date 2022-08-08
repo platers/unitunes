@@ -16,6 +16,11 @@ class PlaylistMetadata(BaseModel):
     uri: PlaylistURIs
 
 
+class PlaylistDetails(BaseModel):
+    name: str
+    description: str
+
+
 class Playlist(BaseModel):
     name: str
     description: str = ""
@@ -79,3 +84,13 @@ class Playlist(BaseModel):
 
         for track in playlist.tracks:
             self.merge_track(track, matcher)
+
+    def metadata(self) -> PlaylistDetails:
+        return PlaylistDetails(
+            name=self.name,
+            description=self.description,
+        )
+
+    def merge_metadata(self, metadata: PlaylistDetails) -> None:
+        self.name = metadata.name
+        self.description = metadata.description

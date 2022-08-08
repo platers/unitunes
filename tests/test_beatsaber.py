@@ -6,7 +6,7 @@ from typing import Any, List
 import pytest
 from unitunes.matcher import DefaultMatcherStrategy
 from unitunes.searcher import DefaultSearcherStrategy
-from unitunes.services.services import cache
+from unitunes.services.services import Pushable, cache
 from unitunes.services.beatsaber import (
     BeatsaberConfig,
     BeatsaberService,
@@ -174,3 +174,7 @@ def test_add_remove_tracks(Beatsaber: BeatsaberService):
 
     Beatsaber.remove_tracks(playlist, [track])
     assert len(Beatsaber.pull_tracks(playlist)) == 2
+
+
+def test_protocols(Beatsaber: BeatsaberService):
+    assert isinstance(Beatsaber, Pushable)

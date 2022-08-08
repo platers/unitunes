@@ -177,11 +177,11 @@ class PlaylistManager:
 
     def pull_playlist(
         self,
-        playlist_name: str,
+        playlist_id: str,
         progress_callback: Callable[[int, int], None] = lambda x, y: None,
     ) -> None:
         """Pull all tracks from a playlist from its services."""
-        playlist = self.playlists[playlist_name]
+        playlist = self.playlists[playlist_id]
 
         new_tracks: List[Track] = []
         missing_uris: List[TrackURIs] = []
@@ -201,6 +201,10 @@ class PlaylistManager:
             assert isinstance(service, PlaylistPullable)
 
             for uri in playlist.uris[service_name]:
+                # Pull metadata
+                remote_metadata = service.pull_metadata(uri)
+                playlist.merge_metadata(remote_metadata)
+
                 # Get remote tracks
                 remote_tracks = service.pull_tracks(uri)
 
@@ -239,11 +243,11 @@ class PlaylistManager:
 
     def push_playlist(
         self,
-        playlist_name: str,
+        playlist_id: str,
         progress_callback: Callable[[int, int], None] = lambda x, y: None,
     ) -> None:
         """Push all tracks from a playlist to its services."""
-        playlist = self.playlists[playlist_name]
+        playlist = self.playlists[playlist_id]
 
         pushable_services = [
             service_name
@@ -259,6 +263,10 @@ class PlaylistManager:
             assert isinstance(service, Pushable)
 
             for uri in playlist.uris[service_name]:
+                # Update remote metadata
+                service.update_metadata(uri, playlist.metadata())
+
+                # Update remote tracks
                 current_tracks = service.pull_tracks(uri)
                 new_tracks = tracks_to_add(
                     service.type, current_tracks, playlist.tracks
