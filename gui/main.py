@@ -42,7 +42,7 @@ class GUI:
     def init(self):
         self.load_app_config()
         self.load_playlist_manager()
-        self.engine = Engine(self.pm)
+        self.engine.set_pm(self.pm)
         self.sync_playlist_list()
         self.sync_service_tabs()
 
@@ -280,6 +280,17 @@ class GUI:
                     label="Push All",
                     tag="push_all_button",
                     callback=push_all_callback,
+                )
+
+                def sync_all_callback():
+                    pull_all_callback()
+                    search_all_callback()
+                    push_all_callback()
+
+                dpg.add_button(
+                    label="Sync All",
+                    tag="sync_all_button",
+                    callback=sync_all_callback,
                 )
 
             if dpg.does_item_exist("edit_playlist_window"):

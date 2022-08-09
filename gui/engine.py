@@ -89,9 +89,14 @@ class Engine:
     thread: Thread
 
     def __init__(self, pm: PlaylistManager) -> None:
-        self._pm = pm
+        self.set_pm(pm)
         self.thread = Thread(target=self._process_queue, daemon=True)
         self.thread.start()
+
+    def set_pm(self, pm: PlaylistManager) -> None:
+        self._pm = pm
+        self._queue.queue.clear()
+        self._jobs.clear()
 
     def _process_queue(self) -> None:
         while True:
