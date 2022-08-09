@@ -59,12 +59,6 @@ class YtmAPIWrapper(ServiceWrapper):
         assert isinstance(id, str)
         return id
 
-    def edit_title(self, playlist_id: str, title: str) -> None:
-        self.ytm.edit_playlist(playlist_id, title=title)
-
-    def edit_description(self, playlist_id: str, description: str) -> None:
-        self.ytm.edit_playlist(playlist_id, description=description)
-
     def add_tracks(self, playlist_id: str, track_ids: List[str]) -> None:
         """Add tracks to a playlist."""
         if playlist_id == "LM":
@@ -97,7 +91,14 @@ class YtmAPIWrapper(ServiceWrapper):
         return self.ytm.get_library_playlists(*args, **kwargs)
 
     def edit_playlist(self, playlist_id: str, title: str, description: str) -> None:
-        self.ytm.edit_playlist(playlist_id, title=title, description=description)
+        if playlist_id == "LM":
+            # Your Likes playlist cannot be edited
+            return
+        try:
+            self.ytm.edit_playlist(playlist_id, title=title, description=description)
+        except Exception as e:
+            print(e)
+            print("Failed to edit playlist")
 
 
 class YTM(StreamingService):

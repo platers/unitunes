@@ -1,7 +1,13 @@
 {
-    "('track:\"value=\\'OBENTO MAGNUM\\' aliases=[]\" artist:\"DOKONJOFINGER(CV:\u4f0a\u6771\u5065\u4eba\u3001\u5c0f\u677e\u660c\u5e73\u3001\u5c0f\u91ce\u53cb\u6a39\u3001\u767d\u4e95\u60a0\u4ecb)\" album:\"TV\u30a2\u30cb\u30e1\u300cSHOW BY ROCK!!STARS!!\u300d\u633f\u5165\u6b4c\u30df\u30cb\u30a2\u30eb\u30d0\u30e0 Vol.1\"',)_{'limit': 5, 'type': 'track'}": {
+    "('track:\"tfarotnfarotnferiatfartnfarotnferiatfarotnfarotnferiatfarotnfarotnfeatfarotnfarotnferiatfarot',)_{'limit': 5, 'type': 'track'}": {
         "tracks": {
-            "items": []
+            "href": "https://api.spotify.com/v1/search?query=track%3A%22tfarotnfarotnferiatfartnfarotnferiatfarotnfarotnferiatfarotnfarotnfeatfarotnfarotnferiatfarot&type=track&offset=0&limit=5",
+            "items": [],
+            "limit": 5,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total": 0
         }
     }
 }

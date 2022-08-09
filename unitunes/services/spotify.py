@@ -50,11 +50,8 @@ class SpotifyAPIWrapper(ServiceWrapper):
 
     @cache
     def search(self, *args, use_cache=True, **kwargs):
-        try:
-            return self.sp.search(*args, **kwargs)
-        except Exception as e:
-            print(e)
-            return {"tracks": {"items": []}}
+        # Query length must be less than or equal to 100 characters, otherwise 404 is returned
+        return self.sp.search(*args, **kwargs)
 
     def create_playlist(self, title: str, description: str = "") -> str:
         id = self.sp.user_playlist_create(self.sp.me()["id"], title, public=False)["id"]
@@ -113,9 +110,18 @@ class SpotifyAPIWrapper(ServiceWrapper):
             self.sp.current_user_saved_tracks_delete(chunk)
 
     def change_details(self, playlist_id: str, title: str, description: str):
-        self.sp.user_playlist_change_details(
-            self.sp.me()["id"], playlist_id, name=title, description=description
-        )
+        if playlist_id == "Liked Songs":
+            # Liked songs has no metadata
+            return
+
+        if not description:
+            self.sp.user_playlist_change_details(
+                self.sp.me()["id"], playlist_id, name=title
+            )
+        else:
+            self.sp.user_playlist_change_details(
+                self.sp.me()["id"], playlist_id, name=title, description=description
+            )
 
 
 class SpotifyService(StreamingService):
@@ -207,6 +213,8 @@ class SpotifyService(StreamingService):
         )
 
     def search_query(self, query: str) -> List[Track]:
+        query = query[:100]
+
         results = self.wrapper.search(query, limit=5, type="track")
         return list(
             map(
