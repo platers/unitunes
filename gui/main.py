@@ -489,7 +489,10 @@ class GUI:
         """Remove all playlist rows and add them again."""
         self.playlists_tab_setup()
 
-        for playlist in self.pm.playlists:
+        playlists = list(self.pm.playlists.keys())
+        # sort by name
+        playlists.sort(key=lambda x: self.pm.playlists[x].name)
+        for playlist in playlists:
             self.add_placeholder_playlist_row(playlist)
             self.sync_playlist_row(playlist)
 
