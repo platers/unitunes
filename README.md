@@ -1,6 +1,6 @@
 # unitunes [![PyPI version](https://badge.fury.io/py/unitunes.svg)](https://badge.fury.io/py/unitunes) ![example workflow](https://github.com/platers/unitunes/actions/workflows/github-actions.yml/badge.svg)
 
-![unituneslogo](https://github.com/platers/unitunes/blob/master/unitunes.png?raw=true)
+![unituneslogo](assets/unitunes.png)
 
 A python GUI and library to sync playlists across music streaming services.
 
