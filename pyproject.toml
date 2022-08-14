@@ -1,15 +1,14 @@
 [tool.poetry]
 name = "unitunes"
-version = "1.0.1"
-description = "A CLI tool to manage playlists across music streaming services."
+version = "2.0.0"
+description = "A GUI and library to manage playlists across music streaming services."
 authors = ["platers <platers81@gmail.com>"]
 readme = "README.md"
 license = "GPLv3"
 homepage = "https://github.com/platers/unitunes"
-keywords = ["cli", "music", "playlist", "playlists", "spotify", "ytmusic", "musicbrainz"]
+keywords = ["gui", "music", "playlist", "playlists", "spotify", "ytmusic", "musicbrainz"]
 classifiers = [
     "Development Status :: 3 - Alpha",
-    "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Natural Language :: English",
@@ -21,13 +20,11 @@ unitunes = "gui.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-typer = {extras = ["all"], version = "^0.4.1"}
 spotipy = "^2.19.0"
 ytmusicapi = "^0.21.0"
 musicbrainzngs = "^0.7.1"
 pydantic = "^1.9.0"
 strsimpy = "^0.2.1"
-rich = "^12.2.0"
 ratelimit = "^2.2.1"
 youtube-title-parse = "^1.0.0"
 tqdm = "^4.64.0"

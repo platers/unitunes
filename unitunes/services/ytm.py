@@ -1,8 +1,6 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
 import time
-from typing import Any, List, Optional
-from pydantic import BaseModel
+from typing import List, Optional
 from tqdm import tqdm
 from ytmusicapi import YTMusic
 from unitunes.playlist import PlaylistDetails, PlaylistMetadata
