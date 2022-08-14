@@ -2,9 +2,9 @@
 
 ![unituneslogo](https://github.com/platers/unitunes/blob/master/unitunes.png?raw=true)
 
-A command-line interface tool to manage playlists across music streaming services.
+A python GUI and library to sync playlists across music streaming services.
 
-![demo](demo.gif)
+![playlist_tab](assets/playlist_tab.png)
 
 ## Introduction
 
@@ -23,107 +23,22 @@ unitunes stores your playlists in plain text, allowing you to version control yo
 
 Want to add support for another service? See [contributing](#contributing).
 
-## Quickstart
-
-### Installation
+## Usage
 
 ```bash
 pip install unitunes
+unitunes
 ```
 
-### Initialize
+In settings, set the directory to store your playlists. You can version control this directory with git.
 
-```bash
-unitunes init
-```
+Connect services in the service tab. Enter a service name, and click the button to add the corresponding service. Each service type requires some configuration, Spotify requires a client id and secret, and Youtube Music requires request headers.
+![service_tab](assets/service_tab.png)
 
-This creates a `index.json` file in the current directory.
+Playlists can then be added to the playlist tab.
 
-### Add Services
-
-#### Spotify
-
-Follow the instructions at https://spotipy.readthedocs.io/en/2.19.0/#getting-started to obtain client credentials.
-
-Put the credentials in a file like so:
-
-```json
-{
-  "client_id": "...",
-  "client_secret": "...",
-  "redirect_uri": "http://example.com"
-}
-```
-
-Register the service in unitunes:
-
-```bash
-unitunes service add spotify spotify_config.json
-```
-
-#### Youtube Music
-
-Follow the instructions at https://ytmusicapi.readthedocs.io/en/latest/setup.html#manual-file-creation to create a `ytm_config.json` file.
-
-Register the service in unitunes:
-
-```bash
-unitunes service add ytm ytm_config.json
-```
-
-### Add Playlists
-
-Initialize UP's from your existing playlists:
-
-```bash
-unitunes fetch spotify # use -f to skip confirmation
-unitunes fetch ytm
-```
-
-### Pull Playlists
-
-Pull all tracks from all playlists.
-
-```bash
-unitunes pull
-```
-
-### Search Playlists
-
-Search for tracks on another service:
-
-```bash
-unitunes search SERVICE_TYPE PLAYLIST_NAME
-```
-
-### Push Playlists
-
-Push all changes to streaming services:
-
-```bash
-unitunes push
-```
+After adding playlists, you can sync them. You likely just want to press the `Sync All` button, which will pull, search, and push all playlists.
 
 ## Contributing
 
-unitunes is in alpha. Contributions are very welcome. I am looking for collaborators to grow unitunes into a foundation for user controlled music software.
-
-Take a look at the open issues!
-
-### Development Setup
-
-1. Fork and clone the repository.
-2. Install [poetry](https://python-poetry.org/).
-3. In the root directory, run `poetry shell`.
-4. Run `poetry install`.
-5. `unitunes` should now be runnable.
-
-#### Testing
-
-Run `pytest` to run tests. With no arguments, it will skip tests that require service configs.
-
-Add a service config to run more tests.
-
-```bash
-pytest --spotify spotify_config.json --ytm ytm_config.json # may need to run with -s to paste spotify redirect URL the first time
-```
+unitunes is rapidly evolving. Take a look at the [contributing guide](CONTRIBUTING.md).
