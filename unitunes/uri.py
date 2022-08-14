@@ -100,6 +100,8 @@ class SpotifyPlaylistURI(PlaylistURI):
     def url_to_uri(url: str) -> str:
         if url == "spotify:liked_songs":
             return "Liked Songs"
+        # remove params
+        url = url.split("?")[0]
         return url.split("/")[-1]
 
     @staticmethod
@@ -267,14 +269,8 @@ track_uri_types = [SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrac
 album_uri_types = [MB_RELEASE_URI]
 all_uri_types = [..., *playlist_uri_types, *track_uri_types, *album_uri_types]
 
-URI = Union[
-    TrackURIs,
-    PlaylistURIs,
-    AlbumURIs,
-]
 
-
-def URI_Builder(service: ServiceType, type: EntityType, uri: str) -> URI:
+def URI_Builder(service: ServiceType, type: EntityType, uri: str) -> URIBase:
     if service == ServiceType.SPOTIFY:
         if type == EntityType.TRACK:
             return SpotifyTrackURI.from_uri(uri)
@@ -320,7 +316,7 @@ def albumURI_from_url(url: str) -> AlbumURIs:
     raise ValueError(f"Unknown URL format {url}")
 
 
-def URI_from_url(url: str) -> URI:
+def URI_from_url(url: str) -> URIBase:
     for cls in all_uri_types:
         if cls.valid_url(url):
             return cls.from_url(url)

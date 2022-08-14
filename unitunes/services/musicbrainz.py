@@ -6,10 +6,8 @@ from ratelimit import sleep_and_retry, limits
 
 import requests
 from unitunes.services.services import (
-    Searchable,
     ServiceWrapper,
     StreamingService,
-    TrackPullable,
     cache,
 )
 from unitunes.track import AliasedString, Track
@@ -56,9 +54,12 @@ class MusicBrainzWrapper(ServiceWrapper):
 class MusicBrainz(StreamingService):
     wrapper: MusicBrainzWrapper
 
-    def __init__(self, wrapper: MusicBrainzWrapper) -> None:
-        super().__init__("MusicBrainz", ServiceType.MB)
-        self.wrapper = wrapper
+    def __init__(self, cache_root: Path) -> None:
+        super().__init__("MusicBrainz", ServiceType.MB, cache_root)
+        self.wrapper = MusicBrainzWrapper(cache_root)
+
+    def load_config(self, config) -> None:
+        pass
 
     @staticmethod
     def parse_track(recording):

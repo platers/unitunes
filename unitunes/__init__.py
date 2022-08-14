@@ -1,1 +1,4 @@
-__version__ = '0.1.0'
+from .main import PlaylistManager
+from .playlist import Playlist
+from .file_manager import FileManager
+from .index import Index

@@ -1,31 +1,37 @@
-from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, List
+from platformdirs import user_documents_dir
 
 from pydantic import BaseModel
 from unitunes.file_manager import format_filename
-from unitunes.playlist import Playlist, PlaylistMetadata
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 import requests
 
 from unitunes.services.services import (
-    Pushable,
-    Searchable,
+    ServiceConfig,
     ServiceWrapper,
     StreamingService,
-    TrackPullable,
-    UserPlaylistPullable,
     cache,
 )
 from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
-    URI,
     BeatsaberPlaylistURI,
     BeatsaberTrackURI,
     PlaylistURI,
-    PlaylistURIs,
-    TrackURI,
 )
+
+
+class BeatsaberSearchConfig(BaseModel):
+    minNps: int = 0
+    maxNps: int = 1000
+    minRating: float = 0.51
+    sortOrder: str = "Relevance"
+
+
+class BeatsaberConfig(ServiceConfig):
+    dir: Path = Path(user_documents_dir()) / "Beatsaber"
+    search_config: BeatsaberSearchConfig = BeatsaberSearchConfig()
 
 
 class BeatsaverAPIWrapper(ServiceWrapper):
@@ -55,29 +61,25 @@ class BPListSong(BaseModel):
 
 
 class BPList(BaseModel):
-    playlistTitle: str
-    playlistAuthor: str
-    playlistDescription: str
-    image: str
-    songs: List[BPListSong]
+    playlistTitle: str = ""
+    playlistAuthor: str = ""
+    playlistDescription: str = ""
+    image: str = ""
+    songs: List[BPListSong] = []
 
 
 class BeatsaberService(StreamingService):
     # Tracks are online at beatsaver.com, playlists are local .bplist files
     wrapper: BeatsaverAPIWrapper
-    search_config = {}
-    dir: Path
+    config: BeatsaberConfig
 
-    def __init__(self, name: str, wrapper: BeatsaverAPIWrapper, config) -> None:
-        super().__init__(name, ServiceType.BEATSABER)
-        self.wrapper = wrapper
+    def __init__(self, name: str, config: BeatsaberConfig, cache_root: Path) -> None:
+        super().__init__(name, ServiceType.BEATSABER, cache_root)
+        self.wrapper = BeatsaverAPIWrapper(cache_root)
+        self.load_config(config)
 
-        if "dir" not in config:
-            raise ValueError("No beatsaber directory specified")
-        self.dir = Path(config["dir"])
-
-        if "search_config" in config:
-            self.search_config = config["search_config"]
+    def load_config(self, config: BeatsaberConfig) -> None:
+        self.config = config
 
     def pull_track(self, uri: BeatsaberTrackURI) -> Track:
         res = self.wrapper.map(uri.uri)
@@ -93,7 +95,7 @@ class BeatsaberService(StreamingService):
         results = self.wrapper.search(
             query,
             0,
-            search_config=self.search_config,
+            search_config=self.config.search_config.dict(),
         )
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
@@ -108,7 +110,7 @@ class BeatsaberService(StreamingService):
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
         # find .bplist files in the beatsaber directory
         playlists = []
-        for file in self.dir.iterdir():
+        for file in self.config.dir.iterdir():
             if file.suffix == ".bplist":
                 bp = BPList.parse_file(file)
                 playlists.append(
@@ -122,17 +124,19 @@ class BeatsaberService(StreamingService):
         return playlists
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        bp = BPList.parse_file(self.dir / (uri.uri))
+        # create a new playlist if it doesn't exist
+        path = self.config.dir / uri.uri
+        if not path.exists():
+            raise FileNotFoundError(f"{path} does not exist. Try pushing first.")
+
+        bp = BPList.parse_file(path)
         return [
             self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
-    def write_bplist(self, playlist_uri: PlaylistURI, bp: BPList) -> None:
-        with (self.dir / (playlist_uri.uri)).open("w") as f:
+    def write_bplist(self, playlist_uri: BeatsaberPlaylistURI, bp: BPList) -> None:
+        with (self.config.dir / playlist_uri.uri).open("w") as f:
             f.write(bp.json(indent=4))
-
-    def read_playlist(self, playlist_uri: PlaylistURI) -> BPList:
-        return BPList.parse_file(self.dir / (playlist_uri.uri))
 
     def create_playlist(
         self, title: str, description: str = ""
@@ -159,6 +163,12 @@ class BeatsaberService(StreamingService):
             songName=results["name"],
         )
 
+    def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
+        path = self.config.dir / playlist_uri.uri
+        if not path.exists():
+            return BPList()
+        return BPList.parse_file(self.config.dir / (playlist_uri.uri))
+
     def add_tracks(
         self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
     ) -> None:
@@ -167,10 +177,27 @@ class BeatsaberService(StreamingService):
         bp.songs.extend(new_songs)
         self.write_bplist(playlist_uri, bp)
 
-    def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
+    def remove_tracks(
+        self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
+    ) -> None:
         bp = self.read_playlist(playlist_uri)
         removed_songs = [self.get_song(track) for track in tracks]
         bp.songs = [
             song for song in bp.songs if song.key not in [s.key for s in removed_songs]
         ]
         self.write_bplist(playlist_uri, bp)
+
+    def pull_metadata(self, uri: BeatsaberPlaylistURI) -> PlaylistDetails:
+        bp = self.read_playlist(uri)
+        return PlaylistDetails(
+            name=bp.playlistTitle,
+            description=bp.playlistDescription,
+        )
+
+    def update_metadata(
+        self, uri: BeatsaberPlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        bp = self.read_playlist(uri)
+        bp.playlistTitle = metadata.name
+        bp.playlistDescription = metadata.description
+        self.write_bplist(uri, bp)

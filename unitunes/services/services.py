@@ -8,11 +8,17 @@ from typing import (
     Protocol,
     runtime_checkable,
 )
-from unitunes.playlist import PlaylistMetadata
+
+from pydantic import BaseModel
+from unitunes.playlist import PlaylistDetails, PlaylistMetadata
 from unitunes.track import Track
 
 from unitunes.types import ServiceType
 from unitunes.uri import PlaylistURI, PlaylistURIs, TrackURI, TrackURIs
+
+
+class ServiceConfig(ABC, BaseModel):
+    pass
 
 
 def cache(method):
@@ -67,6 +73,10 @@ class PlaylistPullable(Protocol):
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
         """Gets tracks from a playlist"""
 
+    @abstractmethod
+    def pull_metadata(self, uri: PlaylistURI) -> PlaylistDetails:
+        """Gets metadata from a playlist"""
+
 
 @runtime_checkable
 class TrackPullable(Protocol):
@@ -101,6 +111,12 @@ class Pushable(PlaylistPullable, Protocol):
     def remove_tracks(self, playlist_uri: PlaylistURI, tracks: List[Track]) -> None:
         """Removes tracks from a playlist"""
 
+    @abstractmethod
+    def update_metadata(
+        self, playlist_uri: PlaylistURI, metadata: PlaylistDetails
+    ) -> None:
+        """Updates the metadata of a playlist"""
+
 
 @runtime_checkable
 class Checkable(Protocol):
@@ -113,7 +129,14 @@ class StreamingService(ABC):
     name: str
     type: ServiceType
     wrapper: ServiceWrapper
+    config: ServiceConfig
+    cache_root: Path
 
-    def __init__(self, name: str, type: ServiceType) -> None:
+    def __init__(self, name: str, type: ServiceType, cache_root: Path) -> None:
         self.name = name
         self.type = type
+        self.cache_root = cache_root
+
+    @abstractmethod
+    def load_config(self, config: ServiceConfig) -> None:
+        """Loads the config for the service"""

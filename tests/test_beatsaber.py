@@ -6,8 +6,12 @@ from typing import Any, List
 import pytest
 from unitunes.matcher import DefaultMatcherStrategy
 from unitunes.searcher import DefaultSearcherStrategy
-from unitunes.services.services import cache
-from unitunes.services.beatsaber import BeatsaberService, BeatsaverAPIWrapper
+from unitunes.services.services import Pushable, cache
+from unitunes.services.beatsaber import (
+    BeatsaberConfig,
+    BeatsaberService,
+    BeatsaverAPIWrapper,
+)
 
 from tests.conftest import cache_path
 from unitunes.track import AliasedString, Track
@@ -119,17 +123,9 @@ def populated_dir(empty_dir: Path):
 
 
 @pytest.fixture
-def Beatsaber(beatsaver_api_wrapper, populated_dir: Path):
-    config = {
-        "dir": populated_dir.absolute().__str__(),
-        "search_config": {
-            "minNps": 0.0,
-            "maxNps": 1000,
-            "minRating": 0,
-            "sortOrder": "Relevance",
-        },
-    }
-    return BeatsaberService("beatsaber", beatsaver_api_wrapper, config)
+def Beatsaber(populated_dir: Path):
+    config = BeatsaberConfig(dir=populated_dir.absolute())
+    return BeatsaberService("beatsaber", config, cache_path)
 
 
 def test_pull_track(Beatsaber: BeatsaberService):
@@ -178,3 +174,7 @@ def test_add_remove_tracks(Beatsaber: BeatsaberService):
 
     Beatsaber.remove_tracks(playlist, [track])
     assert len(Beatsaber.pull_tracks(playlist)) == 2
+
+
+def test_protocols(Beatsaber: BeatsaberService):
+    assert isinstance(Beatsaber, Pushable)

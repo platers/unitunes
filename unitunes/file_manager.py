@@ -1,8 +1,10 @@
+import json
 from pathlib import Path
 import string
 
 from unitunes.index import Index
 from unitunes.playlist import Playlist
+from unitunes.services.services import ServiceConfig
 
 
 def format_filename(s):
@@ -19,44 +21,60 @@ def format_filename(s):
 
 class FileManager:
     dir: Path
-    config_path: Path
+    index_path: Path
     playlist_folder: Path
     cache_path: Path
+    service_configs_path: Path
 
     def __init__(self, dir: Path) -> None:
         self.dir = dir
-        self.config_path = dir / "index.json"
+        self.index_path = dir / "index.json"
         self.playlist_folder = dir / "playlists"
         self.cache_path = dir / "cache"
+        self.service_configs_path = dir / "service_configs"
 
-    def get_playlist_path(self, name: str) -> Path:
-
-        return self.playlist_folder / f"{format_filename(name)}.json"
-
-    def make_playlist_dir(self) -> None:
-        self.playlist_folder.mkdir(exist_ok=True)
+    def get_playlist_path(self, playlist_id: str) -> Path:
+        return self.playlist_folder / f"{format_filename(playlist_id)}.json"
 
     def save_index(self, index: Index) -> None:
-        with open(self.config_path, "w") as f:
+        with open(self.index_path, "w") as f:
             f.write(index.json(indent=4))
 
     def load_index(self) -> Index:
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"index file not found: {self.config_path}")
-        return Index.parse_file(self.config_path)
+        if not self.index_path.exists():
+            raise FileNotFoundError(f"index file not found: {self.index_path}")
+        return Index.parse_file(self.index_path)
 
-    def save_playlist(self, playlist: Playlist) -> None:
-        with open(self.get_playlist_path(playlist.name), "w") as f:
+    def save_playlist(self, playlist: Playlist, playlist_id: str) -> None:
+        self.playlist_folder.mkdir(exist_ok=True)
+        with open(self.get_playlist_path(playlist_id), "w") as f:
             f.write(playlist.json(indent=4))
 
-    def load_playlist(self, name: str) -> Playlist:
-        path = self.get_playlist_path(name)
+    def load_playlist(self, playlist_id: str) -> Playlist:
+        path = self.get_playlist_path(playlist_id)
         if not path.exists():
             raise FileNotFoundError(f"Playlist file not found: {path}")
         return Playlist.parse_file(path)
 
-    def delete_playlist(self, name: str) -> None:
-        path = self.get_playlist_path(name)
+    def delete_playlist(self, playlist_id: str) -> None:
+        path = self.get_playlist_path(playlist_id)
         if not path.exists():
             raise FileNotFoundError(f"Playlist file not found: {path}")
+        path.unlink()
+
+    def service_config_path(self, service_name: str) -> Path:
+        return (
+            self.service_configs_path / f"{format_filename(service_name)}_config.json"
+        )
+
+    def save_service_config(self, service_name: str, config: ServiceConfig) -> None:
+        self.service_configs_path.mkdir(exist_ok=True)
+        path = self.service_config_path(service_name)
+        with open(path, "w") as f:
+            f.write(config.json(indent=4))
+
+    def delete_service_config(self, service_name: str) -> None:
+        path = self.service_config_path(service_name)
+        if not path.exists():
+            raise FileNotFoundError(f"Service config file not found: {path}")
         path.unlink()
