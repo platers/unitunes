@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-unitunes = "gui.main:main"
+unitunes = "unitunes.gui.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.9"

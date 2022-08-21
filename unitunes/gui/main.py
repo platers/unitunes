@@ -4,7 +4,7 @@ import webbrowser
 import dearpygui.dearpygui as dpg
 from appdirs import user_data_dir
 from pydantic import BaseModel
-from gui.engine import Engine, Job, JobStatus, JobType
+from unitunes.gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
 from unitunes.index import IndexServiceEntry
 from unitunes.services.beatsaber import BeatsaberConfig, BeatsaberSearchConfig
