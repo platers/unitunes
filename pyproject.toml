@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "unitunes"
-version = "2.0.0"
+version = "2.0.1"
 description = "A GUI and library to manage playlists across music streaming services."
 authors = ["platers <platers81@gmail.com>"]
 readme = "README.md"
