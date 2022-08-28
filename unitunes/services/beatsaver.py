@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any, List
+from urllib import response
 from platformdirs import user_documents_dir
 
 from pydantic import BaseModel
@@ -16,27 +17,49 @@ from unitunes.services.services import (
 from unitunes.track import AliasedString, Track
 from unitunes.types import ServiceType
 from unitunes.uri import (
-    BeatsaberPlaylistURI,
-    BeatsaberTrackURI,
+    BeatSaverPlaylistURI,
+    BeatSaverTrackURI,
     PlaylistURI,
 )
 
 
-class BeatsaberSearchConfig(BaseModel):
+class BeatSaverSearchConfig(BaseModel):
     minNps: int = 0
     maxNps: int = 1000
     minRating: float = 0.51
     sortOrder: str = "Relevance"
 
 
-class BeatsaberConfig(ServiceConfig):
-    dir: Path = Path(user_documents_dir()) / "Beatsaber"
-    search_config: BeatsaberSearchConfig = BeatsaberSearchConfig()
+class BeatSaverConfig(ServiceConfig):
+    dir: Path = Path(user_documents_dir()) / "BeatSaver"
+    search_config: BeatSaverSearchConfig = BeatSaverSearchConfig()
+    username: str = ""
+    password: str = ""
 
 
-class BeatsaverAPIWrapper(ServiceWrapper):
-    def __init__(self, cache_root) -> None:
-        super().__init__("beatsaber", cache_root=cache_root)
+class BeatSaverAPIWrapper(ServiceWrapper):
+    s: requests.Session
+    config: BeatSaverConfig
+
+    def __init__(self, config, cache_root) -> None:
+        super().__init__("beatsaver", cache_root=cache_root)
+        self.s = requests.Session()
+        self.config = config
+
+    def login(self) -> None:
+        # Check if we're already logged in
+        if self.s.cookies.get("BMSESSIONID") is not None:
+            return
+
+        s = self.s
+        s.post(
+            "https://beatsaver.com/login",
+            data={
+                "username": self.config.username,
+                "password": self.config.password,
+            },
+        )
+        assert s.cookies.get("BMSESSIONID") is not None
 
     @cache
     def map(self, id: str, use_cache=True) -> Any:
@@ -53,6 +76,11 @@ class BeatsaverAPIWrapper(ServiceWrapper):
             params=params,
         ).json()["docs"]
 
+    @cache
+    def get_playlists(self, use_cache=True) -> Any:
+        self.login()
+        return self.s.get("https://beatsaver.com/api/maps/id/0/playlists").json()
+
 
 class BPListSong(BaseModel):
     key: str
@@ -68,20 +96,20 @@ class BPList(BaseModel):
     songs: List[BPListSong] = []
 
 
-class BeatsaberService(StreamingService):
+class BeatSaverService(StreamingService):
     # Tracks are online at beatsaver.com, playlists are local .bplist files
-    wrapper: BeatsaverAPIWrapper
-    config: BeatsaberConfig
+    wrapper: BeatSaverAPIWrapper
+    config: BeatSaverConfig
 
-    def __init__(self, name: str, config: BeatsaberConfig, cache_root: Path) -> None:
-        super().__init__(name, ServiceType.BEATSABER, cache_root)
-        self.wrapper = BeatsaverAPIWrapper(cache_root)
+    def __init__(self, name: str, config: BeatSaverConfig, cache_root: Path) -> None:
+        super().__init__(name, ServiceType.BEATSAVER, cache_root)
+        self.wrapper = BeatSaverAPIWrapper(config, cache_root)
         self.load_config(config)
 
-    def load_config(self, config: BeatsaberConfig) -> None:
+    def load_config(self, config: BeatSaverConfig) -> None:
         self.config = config
 
-    def pull_track(self, uri: BeatsaberTrackURI) -> Track:
+    def pull_track(self, uri: BeatSaverTrackURI) -> Track:
         res = self.wrapper.map(uri.uri)
         track = Track(
             name=AliasedString(res["metadata"]["songName"]),
@@ -98,7 +126,7 @@ class BeatsaberService(StreamingService):
             search_config=self.config.search_config.dict(),
         )
         return [
-            self.pull_track(BeatsaberTrackURI.from_uri(res["id"])) for res in results
+            self.pull_track(BeatSaverTrackURI.from_uri(res["id"])) for res in results
         ]
 
     def query_generator(self, track: Track) -> List[str]:
@@ -108,19 +136,17 @@ class BeatsaberService(StreamingService):
         ]
 
     def get_playlist_metadatas(self) -> list[PlaylistMetadata]:
-        # find .bplist files in the beatsaber directory
-        playlists = []
-        for file in self.config.dir.iterdir():
-            if file.suffix == ".bplist":
-                bp = BPList.parse_file(file)
-                playlists.append(
-                    PlaylistMetadata(
-                        name=bp.playlistTitle,
-                        description=bp.playlistDescription,
-                        uri=BeatsaberPlaylistURI.from_uri(file.name),
-                    )
-                )
+        response = self.wrapper.get_playlists()
 
+        def parse_playlist(playlist):
+            pl = playlist["playlist"]
+            return PlaylistMetadata(
+                name=pl["name"],
+                description="",
+                uri=BeatSaverPlaylistURI.from_uri(pl["playlistId"]),
+            )
+
+        playlists = [parse_playlist(playlist) for playlist in response]
         return playlists
 
     def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
@@ -131,16 +157,16 @@ class BeatsaberService(StreamingService):
 
         bp = BPList.parse_file(path)
         return [
-            self.pull_track(BeatsaberTrackURI.from_uri(song.key)) for song in bp.songs
+            self.pull_track(BeatSaverTrackURI.from_uri(song.key)) for song in bp.songs
         ]
 
-    def write_bplist(self, playlist_uri: BeatsaberPlaylistURI, bp: BPList) -> None:
+    def write_bplist(self, playlist_uri: BeatSaverPlaylistURI, bp: BPList) -> None:
         with (self.config.dir / playlist_uri.uri).open("w") as f:
             f.write(bp.json(indent=4))
 
     def create_playlist(
         self, title: str, description: str = ""
-    ) -> BeatsaberPlaylistURI:
+    ) -> BeatSaverPlaylistURI:
         bp = BPList(
             playlistTitle=title,
             playlistAuthor="",
@@ -148,13 +174,13 @@ class BeatsaberService(StreamingService):
             image="",
             songs=[],
         )
-        uri = BeatsaberPlaylistURI.from_uri(format_filename(title) + ".bplist")
+        uri = BeatSaverPlaylistURI.from_uri(format_filename(title) + ".bplist")
         self.write_bplist(uri, bp)
 
         return uri
 
     def get_song(self, track: Track) -> BPListSong:
-        uri = track.find_uri(ServiceType.BEATSABER)
+        uri = track.find_uri(ServiceType.BEATSAVER)
         assert uri is not None
         results = self.wrapper.map(uri.uri)
         return BPListSong(
@@ -163,14 +189,14 @@ class BeatsaberService(StreamingService):
             songName=results["name"],
         )
 
-    def read_playlist(self, playlist_uri: BeatsaberPlaylistURI) -> BPList:
+    def read_playlist(self, playlist_uri: BeatSaverPlaylistURI) -> BPList:
         path = self.config.dir / playlist_uri.uri
         if not path.exists():
             return BPList()
         return BPList.parse_file(self.config.dir / (playlist_uri.uri))
 
     def add_tracks(
-        self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
+        self, playlist_uri: BeatSaverPlaylistURI, tracks: List[Track]
     ) -> None:
         bp = self.read_playlist(playlist_uri)
         new_songs = [self.get_song(track) for track in tracks]
@@ -178,7 +204,7 @@ class BeatsaberService(StreamingService):
         self.write_bplist(playlist_uri, bp)
 
     def remove_tracks(
-        self, playlist_uri: BeatsaberPlaylistURI, tracks: List[Track]
+        self, playlist_uri: BeatSaverPlaylistURI, tracks: List[Track]
     ) -> None:
         bp = self.read_playlist(playlist_uri)
         removed_songs = [self.get_song(track) for track in tracks]
@@ -187,7 +213,7 @@ class BeatsaberService(StreamingService):
         ]
         self.write_bplist(playlist_uri, bp)
 
-    def pull_metadata(self, uri: BeatsaberPlaylistURI) -> PlaylistDetails:
+    def pull_metadata(self, uri: BeatSaverPlaylistURI) -> PlaylistDetails:
         bp = self.read_playlist(uri)
         return PlaylistDetails(
             name=bp.playlistTitle,
@@ -195,7 +221,7 @@ class BeatsaberService(StreamingService):
         )
 
     def update_metadata(
-        self, uri: BeatsaberPlaylistURI, metadata: PlaylistDetails
+        self, uri: BeatSaverPlaylistURI, metadata: PlaylistDetails
     ) -> None:
         bp = self.read_playlist(uri)
         bp.playlistTitle = metadata.name

@@ -1,0 +1,24 @@
+{
+    "()_{}": [
+        {
+            "playlist": {
+                "playlistId": 8102,
+                "playlistImage": "https://na.cdn.beatsaver.com/playlist/8102.jpg",
+                "name": "another one",
+                "public": true,
+                "owner": 4354623
+            },
+            "inPlaylist": false
+        },
+        {
+            "playlist": {
+                "playlistId": 7803,
+                "playlistImage": "https://na.cdn.beatsaver.com/playlist/7803.jpg",
+                "name": "TFRTF",
+                "public": true,
+                "owner": 4354623
+            },
+            "inPlaylist": false
+        }
+    ]
+}

@@ -260,36 +260,77 @@ class BeatsaberPlaylistURI(PlaylistURI):
         return BeatsaberPlaylistURI.from_uri(BeatsaberPlaylistURI.url_to_uri(url))
 
 
-TrackURIs = Union[SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrackURI]
-PlaylistURIs = Union[SpotifyPlaylistURI, YtmPlaylistURI, BeatsaberPlaylistURI]
+class BeatSaverTrackURI(TrackURI):
+    service: Literal[ServiceType.BEATSAVER] = ServiceType.BEATSAVER
+
+    @classmethod
+    def from_uri(cls, uri: str) -> "BeatSaverTrackURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://beatsaver.com/maps/{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://beatsaver.com/maps/")
+
+    @staticmethod
+    def from_url(url: str) -> "BeatSaverTrackURI":
+        return BeatSaverTrackURI.from_uri(BeatSaverTrackURI.url_to_uri(url))
+
+
+class BeatSaverPlaylistURI(PlaylistURI):
+    service: Literal[ServiceType.BEATSAVER] = ServiceType.BEATSAVER
+
+    @classmethod
+    def from_uri(cls, uri: str) -> "BeatSaverPlaylistURI":
+        return cls(uri=uri, url=cls.uri_to_url(uri))
+
+    @staticmethod
+    def uri_to_url(uri: str) -> str:
+        return f"https://beatsaver.com/playlists/{uri}"
+
+    @staticmethod
+    def url_to_uri(url: str) -> str:
+        return url.split("/")[-1]
+
+    @staticmethod
+    def valid_url(url: str) -> bool:
+        return url.startswith("https://beatsaver.com/playlists/")
+
+    @staticmethod
+    def from_url(url: str) -> "BeatSaverPlaylistURI":
+        return BeatSaverPlaylistURI.from_uri(BeatSaverPlaylistURI.url_to_uri(url))
+
+
+TrackURIs = Union[
+    SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrackURI, BeatSaverTrackURI
+]
+PlaylistURIs = Union[
+    SpotifyPlaylistURI, YtmPlaylistURI, BeatsaberPlaylistURI, BeatSaverPlaylistURI
+]
 AlbumURIs = MB_RELEASE_URI
 
-playlist_uri_types = [SpotifyPlaylistURI, YtmPlaylistURI, BeatsaberPlaylistURI]
-track_uri_types = [SpotifyTrackURI, YtmTrackURI, MB_RECORDING_URI, BeatsaberTrackURI]
+playlist_uri_types = [
+    SpotifyPlaylistURI,
+    YtmPlaylistURI,
+    BeatsaberPlaylistURI,
+    BeatSaverPlaylistURI,
+]
+track_uri_types = [
+    SpotifyTrackURI,
+    YtmTrackURI,
+    MB_RECORDING_URI,
+    BeatsaberTrackURI,
+    BeatSaverTrackURI,
+]
 album_uri_types = [MB_RELEASE_URI]
 all_uri_types = [..., *playlist_uri_types, *track_uri_types, *album_uri_types]
-
-
-def URI_Builder(service: ServiceType, type: EntityType, uri: str) -> URIBase:
-    if service == ServiceType.SPOTIFY:
-        if type == EntityType.TRACK:
-            return SpotifyTrackURI.from_uri(uri)
-        elif type == EntityType.PLAYLIST:
-            return SpotifyPlaylistURI.from_uri(uri)
-    elif service == ServiceType.YTM:
-        if type == EntityType.TRACK:
-            return YtmTrackURI.from_uri(uri)
-        elif type == EntityType.PLAYLIST:
-            return YtmPlaylistURI.from_uri(uri)
-    elif service == ServiceType.MB:
-        if type == EntityType.TRACK:
-            return MB_RECORDING_URI.from_uri(uri)
-        elif type == EntityType.ALBUM:
-            return MB_RELEASE_URI.from_uri(uri)
-    else:
-        raise ValueError(f"Unknown service type {service}")
-
-    raise ValueError(f"Unknown entity type {type} for service {service}")
 
 
 def playlistURI_from_url(url: str) -> PlaylistURIs:

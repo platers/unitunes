@@ -6,3 +6,4 @@ service_configs
 .vscode
 dist
 .DS_Store
+test.py

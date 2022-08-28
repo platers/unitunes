@@ -19,6 +19,7 @@ from unitunes.services.beatsaber import (
     BeatsaberConfig,
     BeatsaberService,
 )
+from unitunes.services.beatsaver import BeatSaverConfig, BeatSaverService
 from unitunes.services.musicbrainz import MusicBrainz
 from unitunes.services.services import (
     PlaylistPullable,
@@ -60,6 +61,10 @@ def service_factory(
         assert config_path is not None
         config = BeatsaberConfig.parse_file(config_path)
         return BeatsaberService(name, config, cache_path)
+    elif service_type == ServiceType.BEATSAVER:
+        assert config_path is not None
+        config = BeatSaverConfig.parse_file(config_path)
+        return BeatSaverService(name, config, cache_path)
     else:
         raise ValueError(f"Unknown service type: {service_type}")
 

@@ -14,3 +14,6 @@ def pytest_addoption(parser):
     parser.addoption(
         "--ytm", action="store", default=None, help="Youtube Music config path"
     )
+    parser.addoption(
+        "--beatsaver", action="store", default=None, help="BeatSaver config path"
+    )
