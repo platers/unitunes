@@ -90,26 +90,22 @@ def test_get_playlist_metadatas(BeatSaver: BeatSaverService):
 
 
 def test_pull_tracks(BeatSaver: BeatSaverService):
-    tracks = BeatSaver.pull_tracks(
-        BeatSaverPlaylistURI.from_uri("bass_house_music_pack.bplist")
-    )
-    assert len(tracks) == 2
-    assert tracks[0].name.value == "Jump Around"
-    assert tracks[1].name.value == "Levitate"
+    tracks = BeatSaver.pull_tracks(BeatSaverPlaylistURI.from_uri("7803"))
+    assert len(tracks) == 1
 
 
 def test_add_remove_tracks(BeatSaver: BeatSaverService):
-    playlist = BeatSaverPlaylistURI.from_uri("bass_house_music_pack.bplist")
+    playlist = BeatSaverPlaylistURI.from_uri("7803")
     track = Track(
         name=AliasedString("My Hero"),
         artists=[AliasedString("MAN WITH A MISSION")],
         uris=[BeatSaverTrackURI.from_uri("27b65")],
     )
     BeatSaver.add_tracks(playlist, [track])
-    assert len(BeatSaver.pull_tracks(playlist)) == 3
+    assert len(BeatSaver.pull_tracks(playlist)) == 2
 
     BeatSaver.remove_tracks(playlist, [track])
-    assert len(BeatSaver.pull_tracks(playlist)) == 2
+    assert len(BeatSaver.pull_tracks(playlist)) == 1
 
 
 def test_protocols(BeatSaver: BeatSaverService):

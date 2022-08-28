@@ -76,24 +76,31 @@ class BeatSaverAPIWrapper(ServiceWrapper):
             params=params,
         ).json()["docs"]
 
-    @cache
     def get_playlists(self, use_cache=True) -> Any:
         self.login()
         return self.s.get("https://beatsaver.com/api/maps/id/0/playlists").json()
 
+    def add_to_playlist(self, playlist_id: str, track_id: str) -> None:
+        self.login()
+        res = self.s.post(
+            f"https://beatsaver.com/api/playlists/id/{playlist_id}/add",
+            json={"mapId": track_id, "inPlaylist": True},
+        )
+        assert res.status_code == 200
 
-class BPListSong(BaseModel):
-    key: str
-    hash: str
-    songName: str
+    def remove_from_playlist(self, playlist_id: str, track_id: str) -> None:
+        self.login()
+        res = self.s.post(
+            f"https://beatsaver.com/api/playlists/id/{playlist_id}/add",
+            json={"mapId": track_id, "inPlaylist": False},
+        )
+        assert res.status_code == 200
 
-
-class BPList(BaseModel):
-    playlistTitle: str = ""
-    playlistAuthor: str = ""
-    playlistDescription: str = ""
-    image: str = ""
-    songs: List[BPListSong] = []
+    def get_playlist(self, playlist_id: str) -> Any:
+        self.login()
+        return self.s.get(
+            f"https://beatsaver.com/api/playlists/id/{playlist_id}/0"
+        ).json()
 
 
 class BeatSaverService(StreamingService):
@@ -140,90 +147,60 @@ class BeatSaverService(StreamingService):
 
         def parse_playlist(playlist):
             pl = playlist["playlist"]
+            id = pl["playlistId"]
+            uri = BeatSaverPlaylistURI.from_uri(id)
+            data = self.pull_metadata(uri)
             return PlaylistMetadata(
-                name=pl["name"],
-                description="",
-                uri=BeatSaverPlaylistURI.from_uri(pl["playlistId"]),
+                name=data.name,
+                description=data.description,
+                uri=uri,
             )
 
         playlists = [parse_playlist(playlist) for playlist in response]
         return playlists
 
-    def pull_tracks(self, uri: PlaylistURI) -> List[Track]:
-        # create a new playlist if it doesn't exist
-        path = self.config.dir / uri.uri
-        if not path.exists():
-            raise FileNotFoundError(f"{path} does not exist. Try pushing first.")
+    def pull_tracks(self, uri: BeatSaverPlaylistURI) -> List[Track]:
+        maps = self.wrapper.get_playlist(uri.uri)["maps"]
 
-        bp = BPList.parse_file(path)
-        return [
-            self.pull_track(BeatSaverTrackURI.from_uri(song.key)) for song in bp.songs
-        ]
+        def parse_map(map) -> Track:
+            return Track(
+                name=AliasedString(map["metadata"]["songName"]),
+                artists=[AliasedString(map["metadata"]["songAuthorName"])],
+                length=map["metadata"]["duration"],
+                uris=[BeatSaverTrackURI.from_uri(map["id"])],
+            )
 
-    def write_bplist(self, playlist_uri: BeatSaverPlaylistURI, bp: BPList) -> None:
-        with (self.config.dir / playlist_uri.uri).open("w") as f:
-            f.write(bp.json(indent=4))
+        return [parse_map(map["map"]) for map in maps]
 
     def create_playlist(
         self, title: str, description: str = ""
     ) -> BeatSaverPlaylistURI:
-        bp = BPList(
-            playlistTitle=title,
-            playlistAuthor="",
-            playlistDescription=description,
-            image="",
-            songs=[],
-        )
-        uri = BeatSaverPlaylistURI.from_uri(format_filename(title) + ".bplist")
-        self.write_bplist(uri, bp)
-
-        return uri
-
-    def get_song(self, track: Track) -> BPListSong:
-        uri = track.find_uri(ServiceType.BEATSAVER)
-        assert uri is not None
-        results = self.wrapper.map(uri.uri)
-        return BPListSong(
-            key=results["id"],
-            hash=results["versions"][0]["hash"],
-            songName=results["name"],
-        )
-
-    def read_playlist(self, playlist_uri: BeatSaverPlaylistURI) -> BPList:
-        path = self.config.dir / playlist_uri.uri
-        if not path.exists():
-            return BPList()
-        return BPList.parse_file(self.config.dir / (playlist_uri.uri))
+        raise NotImplementedError()
 
     def add_tracks(
         self, playlist_uri: BeatSaverPlaylistURI, tracks: List[Track]
     ) -> None:
-        bp = self.read_playlist(playlist_uri)
-        new_songs = [self.get_song(track) for track in tracks]
-        bp.songs.extend(new_songs)
-        self.write_bplist(playlist_uri, bp)
+        for track in tracks:
+            uri = track.find_uri(self.type)
+            assert uri is not None
+            self.wrapper.add_to_playlist(playlist_uri.uri, uri.uri)
 
     def remove_tracks(
         self, playlist_uri: BeatSaverPlaylistURI, tracks: List[Track]
     ) -> None:
-        bp = self.read_playlist(playlist_uri)
-        removed_songs = [self.get_song(track) for track in tracks]
-        bp.songs = [
-            song for song in bp.songs if song.key not in [s.key for s in removed_songs]
-        ]
-        self.write_bplist(playlist_uri, bp)
+        for track in tracks:
+            uri = track.find_uri(self.type)
+            assert uri is not None
+            self.wrapper.remove_from_playlist(playlist_uri.uri, uri.uri)
 
     def pull_metadata(self, uri: BeatSaverPlaylistURI) -> PlaylistDetails:
-        bp = self.read_playlist(uri)
+        data = self.wrapper.get_playlist(uri.uri)
         return PlaylistDetails(
-            name=bp.playlistTitle,
-            description=bp.playlistDescription,
+            name=data["playlist"]["name"],
+            description=data["playlist"]["description"],
         )
 
     def update_metadata(
         self, uri: BeatSaverPlaylistURI, metadata: PlaylistDetails
     ) -> None:
-        bp = self.read_playlist(uri)
-        bp.playlistTitle = metadata.name
-        bp.playlistDescription = metadata.description
-        self.write_bplist(uri, bp)
+        raise NotImplementedError()
