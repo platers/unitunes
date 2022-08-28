@@ -4,6 +4,7 @@ from typing import Any, List
 
 import pytest
 from unitunes.matcher import DefaultMatcherStrategy
+from unitunes.playlist import PlaylistDetails
 from unitunes.searcher import DefaultSearcherStrategy
 from unitunes.services.services import Pushable, cache
 from unitunes.services.beatsaver import (
@@ -29,41 +30,9 @@ def empty_dir():
 
 
 @pytest.fixture
-def populated_dir(empty_dir: Path):
-    raw = {
-        "playlistTitle": "Bass House Music Pack",
-        "playlistAuthor": "alphabeat",
-        "playlistDescription": "A description",
-        "image": "truncated47318904732189047201",
-        "customData": {
-            "syncURL": "https://api.beatsaver.com/playlists/id/7015/download"
-        },
-        "songs": [
-            {
-                "key": "27bfe",
-                "hash": "24800f88b15041713940163bebaf344df0775471",
-                "songName": "[Alphabeat - Bass House Pack] Cheyenne Giles - Jump Around",
-            },
-            {
-                "key": "27ca1",
-                "hash": "c07dfcec4114f36cd686273e8cd99f94651009d8",
-                "songName": "[Alphabeat - Bass House Pack] Rootkit - Levitate",
-            },
-        ],
-    }
-    file = empty_dir / "bass_house_music_pack.bplist"
-    file.write_text(json.dumps(raw, indent=4))
-
-    yield empty_dir
-
-    file.unlink()
-
-
-@pytest.fixture
-def BeatSaver(populated_dir: Path, pytestconfig):
+def BeatSaver(pytestconfig):
     config_path = pytestconfig.getoption("beatsaver", skip=True)
     config = BeatSaverConfig.parse_file(config_path)
-    config.dir = populated_dir
     return BeatSaverService("BeatSaver", config, cache_path)
 
 
@@ -106,6 +75,16 @@ def test_add_remove_tracks(BeatSaver: BeatSaverService):
 
     BeatSaver.remove_tracks(playlist, [track])
     assert len(BeatSaver.pull_tracks(playlist)) == 1
+
+
+def test_update_metadata(BeatSaver: BeatSaverService):
+    playlist = BeatSaverPlaylistURI.from_uri("7803")
+    metadata = PlaylistDetails(
+        name="Test Playlist",
+        description="Test description",
+    )
+    BeatSaver.update_metadata(playlist, metadata)
+    assert BeatSaver.pull_metadata(playlist).description == "Test description"
 
 
 def test_protocols(BeatSaver: BeatSaverService):

@@ -31,7 +31,6 @@ class BeatSaverSearchConfig(BaseModel):
 
 
 class BeatSaverConfig(ServiceConfig):
-    dir: Path = Path(user_documents_dir()) / "BeatSaver"
     search_config: BeatSaverSearchConfig = BeatSaverSearchConfig()
     username: str = ""
     password: str = ""
@@ -101,6 +100,19 @@ class BeatSaverAPIWrapper(ServiceWrapper):
         return self.s.get(
             f"https://beatsaver.com/api/playlists/id/{playlist_id}/0"
         ).json()
+
+    def edit_playlist(
+        self, playlist_id: str, name: str, description: str, public: bool = True
+    ) -> None:
+        self.login()
+        res = self.s.post(
+            f"https://beatsaver.com/api/playlists/id/{playlist_id}/edit",
+            files={
+                "name": (None, name),
+                "description": (None, description),
+            },
+        )
+        assert res.status_code == 200
 
 
 class BeatSaverService(StreamingService):
@@ -203,4 +215,4 @@ class BeatSaverService(StreamingService):
     def update_metadata(
         self, uri: BeatSaverPlaylistURI, metadata: PlaylistDetails
     ) -> None:
-        raise NotImplementedError()
+        self.wrapper.edit_playlist(uri.uri, metadata.name, metadata.description)
