@@ -59,7 +59,7 @@ class GUI:
 
     def load_app_config(self):
         # If the config file doesn't exist, create it
-        config_dir = Path(user_data_dir("unitunes"))
+        config_dir = self.get_config_dir()
         config_dir.mkdir(exist_ok=True)
         config_path = config_dir / "config.json"
         if not config_path.exists():
@@ -75,9 +75,12 @@ class GUI:
             self.save_app_config()
 
     def save_app_config(self):
-        config_path = Path(user_data_dir("unitunes")) / "config.json"
+        config_path = self.get_config_dir() / "config.json"
         with open(config_path, "w") as f:
             f.write(self.app_config.json())
+
+    def get_config_dir(self) -> Path:
+        return Path(user_data_dir("unitunes", False))
 
     def init_themes(self):
         with dpg.theme(tag="hyperlinkTheme"):
