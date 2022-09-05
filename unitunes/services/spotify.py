@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import spotipy
 from spotipy import SpotifyOAuth
 from unitunes.playlist import PlaylistDetails, PlaylistMetadata
@@ -224,15 +224,47 @@ class SpotifyService(StreamingService):
         )
 
     def query_generator(self, track: Track) -> List[str]:
-        query = f'track:"{track.name.value}"'
-        if track.artists:
-            query += (
-                f" artist:\"{' '.join([artist.value for artist in track.artists])}\""
-            )
-        if track.albums:
-            query += f' album:"{track.albums[0].value}"'
+        queries = []
 
-        return [query]
+        # query with all attributes
+        queries.append(self._build_query(track.name, track.artists, track.albums))
+
+        if track.artists:
+            # query without artists
+            queries.append(self._build_query(track.name, None, track.albums))
+
+        if track.artists:
+            # query without album
+            queries.append(self._build_query(track.name, track.artists, None))
+
+        # query with title outside track field
+        # (this seems to trigger a more fuzzy search, in case the title doesn't match exactly)
+        queries.append(self._build_query(None, track.artists, track.albums, track.name))
+
+        if track.artists:
+            # query without artists
+            queries.append(self._build_query(None, None, track.albums, track.name))
+
+        if track.artists:
+            # query without album
+            queries.append(self._build_query(None, track.artists, None, track.name))
+
+        return queries
+
+
+    def _build_query(self, name: Optional[AliasedString], artists: Optional[List[AliasedString]], albums: Optional[List[AliasedString]], other: Optional[AliasedString] = None):
+        query = ''
+        if name:
+            query += f'track:"{name.value}"'
+        if artists:
+            query += (
+                f" artist:\"{' '.join([artist.value for artist in artists])}\""
+            )
+        if albums:
+            query += f' album:"{albums[0].value}"'
+        if other:
+            query += f' {other.value}'
+        return query
 
     def create_playlist(self, name: str, description: str = "") -> SpotifyPlaylistURI:
         playlist = self.wrapper.user_playlist_create(
