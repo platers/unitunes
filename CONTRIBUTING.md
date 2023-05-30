@@ -15,5 +15,5 @@ Run `pytest` to run tests. With no arguments, it will skip tests that require se
 Add a service config to run more tests.
 
 ```bash
-pytest -s --spotify spotify_config.json --ytm ytm_config.json # may need to run with -s to paste spotify redirect URL the first time
+pytest -s --spotify=spotify_config.json --ytm=ytm_config.json # may need to run with -s to paste spotify redirect URL the first time
 ```
