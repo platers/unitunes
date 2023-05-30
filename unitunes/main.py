@@ -35,7 +35,7 @@ from unitunes.services.spotify import (
 )
 from unitunes.services.ytm import YTM, YtmConfig
 from unitunes.track import Track
-from unitunes.types import ServiceType
+from unitunes.common_types import ServiceType
 from unitunes.uri import PlaylistURIs, TrackURI, TrackURIs
 
 

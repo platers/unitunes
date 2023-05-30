@@ -10,7 +10,7 @@ from unitunes.index import IndexServiceEntry
 from unitunes.services.beatsaber import BeatsaberConfig, BeatsaberSearchConfig
 from unitunes.services.spotify import SpotifyConfig
 from unitunes.services.ytm import YtmConfig
-from unitunes.types import ServiceType
+from unitunes.common_types import ServiceType
 from unitunes.uri import PlaylistURIs, playlistURI_from_url
 
 dpg.create_context()

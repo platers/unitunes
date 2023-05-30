@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Dict, List
 
-from unitunes.types import ServiceType
+from unitunes.common_types import ServiceType
 
 
 class IndexServiceEntry(BaseModel):

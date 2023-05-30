@@ -12,7 +12,7 @@ from unitunes.services.services import (
 )
 from unitunes.track import Track
 
-from unitunes.types import ServiceType
+from unitunes.common_types import ServiceType
 from unitunes.uri import TrackURIs
 
 
