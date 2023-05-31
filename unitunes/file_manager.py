@@ -20,6 +20,10 @@ def format_filename(s):
 
 
 class FileManager:
+    """
+    FileManager is a class that manipulates the files in the unitunes directory.
+    """
+
     dir: Path
     index_path: Path
     playlist_folder: Path

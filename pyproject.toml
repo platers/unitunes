@@ -19,7 +19,7 @@ classifiers = [
 unitunes = "unitunes.gui.main:main"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 spotipy = "^2.19.0"
 ytmusicapi = "^0.21.0"
 musicbrainzngs = "^0.7.1"
@@ -31,6 +31,7 @@ tqdm = "^4.64.0"
 dearpygui = "^1.6.2"
 appdirs = "^1.4.4"
 platformdirs = "^2.5.2"
+streamlit = "^1.22.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
