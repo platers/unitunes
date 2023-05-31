@@ -15,7 +15,7 @@ from unitunes.services.services import (
     cache,
 )
 from unitunes.track import AliasedString, Track
-from unitunes.types import ServiceType
+from unitunes.common_types import ServiceType
 from unitunes.uri import (
     BeatSaverPlaylistURI,
     BeatSaverTrackURI,
