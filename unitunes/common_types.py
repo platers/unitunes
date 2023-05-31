@@ -6,6 +6,7 @@ class ServiceType(str, Enum):
     YTM = "ytm"
     MB = "mb"
     BEATSABER = "beatsaber"
+    BEATSAVER = "beatsaver"
 
 
 class EntityType(str, Enum):

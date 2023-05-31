@@ -36,7 +36,7 @@ class BeatsaberConfig(ServiceConfig):
 
 class BeatsaverAPIWrapper(ServiceWrapper):
     def __init__(self, cache_root) -> None:
-        super().__init__("beatsaver", cache_root=cache_root)
+        super().__init__("beatsaber", cache_root=cache_root)
 
     @cache
     def map(self, id: str, use_cache=True) -> Any:

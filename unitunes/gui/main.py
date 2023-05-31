@@ -8,6 +8,7 @@ from unitunes.gui.engine import Engine, Job, JobStatus, JobType
 from unitunes import PlaylistManager, FileManager, Index
 from unitunes.index import IndexServiceEntry
 from unitunes.services.beatsaber import BeatsaberConfig, BeatsaberSearchConfig
+from unitunes.services.beatsaver import BeatSaverConfig, BeatSaverSearchConfig
 from unitunes.services.spotify import SpotifyConfig
 from unitunes.services.ytm import YtmConfig
 from unitunes.common_types import ServiceType
@@ -547,6 +548,8 @@ class GUI:
                         config = YtmConfig()
                     elif type == ServiceType.BEATSABER:
                         config = BeatsaberConfig()
+                    elif type == ServiceType.BEATSAVER:
+                        config = BeatSaverConfig()
                     else:
                         raise ValueError(f"Unknown service type {type}")
 
@@ -576,6 +579,11 @@ class GUI:
                     label="Add Beatsaber",
                     tag="add_beatsaber_button",
                     callback=lambda: create_service_callback(ServiceType.BEATSABER),
+                )
+                dpg.add_button(
+                    label="Add BeatSaver",
+                    tag="add_beatsaver_button",
+                    callback=lambda: create_service_callback(ServiceType.BEATSAVER),
                 )
                 with dpg.window(
                     tag=f"delete_service_popup",
@@ -651,6 +659,28 @@ class GUI:
             )
             dpg.set_value(
                 f"beatsaber_min_rating_input_{service_entry.name}",
+                config.search_config.minRating,
+            )
+        elif service_entry.service == ServiceType.BEATSAVER:
+            config = BeatSaverConfig.parse_file(service_entry.config_path)
+            dpg.set_value(
+                f"beatsaver_username_input_{service_entry.name}",
+                config.username,
+            )
+            dpg.set_value(
+                f"beatsaver_password_input_{service_entry.name}",
+                config.password,
+            )
+            dpg.set_value(
+                f"beatsaver_min_nps_input_{service_entry.name}",
+                config.search_config.minNps,
+            )
+            dpg.set_value(
+                f"beatsaver_max_nps_input_{service_entry.name}",
+                config.search_config.maxNps,
+            )
+            dpg.set_value(
+                f"beatsaver_min_rating_input_{service_entry.name}",
                 config.search_config.minRating,
             )
         else:
@@ -811,6 +841,60 @@ class GUI:
                         label="Save",
                         tag=f"beatsaber_save_button_{service_name}",
                         callback=sync_beatsaber_service_callback,
+                    )
+
+                elif service_entry.service == ServiceType.BEATSAVER:
+
+                    def sync_beatsaver_service_callback():
+                        self.pm.file_manager.save_service_config(
+                            service_name,
+                            BeatSaverConfig(
+                                search_config=BeatSaverSearchConfig(
+                                    minNps=dpg.get_value(
+                                        f"beatsaver_min_nps_input_{service_name}",
+                                    ),
+                                    maxNps=dpg.get_value(
+                                        f"beatsaver_max_nps_input_{service_name}",
+                                    ),
+                                    minRating=dpg.get_value(
+                                        f"beatsaver_min_rating_input_{service_name}",
+                                    ),
+                                ),
+                                username=dpg.get_value(
+                                    f"beatsaver_username_input_{service_name}",
+                                ),
+                                password=dpg.get_value(
+                                    f"beatsaver_password_input_{service_name}",
+                                ),
+                            ),
+                        )
+                        self.sync_service_tab(service_entry)
+
+                    dpg.add_input_text(
+                        label="Username",
+                        tag=f"beatsaver_username_input_{service_name}",
+                    )
+                    dpg.add_input_text(
+                        label="Password",
+                        tag=f"beatsaver_password_input_{service_name}",
+                    )
+                    dpg.add_input_int(
+                        label="Min Notes per Second",
+                        tag=f"beatsaver_min_nps_input_{service_name}",
+                    )
+                    dpg.add_input_int(
+                        label="Max Notes per Second",
+                        tag=f"beatsaver_max_nps_input_{service_name}",
+                    )
+                    dpg.add_input_float(
+                        label="Min Rating",
+                        tag=f"beatsaver_min_rating_input_{service_name}",
+                    )
+
+                    dpg.add_button(
+                        label="Save",
+                        tag=f"beatsaver_save_button_{service_name}",
+                        callback=sync_beatsaver_service_callback,
                     )
 
                 def delete_service_callback():

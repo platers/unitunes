@@ -5,3 +5,5 @@ service_configs
 *-raw
 .vscode
 dist
+.DS_Store
+test.py
