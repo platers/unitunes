@@ -303,7 +303,8 @@ class PlaylistManager:
         searchable_services = [
             service_name
             for service_name in playlist.uris
-            if isinstance(self.services[service_name], Searchable)
+            if service_name in self.services
+            and isinstance(self.services[service_name], Searchable)
         ]
 
         tracks_to_search: List[Tuple[str, Track]] = []

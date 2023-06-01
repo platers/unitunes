@@ -37,6 +37,7 @@ class Action(Enum):
     SYNC = "Sync"
     PULL = "Pull"
     PUSH = "Push"
+    SEARCH = "Search"
 
 
 playlist_containers = {}
@@ -45,16 +46,32 @@ for playlist in pm.playlists:
     playlist_containers[playlist] = container
 
 
-def apply_action(playlist: str, action: Action):
+def apply_action(playlist: str, action: Action, save: bool = True):
     container = playlist_containers[playlist]
     bar = container.progress(0.0, f"{action.value}ing {playlist}")
 
     def progress_callback(progress: int, size: int):
+        if size == 0:
+            return
         bar.progress(progress / size)
 
-    pm.pull_playlist(playlist, progress_callback=progress_callback)
+    if action == Action.PULL:
+        pm.pull_playlist(playlist, progress_callback=progress_callback)
+    elif action == Action.SEARCH:
+        pm.search_playlist(playlist, progress_callback=progress_callback)
+    elif action == Action.PUSH:
+        pm.push_playlist(playlist, progress_callback=progress_callback)
+    elif action == Action.SYNC:
+        pm.pull_playlist(playlist, progress_callback=progress_callback)
+        pm.search_playlist(playlist, progress_callback=progress_callback)
+        pm.push_playlist(playlist, progress_callback=progress_callback)
+
     container.success(f"{action.value}ed {playlist}")
     print(f"{action.value}ed {playlist}")
+
+    if save:
+        pm.save_playlist(playlist)
+        print(f"Saved {playlist}")
 
 
 def apply_all(action: Action):
@@ -65,6 +82,7 @@ def apply_all(action: Action):
 with playlist_header.container():
     st.button("Sync All", on_click=partial(apply_all, Action.SYNC))
     st.button("Pull All", on_click=partial(apply_all, Action.PULL))
+    st.button("Search All", on_click=partial(apply_all, Action.SEARCH))
     st.button("Push All", on_click=partial(apply_all, Action.PUSH))
 
 for playlist in pm.playlists:
@@ -86,6 +104,11 @@ for playlist in pm.playlists:
             "Pull",
             key=f"pull_{playlist}",
             on_click=partial(apply_action, playlist, Action.PULL),
+        )
+        st.button(
+            "Search",
+            key=f"search_{playlist}",
+            on_click=partial(apply_action, playlist, Action.SEARCH),
         )
         st.button(
             "Push",
