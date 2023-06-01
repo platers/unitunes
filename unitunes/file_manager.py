@@ -79,6 +79,5 @@ class FileManager:
 
     def delete_service_config(self, service_name: str) -> None:
         path = self.service_config_path(service_name)
-        if not path.exists():
-            raise FileNotFoundError(f"Service config file not found: {path}")
-        path.unlink()
+        if path.exists():
+            path.unlink()

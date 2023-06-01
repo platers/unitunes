@@ -7,21 +7,14 @@ from unitunes.main import PlaylistManager, FileManager
 
 st.title("Unitunes")
 
-music_dir = Path("/home/victor/dev/music")
+music_dir_input = st.text_input("Music directory", value="/home/victor/dev/music")
+music_dir = Path(music_dir_input)
+
 fm = FileManager(music_dir)
+pm = PlaylistManager(fm.load_index(), fm)
 
-
-@st.cache_resource
-def playlist_manager():
-    pm = PlaylistManager(fm.load_index(), fm)
-    return pm
-
-
-pm = playlist_manager()
 
 playlist_header = st.empty()
-
-st.header("Playlists")
 
 
 class Action(Enum):
