@@ -127,7 +127,7 @@ class BeatsaberService(StreamingService):
         # create a new playlist if it doesn't exist
         path = self.config.dir / uri.uri
         if not path.exists():
-            raise FileNotFoundError(f"{path} does not exist. Try pushing first.")
+            return []
 
         bp = BPList.parse_file(path)
         return [

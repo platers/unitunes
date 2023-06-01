@@ -46,7 +46,6 @@ def service_factory(
     cache_path: Path,
     config_path: Optional[Path] = None,
 ) -> StreamingService:
-
     if service_type == ServiceType.SPOTIFY:
         assert config_path is not None
         config = SpotifyConfig.parse_file(config_path)
@@ -195,7 +194,8 @@ class PlaylistManager:
         pullable_services = [
             service_name
             for service_name in playlist.uris
-            if isinstance(self.services[service_name], PlaylistPullable)
+            if service_name in self.services
+            and isinstance(self.services[service_name], PlaylistPullable)
         ]
 
         progress = 0
@@ -294,7 +294,6 @@ class PlaylistManager:
         playlist_name: str,
         progress_callback: Callable[[int, int], None] = lambda x, y: None,
     ) -> None:
-
         """
         Search for tracks on a service. Adds found URI's to tracks.
         """
