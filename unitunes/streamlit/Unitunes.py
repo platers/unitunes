@@ -19,18 +19,9 @@ def playlist_manager():
 
 pm = playlist_manager()
 
-# List services
-st.header("Services")
-# for service in pm.services:
-#     st.write(service)
-tabs = st.tabs(pm.services)
-for tab, service in zip(tabs, pm.services):
-    with tab:
-        st.write(service)
+playlist_header = st.empty()
 
 st.header("Playlists")
-
-playlist_header = st.empty()
 
 
 class Action(Enum):
@@ -80,38 +71,54 @@ def apply_all(action: Action):
 
 
 with playlist_header.container():
-    st.button("Sync All", on_click=partial(apply_all, Action.SYNC))
-    st.button("Pull All", on_click=partial(apply_all, Action.PULL))
-    st.button("Search All", on_click=partial(apply_all, Action.SEARCH))
-    st.button("Push All", on_click=partial(apply_all, Action.PUSH))
+    cols = st.columns([1, 1, 1, 1])
+    with cols[0]:
+        st.button(
+            "Sync All",
+            on_click=partial(apply_all, Action.SYNC),
+            help="Pull, search and push all playlists",
+        )
+    with cols[1]:
+        st.button("Pull All", on_click=partial(apply_all, Action.PULL))
+    with cols[2]:
+        st.button("Search All", on_click=partial(apply_all, Action.SEARCH))
+    with cols[3]:
+        st.button("Push All", on_click=partial(apply_all, Action.PUSH))
 
 for playlist in pm.playlists:
     pl = pm.playlists[playlist]
     container = playlist_containers[playlist]
     container.divider()
 
-    col1, col2 = container.columns(2)
-    with col1:
+    cols = container.columns([3, 1, 1, 1, 1])
+    with cols[0]:
         st.subheader(playlist)
         st.write(f"Tracks: {len(pl.tracks)}")
-    with col2:
+    with cols[1]:
         st.button(
             "Sync",
             key=f"sync_{playlist}",
             on_click=partial(apply_action, playlist, Action.SYNC),
+            help="Pull, search and push playlist",
         )
+    with cols[2]:
         st.button(
             "Pull",
             key=f"pull_{playlist}",
             on_click=partial(apply_action, playlist, Action.PULL),
+            help="Pull playlist from services",
         )
+    with cols[3]:
         st.button(
             "Search",
             key=f"search_{playlist}",
             on_click=partial(apply_action, playlist, Action.SEARCH),
+            help="Search for tracks in services",
         )
+    with cols[4]:
         st.button(
             "Push",
             key=f"push_{playlist}",
             on_click=partial(apply_action, playlist, Action.PUSH),
+            help="Push local changes to services",
         )
