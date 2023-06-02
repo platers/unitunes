@@ -58,6 +58,9 @@ for tab, s in zip(tabs, pm.index.services.values()):
         if service_type == ServiceType.SPOTIFY:
             config = SpotifyConfig.parse_file(s.config_path)
             with tab.form(f"spotify_config_{s.name}"):
+                st.write(
+                    "Follow the instructions to obtain a client id and secret https://spotipy.readthedocs.io/en/2.19.0/#getting-started"
+                )
                 config.client_id = st.text_input("Client ID", config.client_id)
                 config.client_secret = st.text_input(
                     "Client secret", config.client_secret
@@ -73,6 +76,9 @@ for tab, s in zip(tabs, pm.index.services.values()):
             config = YtmConfig.parse_file(s.config_path)
 
             with tab.form(f"ytm_config_{s.name}"):
+                st.write(
+                    "Copy headers with the following instructions: https://ytmusicapi.readthedocs.io/en/stable/setup/browser.html#copy-authentication-headers"
+                )
                 config.headers = st.text_area("Headers", config.headers)
 
                 if st.form_submit_button("Save"):
