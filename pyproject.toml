@@ -16,7 +16,6 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-unitunes = "unitunes.gui.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -28,8 +27,6 @@ strsimpy = "^0.2.1"
 ratelimit = "^2.2.1"
 youtube-title-parse = "^1.0.0"
 tqdm = "^4.64.0"
-dearpygui = "^1.6.2"
-appdirs = "^1.4.4"
 platformdirs = "^2.5.2"
 streamlit = "^1.22.0"
 
