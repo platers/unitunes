@@ -1,15 +1,19 @@
 import streamlit as st
 from pathlib import Path
 from functools import partial
+import argparse
 from enum import Enum
 
 from unitunes.main import PlaylistManager, FileManager
 
 st.title("Unitunes")
 
-music_dir_input = st.text_input("Music directory", value="/home/victor/dev/music")
-music_dir = Path(music_dir_input)
+parser = argparse.ArgumentParser()
+parser.add_argument("--music-dir", type=Path, required=True)
+args = parser.parse_args()
 
+
+music_dir = args.music_dir
 fm = FileManager(music_dir)
 pm = PlaylistManager(fm.load_index(), fm)
 

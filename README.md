@@ -4,8 +4,6 @@
 
 A python GUI and library to sync playlists across music streaming services.
 
-![playlist_tab](assets/playlist_tab.png)
-
 ## Introduction
 
 unitunes manages playlists across streaming services. unitunes can transfer songs between services and keep playlists in sync.
@@ -23,17 +21,26 @@ unitunes stores your playlists in plain text, allowing you to version control yo
 
 Want to add support for another service? See [contributing](#contributing).
 
+### How it works
+
+All data is stored with json files stored in a music directory. You can version control this directory with git.
+
 ## Usage
 
 ```bash
-pip install unitunes
-unitunes
+# Clone the repo
+git clone https://github.com/platers/unitunes.git
+# Change directory
+cd unitunes
+# Start a poetry shell
+poetry shell
+# Install dependencies
+poetry install
+# Run the GUI
+streamlit run unitunes/streamlit/Unitunes.py -- --music-dir {path to music directory}
 ```
 
-In settings, set the directory to store your playlists. You can version control this directory with git.
-
-Connect services in the service tab. Enter a service name, and click the button to add the corresponding service. Each service type requires some configuration, Spotify requires a client id and secret, and Youtube Music requires request headers.
-![service_tab](assets/service_tab.png)
+First connect streaming services on the service page. Enter the service name and type. After adding a service, follow the instructions in the app to configure it. Each service type requires some configuration, Spotify requires a client id and secret, and Youtube Music requires request headers.
 
 Playlists can then be added to the playlist tab.
 
@@ -41,4 +48,4 @@ After adding playlists, you can sync them. You likely just want to press the `Sy
 
 ## Contributing
 
-unitunes is rapidly evolving. Take a look at the [contributing guide](CONTRIBUTING.md).
+unitunes is still in an alpha state. Take a look at the [contributing guide](CONTRIBUTING.md).
