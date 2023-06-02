@@ -25,6 +25,8 @@ Want to add support for another service? See [contributing](#contributing).
 
 All data is stored with json files stored in a music directory. You can version control this directory with git.
 
+Unitunes supports three operations: pulling, searching, and pushing. Pulling a playlist updates the unitunes playlist with the latest tracks from the streaming service. Searching tries to find matching tracks on other streaming services and adds them to the unitunes playlist. Pushing a playlist adds the tracks in the unitunes playlist to the streaming service. For convenience, there is a `Sync` button that performs all three operations.
+
 ## Usage
 
 ```bash
