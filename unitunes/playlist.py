@@ -2,6 +2,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Tuple,
 )
 from pydantic import BaseModel
 from unitunes.matcher import MatcherStrategy
@@ -50,6 +51,13 @@ class Playlist(BaseModel):
         self.uris[service_name].remove(uri)
         if not self.uris[service_name]:
             del self.uris[service_name]
+
+    def list_uris(self) -> List[Tuple[str, PlaylistURIs]]:
+        return [
+            (service_name, uri)
+            for service_name, uris in self.uris.items()
+            for uri in uris
+        ]
 
     def remove_service(self, service_name: str) -> None:
         if service_name in self.uris:
