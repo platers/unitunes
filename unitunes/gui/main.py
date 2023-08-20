@@ -725,7 +725,7 @@ class GUI:
                         self.sync_service_tab(service_entry)
 
                     hyperlink(
-                        "https://ytmusicapi.readthedocs.io/en/latest/setup.html#copy-authentication-headers"
+                        "https://ytmusicapi.readthedocs.io/en/stable/setup/browser.html#copy-authentication-headers"
                     )
 
                     dpg.add_input_text(
